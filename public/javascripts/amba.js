@@ -179,6 +179,13 @@ Div.prototype.moveDown = function(y, delay) {
 	return this;
 }
 
-function random (max) {
-	return parseInt(Math.random(max)*max);
-}
+$(document).ready(function(){
+
+    var path = AB.getParameter('app');
+    if(!path) {
+    	div().append().text('Please make first application');
+    	return;
+    }
+    
+    AB.loadScript('/app/'+path);
+});

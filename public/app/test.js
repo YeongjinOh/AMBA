@@ -1,0 +1,1 @@
+div().append().text('This is test application');
