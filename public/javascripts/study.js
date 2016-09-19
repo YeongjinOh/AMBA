@@ -182,37 +182,3 @@ Div.prototype.moveDown = function(y, delay) {
 function random (max) {
 	return parseInt(Math.random(max)*max);
 }
-
-$(document).ready(function(){
-	var parent = div().size('100%','100%').minHeight(50).color('black').append().click(function(e){
-		// div().size(4, 4).appendTo(parent).margin(10).color('red').border(1).borderColor('orange').align('center').textSize(30).draggable().click(function(dv){
-		// 	dv.moveDown(10);
-		// });
-	}).overflow('scroll').border(1).borderColor('orange').borderRadius(20);
-
-	for(var i=0; i<200; i++) {
-
-		div().size(4, 4).appendTo(parent).color('white').offset(random(500), random(500));
-	}
-
-	// div().size(50,50).appendTo(parent).margin(10).color('pink');
-	// div().size(200,50).appendTo(parent).margin(10).color('lightblue');
-
-	// var parent2 = div().size(400,'auto').minHeight(50).color('yellow').append().align('center');
-
-	// div().size(50,50).appendTo(parent2).margin(10).color('pink');
-	// div().size(200,50).appendTo(parent2).margin(10).color('lightblue');
-
-	// div().size(50,50).color('red').appendTo(parent);
-	// for(var i=0; i<10; i++) {
-	// 	div().size(50,50).color('green').appendTo(parent);//.border(2);
-	// }
-	
-
-});
-
-
-
-
-
-
