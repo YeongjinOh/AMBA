@@ -44,6 +44,28 @@ Div.prototype.displayInlineBlock = function() {
 	return this;
 }
 
+/**
+ * @desc	set display block
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.displayBlock = function() {
+	this.css('display', 'block');
+	return this;
+}
+
+/**
+ * @desc	set display status
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.display = function(display) {
+	if(display === undefined)
+		this.css('display');
+	this.css('display', display);
+	return this;
+}
+
 Div.prototype.align = function(value) {
 	this.css('text-align', value);
 	return this;
@@ -126,6 +148,19 @@ Div.prototype.padding = function(px) {
 	return this;
 }
 
+/**
+ * @desc	left padding
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ * @todo	create top, right, bottom
+ */
+Div.prototype.paddingLeft = function(px) {
+	if(px === undefined)
+		return this.css('padding-left');
+	this.css('padding-left', px);
+	return this;
+}
+
 Div.prototype.overflow = function(value) {
 	if(value === undefined)
 		return this.css('overflow');
@@ -176,6 +211,30 @@ Div.prototype.moveDown = function(y, delay) {
 	this.$.animate({
 		top: '+20'
 	}, delay);
+	return this;
+}
+
+/**
+ * @desc	hover event
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.hover = function(fn) {
+	var that = this;
+	this.$.hover(function(){
+		if(fn) fn(that);
+	});
+	return this;
+}
+
+/**
+ * @desc	stop animation
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ * @todo	add parameter
+ */
+Div.prototype.stop = function() {
+	this.$.stop();
 	return this;
 }
 
