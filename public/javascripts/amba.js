@@ -98,9 +98,8 @@ Div.prototype.textSize = function(px) {
 }
 
 Div.prototype.text = function(txt) {
-	if(px === undefined)
+	if(txt === undefined)
 		return this.$.text();
-
 	this.$.text(txt);
 	if(this.isAddedText === false) {
 		this.textSize(14);
