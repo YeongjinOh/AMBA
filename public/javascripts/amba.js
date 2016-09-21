@@ -5,9 +5,8 @@ function div() {
 function Div() {
 	this.$ = $('<div></div>');
 	this.displayInlineBlock();
-	this.textSize(0);
 	this.isAddedText = false;
-	// this.align('center');
+	this.verticalAlign('top');
 }
 
 Div.prototype.css = function(key, value) {
@@ -44,19 +43,54 @@ Div.prototype.displayInlineBlock = function() {
 	return this;
 }
 
+/**
+ * @desc	set display block
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.displayBlock = function() {
+	this.css('display', 'block');
+	return this;
+}
+
+/**
+ * @desc	set display status
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.display = function(display) {
+	if(display === undefined)
+		this.css('display');
+	this.css('display', display);
+	return this;
+}
+
 Div.prototype.align = function(value) {
+	if(!value)
+		this.css('text-align');
 	this.css('text-align', value);
 	return this;
 }
 
+Div.prototype.verticalAlign = function(value) {
+	if(!value)
+		return this.css('vertical-align');
+	this.css('vertical-align', value);
+	return this;
+}
+
 Div.prototype.textSize = function(px) {
+	if(px === undefined)
+		return this.css('font-size');
 	this.css('font-size', px);
 	this.isAddedText = true;
 	return this;
 }
 
 Div.prototype.text = function(txt) {
-	// this.css('font-size', px);
+	if(px === undefined)
+		return this.$.text();
+
 	this.$.text(txt);
 	if(this.isAddedText === false) {
 		this.textSize(14);
@@ -65,21 +99,32 @@ Div.prototype.text = function(txt) {
 }
 
 Div.prototype.border = function(px) {
+	if(px === undefined)
+		return this.css('border');
+
 	this.css('border', px+'px solid');
 	return this;
 }
 
 Div.prototype.borderColor = function(c) {
+	if(c === undefined)
+		return this.css('border-color');
+
 	this.css('border-color', c);
 	return this;
 }
 
 Div.prototype.borderRadius = function(px) {
+	if(px === undefined)
+		return this.css('border-radius');
 	this.css('border-radius', px);
 	return this;
 }
 
 Div.prototype.color = function(c) {
+	if(c === undefined)
+		return this.css('background-color');
+
 	this.css('background-color', c);
 	return this;
 }
@@ -126,6 +171,19 @@ Div.prototype.padding = function(px) {
 	return this;
 }
 
+/**
+ * @desc	left padding
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ * @todo	create top, right, bottom
+ */
+Div.prototype.paddingLeft = function(px) {
+	if(px === undefined)
+		return this.css('padding-left');
+	this.css('padding-left', px);
+	return this;
+}
+
 Div.prototype.overflow = function(value) {
 	if(value === undefined)
 		return this.css('overflow');
@@ -160,6 +218,10 @@ Div.prototype.offset = function(x, y) {
 }
 
 Div.prototype.click = function(fn) {
+	if(fn === undefined) {
+		return this.$.click();
+	}
+
 	var that = this;
 	this.$.click(function(){
 		if(fn) fn(that);
@@ -173,19 +235,45 @@ Div.prototype.draggable = function(opt) {
 }
 
 Div.prototype.moveDown = function(y, delay) {
+	var value = y >= 0 ? '+'+y : '-'+y;
 	this.$.animate({
-		top: '+20'
+		top: value
 	}, delay);
 	return this;
 }
 
-$(document).ready(function(){
+/**
+ * @desc	hover event
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.hover = function(fn1, fn2) {
+	var that = this;
+	if(fn1) {
+		var fn1Func = fn1;
+		fn1 = function(){
+			fn1Func(that);
+		};
+	}
 
-    var path = AB.getParameter('app');
-    if(!path) {
-    	div().append().text('Please make first application');
-    	return;
-    }
-    
-    AB.loadScript('/app/'+path+'.js');
-});
+	if(fn2) {
+		var fn2Func = fn2;
+		fn2 = function(){
+			fn2Func(that);
+		};
+	}
+	
+	this.$.hover(fn1, fn2);
+	return this;
+}
+
+/**
+ * @desc	stop animation
+ * @since	2016-09-20
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ * @todo	add parameter
+ */
+Div.prototype.stop = function() {
+	this.$.stop();
+	return this;
+}

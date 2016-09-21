@@ -27,7 +27,13 @@
     <script>
     	$(document).ready(function(){
 
-    		
+    		var path = AB.getParameter('app');
+            if(!path) {
+                div().append().text('Please make first application');
+                return;
+            }
+            
+            AB.loadScript('/app/'+path+'.js');
     		
     	});
     </script>
