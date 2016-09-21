@@ -187,5 +187,5 @@ $(document).ready(function(){
     	return;
     }
     
-    AB.loadScript('/app/'+path);
+    AB.loadScript('/app/'+path+'.js');
 });
