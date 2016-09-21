@@ -38,6 +38,46 @@ Div.prototype.appendTo = function(parent) {
 	return this;
 }
 
+/**
+ * @desc Div 객체에 parent 속성을 추가하여 이를 이용한 함수들을 구현합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.appendToParent = function(parent) {
+	this.$.appendTo(parent.$);
+	this.parent = parent;
+	return this;
+}
+
+Div.prototype.getParent = function() {
+	return this.parent;
+}
+
+/**
+ * @desc parent 속성을 가진 객체인 경우, parent 객체의 width의 해당 ratio만큼을 width로 설정합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.setParentWidth = function(ratio) {
+	if (this.parent === undefined)
+		return this;
+
+	var	width = parseInt(this.parent.width());
+	if (typeof ratio === 'number')
+		width = width * ratio;
+	return this.width(width);
+}
+
+Div.prototype.setParentHeight = function(ratio) {
+	if (this.parent === undefined)
+		return this;
+
+	var	height = parseInt(this.parent.height());
+	if (typeof ratio === 'number')
+		height *= ratio;
+	return this.height(height);
+}
+
+
+
 Div.prototype.displayInlineBlock = function() {
 	this.css('display', 'inline-block');
 	return this;
@@ -117,6 +157,24 @@ Div.prototype.text = function(txt) {
 	return this;
 }
 
+/**
+ * @desc set text-decoration line-through
+ * @author Yeongjin Oh
+ */
+Div.prototype.textLineThrough = function() {
+	this.$.css('text-decoration','line-through');
+	return this;
+}
+
+/**
+ * @desc remove text-decoration
+ * @author Yeongjin Oh
+ */
+Div.prototype.textLineNone = function() {
+	this.$.css('text-decoration','none');
+	return this;
+}
+
 Div.prototype.border = function(px) {
 	if(px === undefined)
 		return this.css('border');
@@ -174,6 +232,15 @@ Div.prototype.minHeight = function(px) {
 		return this.css('min-height');
 	this.css('min-height', px);
 	return this;
+}
+
+Div.prototype.parentWidth = function () {
+	return this.getParent().width();
+}
+
+
+Div.prototype.parentHeight = function () {
+	return this.getParent().height();
 }
 
 Div.prototype.margin = function(px) {
