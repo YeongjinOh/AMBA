@@ -241,8 +241,9 @@ Div.prototype.stop = function() {
 $(document).ready(function(){
 
     var path = AB.getParameter('app');
-    if(!path) {
-    	div().append().text('Please make first application');
+	console.log('path : ', path);
+	if(!path) {
+		div().append().text('Please make first application');
     	return;
     }
     
