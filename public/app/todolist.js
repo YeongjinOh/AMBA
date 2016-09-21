@@ -1,30 +1,48 @@
 $(document).ready(function(){
-
+	var defaultMessage = 'To do';
 	var parent = div().size('100%','100%').append();
 	var viewer = div().size(350,500).minHeight(50).color('sky').padding(10)
-		//.click(function(e){})
 	.overflow('scroll').border(1).borderColor('orange').borderRadius(20).appendTo(parent);
-
 	var bottomBarHeight = 50;
 	var bottomBar = div().size(350,bottomBarHeight).margin(10).css('display','block').appendTo(parent);
 
-	var inputForm = div().size(230-20,bottomBarHeight-20).attr('contenteditable','true').css('position','relative').margin('auto 12px').padding(10).color('gray').text('To do').appendTo(bottomBar);
+	var inputForm = div().size(230-20,bottomBarHeight-20).attr('contenteditable','true').margin('auto 12px').padding(10).color('gray').text(defaultMessage).appendTo(bottomBar);
 	var inputButton = div().size(50,bottomBarHeight).margin('auto 13px').color('yellow').appendTo(bottomBar);
+	var blank = div();
+
+	var uncheckedList = div().margin(0).minHeight(0).appendToParent(viewer).setParentWidth();
+	var checkedList = div().margin(0).minHeight(0).appendToParent(viewer).setParentWidth();
 
 	// set insert functionality
 	inputButton.click(function (e) {
 		var text = inputForm.text();
-		inputForm.text('To do');
+		inputForm.text(defaultMessage);
 		var checked = false;
-		var todoWrapper = div().appendToParent(viewer).setParentWidth();
+		var todoWrapper = div().appendToParent(uncheckedList).setParentWidth().border('1px dotted','bottom').border('rgb(200,200,200)','color');
 
-		var todo = div().padding(10).color('gray').text(text).click(function (e){
+		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).textSize(18).textBold();
+
+		// set effect onto todoWrapper
+		todoWrapper.hover(function () {
+			todoWrapper.color('rgb(220,253,244)');
+		}, function () {
+			todoWrapper.color('white');
+		})
+		.click(function (){
 			checked = !checked;
-			if (checked)
-				todo.textLineThrough();
-			else
-				todo.textLineNone();
-		}).appendTo(todoWrapper);
-		var cancelButton = div().margin(20).size(10,10).color('red').css('float','right').appendTo(todoWrapper);
+			if (checked) {
+				todo.textLineThrough().textColor('gray').textNormal();
+				todoWrapper.detach().appendTo(checkedList);
+			}
+			else {
+				todo.textLineNone().textColor('black').textBold();
+				todoWrapper.detach().appendTo(uncheckedList);
+			}
+		})
+		var cancelButton = div().margin(15).size(10,10).color('gray').css('float','right').appendTo(todoWrapper).click(function () {
+			todoWrapper.remove();
+			blank.appendTo(viewer);
+		});
+		blank.appendTo(viewer);
 	});
 });
