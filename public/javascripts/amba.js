@@ -98,7 +98,7 @@ Div.prototype.textSize = function(px) {
 }
 
 Div.prototype.text = function(txt) {
-	if(px === undefined)
+	if(txt === undefined)
 		return this.$.text();
 
 	this.$.text(txt);
@@ -249,30 +249,6 @@ Div.prototype.moveDown = function(y, delay) {
 	this.$.animate({
 		top: value
 	}, delay);
-	return this;
-}
-
-/**
- * @desc	set attr
- * @since	2016-09-21
- * @author	Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.attr = function(key, value) {
-	if(value === undefined) {
-		return this.$.attr(key);
-	}
-
-	this.$.attr(key, value);
-	return this;
-}
-
-/**
- * @desc	set div editable
- * @since	2016-09-21
- * @author	Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.editable = function() {
-	this.attr('contentEditable', 'true');
 	return this;
 }
 
