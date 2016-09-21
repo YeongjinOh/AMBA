@@ -82,6 +82,16 @@ Div.prototype.alignCenter = function() {
 	return this;
 }
 
+/**
+ * @desc	set text-align right
+ * @since	2016-09-21
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.alignRight = function() {
+	this.css('text-align', 'right');
+	return this;
+}
+
 Div.prototype.verticalAlign = function(value) {
 	if(!value)
 		return this.css('vertical-align');
@@ -190,6 +200,31 @@ Div.prototype.paddingLeft = function(px) {
 	if(px === undefined)
 		return this.css('padding-left');
 	this.css('padding-left', px);
+	return this;
+}
+
+/**
+ * @desc	set attr
+ * @since	2016-09-21
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+// Div.prototype.attr = function(key, value) {
+// 	if(value === undefined) {
+// 		return this.$.attr(key);
+// 	}
+//
+// 	this.$.attr(key, value);
+// 	return this;
+// }
+
+/**
+ * @desc	set none-select element
+ * @since	2016-09-21
+ * @author	Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.selectNone = function() {
+	this.css('user-select', 'none');
+
 	return this;
 }
 
