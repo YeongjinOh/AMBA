@@ -1,18 +1,93 @@
 /**
  * Created by Lightsoo on 2016. 9. 21..
  */
+<<<<<<< HEAD
 var top = div().append().color('white').size('100%',80).border(1).borderColor('black').displayBlock();
-
+=======
+var topDiv = div().append().color('white').size('100%',80).border(1).borderColor('black').displayBlock();
 //현재 클릭되어있는 메모장을 보여주고 저장하자.
-var directorys = div().append().color('white').size(300,600).border(1).borderColor('black').text('나의 메모장');
+var directorys = div().append().color('white').size(200,600).border(1).borderColor('black').text('나의 메모장');
+
 var momos = div().append().color('white').size(300,600).border(1).borderColor('black').overflow('scroll');
-var momo = div().append().color('white').size(300,600).border(1).borderColor('black');
+var memoArea = div().append().color('white').size(300,600).border(1).borderColor('black');
+
+var bottomDiv = div().append().color('white').size('100%',100).border(1).borderColor('black');
+
+//현재 클릭된 메모
+var cntMemo;
 
 //메모할 내용 추가하기
-//var addMemo = div().appendTo(top).size(50,50).border(1).color('white').borderColor('black').text('메모장 추가').overflow('auto').click(function (e) {
-//    div().appendTo(momos).size(300, 100).border(1).borderColor('black').color('red').displayBlock();
-//})
+var addMemo = div().size(100,50).border(1).color('white').borderColor('black').text('메모장 추가').appendTo(topDiv)
+    .click(function (e) {
 
+    memoArea.isEditable(true).color('gray').text('메모하세요');
+    var memo = div().appendTo(momos).size(300, 100).border(1).borderColor('black').color('red').displayBlock()
+        .setClass('test' + random(500))
+        .hover(function () {
+            memo.color('blue')
+        }, function () {
+            memo.color('red')
+        })
+        .click(function () {
+            //현재 메모의 클래스를 가져온다.
+            cntMemo = memo.getClass();
+            //bottomDiv.text(cntMemo);
+            var txt = localStorage.getItem(cntMemo);
+            memoArea.text(txt);
+        });
+>>>>>>> 535448e3fcba59eb97cf70af30ddb21f31d90651
+
+        //.setClass('please')
+    //random(500);
+    //var contents = memoArea.text();
+    //localstorage('momo1', contents);
+
+
+<<<<<<< HEAD
 //var saveMemo = div().appendTo(top).size(50,50).border(1).color('white').borderColor('black').text('메모장 저장').overflow('auto').click(function (e) {
     localStorage.setItem('','');
 //})
+=======
+
+}).hover(function () {
+        addMemo.color('blue')
+    }, function () {
+        addMemo.color('red')
+    })
+
+
+//memo.click(function () {
+//
+//    var temp = localStorage.getItem();
+//    memoArea.text()
+//});
+
+//메모장 저장하기
+var saveMemo = div().size(100,50).border(1).color('white').borderColor('black').text('메모장 저장')
+    .click(function (e) {
+        var text = memoArea.text();
+        //bottomDiv.text(cntMemo);
+        localStorage.setItem(cntMemo,text);
+}).appendTo(topDiv)
+    .hover(function () {
+        saveMemo.color('blue')
+    }, function () {
+        saveMemo.color('red')
+    });
+
+
+//var test = div().size(60,60).color('white').border(1).borderColor('black').text('불러와지는지 확인용').click(function (e) {
+//    //var temp = localStorage.getItem('test1');
+//    var class_name = memo.getClass();
+//    var temp = localStorage.getItem('please1');
+//    memoArea.text(temp);
+//}).appendTo(topDiv)
+
+function random (max) {
+    return parseInt(Math.random(max)*max);
+}
+
+function init(){
+
+}
+>>>>>>> 535448e3fcba59eb97cf70af30ddb21f31d90651
