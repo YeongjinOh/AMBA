@@ -43,9 +43,19 @@ Div.prototype.setClass = function (value) {
  */
 Div.prototype.getClass = function () {
     //this.$.attr('class')
-    this.attr('class');
-    return this;
+
+    return this.attr('class');
 }
+
+
+//Div.prototype.width = function (px) {
+//    if (px === undefined)
+//        return this.css('width');
+//    this.css('width', px);
+//    return this;
+//}
+
+
 
 Div.prototype.append = function () {
     $('body').append(this.$);
@@ -439,7 +449,6 @@ Div.prototype.hover = function(fn1, fn2) {
 		};
 	}
 
-	this.$.hover(fn1, fn2);
 	this.$.hover(fn1, fn2);
 	return this;
 }
