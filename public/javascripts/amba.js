@@ -256,6 +256,7 @@ Div.prototype.moveDown = function(y, delay) {
  * @since	2016-09-20
  * @author	Yoon JiSoo yjsgoon@naver.com
  */
+
 Div.prototype.hover = function(fn1, fn2) {
 	var that = this;
 	if(fn1) {
@@ -284,5 +285,17 @@ Div.prototype.hover = function(fn1, fn2) {
  */
 Div.prototype.stop = function() {
 	this.$.stop();
+	return this;
+}
+/**
+ * @desc set editable at div
+ * @param value
+ * @returns {Div}
+ */
+Div.prototype.isEditable = function (value) {
+	this.attr('contentEditable', value);
+	if(value == true){
+		this.text('');
+	}
 	return this;
 }
