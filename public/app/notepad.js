@@ -2,7 +2,6 @@
  * Created by Lightsoo on 2016. 9. 21..
  */
 var topDiv = div().append().color('white').size('100%',80).border(1).borderColor('black').displayBlock();
-
 //현재 클릭되어있는 메모장을 보여주고 저장하자.
 var directorys = div().append().color('white').size(300,600).border(1).borderColor('black').text('나의 메모장');
 var momos = div().append().color('white').size(300,600).border(1).borderColor('black').overflow('scroll');
@@ -37,5 +36,3 @@ var test = div().size(100,100).color('red').click(function (e) {
 
     memoArea.text(temp);
 }).appendTo(topDiv)
-
-
