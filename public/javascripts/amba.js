@@ -28,6 +28,25 @@ Div.prototype.attr = function (key, value) {
     return this;
 }
 
+/**
+ * @desc set div's class name
+ * @param value
+ * @returns {Div}
+ */
+Div.prototype.setClass = function (value) {
+    this.attr('class', value)
+    return this;
+}
+
+/**
+ * get div's Class name
+ */
+Div.prototype.getClass = function () {
+    //this.$.attr('class')
+    this.attr('class');
+    return this;
+}
+
 Div.prototype.append = function () {
     $('body').append(this.$);
     return this;
@@ -421,6 +440,7 @@ Div.prototype.hover = function(fn1, fn2) {
 	}
 
 	this.$.hover(fn1, fn2);
+	this.$.hover(fn1, fn2);
 	return this;
 }
 /**
@@ -447,3 +467,4 @@ Div.prototype.isEditable = function (value) {
 	}
 	return this;
 }
+
