@@ -6,7 +6,7 @@
  * 추가해야될것
  * 1. 마우스 우클릭 적용
  * 2. 폴더들 리스트화
- * 3. 메모들에 타이틀 적용(var meme를  )
+ * 3. 메모들에 타이틀 적용(var memo에서 특정 디브를 찾아서 적용)
  */
 var topDiv = div().append().color('white').size('100%',80).border(1).borderColor('black').displayBlock();
 //현재 클릭되어있는 메모장을 보여주고 저장하자.
