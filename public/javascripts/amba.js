@@ -236,6 +236,30 @@ Div.prototype.textLineNone = function () {
 }
 
 /**
+ * @desc    범위를 넘어가면 text를 자른다.
+ * @since   2016-09-22
+ * @author  Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.textClip = function() {
+    this.css('text-overflow', 'clip');
+
+    return this;
+}
+
+/**
+ * @desc    범위를 넘어가는 text를 ...으로 표현한다.
+ * @since   2016-09-22
+ * @author  Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.textHide = function() {
+    this.css('text-overflow', 'ellipsis');
+    this.css('white-space', 'nowrap');
+    this.css('overflow', 'hidden');
+
+    return this;
+}
+
+/**
  * border와 관련된 다양한 옵션들을 자유롭게 쓸 수 있도록 바꾸었습니다.
  * @param value border의 width가 될 숫자값 혹은 '2px solid'와 같은 value
  * @param option 'color', 'bottom', 'width' 등 border-option 과 같이 css에서 정의되어있는 border property
@@ -319,6 +343,22 @@ Div.prototype.margin = function (px) {
     return this;
 }
 
+Div.prototype.marginTop = function (px) {
+    return this.css('margin-top', px);
+}
+
+Div.prototype.marginRight = function (px) {
+    return this.css('margin-right', px);
+}
+
+Div.prototype.marginBottom = function(px) {
+    return this.css('margin-bottom', px);
+}
+
+Div.prototype.marginLeft = function (px) {
+    return this.css('margin-left', px);
+}
+
 Div.prototype.padding = function (px) {
     if (px === undefined)
         return this.css('padding');
@@ -339,34 +379,77 @@ Div.prototype.paddingLeft = function (px) {
     return this;
 }
 
-Div.prototype.marginTop = function (px) {
-    return this.css('margin-top',px);
-}
-
-
 /**
- * @desc    set attr
+ * @desc    set none-drag element
  * @since    2016-09-21
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
-// Div.prototype.attr = function(key, value) {
-// 	if(value === undefined) {
-// 		return this.$.attr(key);
-// 	}
-//
-// 	this.$.attr(key, value);
-// 	return this;
-// }
-
-/**
- * @desc    set none-select element
- * @since    2016-09-21
- * @author    Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.selectNone = function () {
+Div.prototype.textDragNone = function () {
+    this.css('user-drag', 'none');
     this.css('user-select', 'none');
+    this.css('-moz-user-select', 'none');
+    this.css('-webkit-user-drag', 'none');
+    this.css('-webkit-user-select', 'none');
+    this.css('-ms-user-select', 'none');
 
     return this;
+}
+
+/**
+ * @desc    set mouse pointer on text
+ * @since   2016-09-22
+ * @author  Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.textCursor = function(value) {
+    if (value === undefined)
+        return this.css('curosr');
+    this.css('cursor', value);
+    return this;
+}
+
+Div.prototype.textCursorAuto = function() {
+    this.css('cursor', 'auto');
+    return this;
+}
+
+Div.prototype.textCursorDefault = function() {
+        this.css('cursor', 'default');
+        return this;
+}
+
+Div.prototype.textCursorCrosshair = function() {
+        this.css('cursor', 'crosshair');
+        return this;
+}
+
+Div.prototype.textCursorPointer = function() {
+        this.css('cursor', 'pointer');
+        return this;
+}
+
+Div.prototype.textCursorMove = function() {
+        this.css('cursor', 'move');
+        return this;
+}
+
+Div.prototype.textCursorMove = function() {
+        this.css('cursor', 'move');
+        return this;
+}
+
+Div.prototype.textCursorText = function() {
+        this.css('cursor', 'text');
+        return this;
+}
+
+Div.prototype.textCursorWait = function() {
+        this.css('cursor', 'wait');
+        return this;
+}
+
+Div.prototype.textCursorHelp = function() {
+        this.css('cursor', 'help');
+        return this;
 }
 
 Div.prototype.overflow = function (value) {
