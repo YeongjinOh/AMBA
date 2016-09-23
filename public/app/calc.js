@@ -109,8 +109,9 @@ for (index = 0; index < token.etc.length; index += 1) {
                 }
                 break;
             case '=': // tracer or history기능 추가하기
+                subCurrent.text(subCurrent.text().replace(/×/g, '*').replace(/÷/g, '/'));
                 if(op_flag === true)
-                    mainCurrent.text(eval(subCurrent.text().slice(0, length-1)));
+                    mainCurrent.text(eval(subCurrent.text().slice(0, length-2)));
                 else
                     mainCurrent.text(eval(subCurrent.text() + mainCurrent.text()));
                 subCurrent.text('');
