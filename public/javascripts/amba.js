@@ -5,10 +5,10 @@ function div() {
 function Div() {
     this.$ = $('<div></div>');
     this.$.data('div', this);
+    this.param = {};
     this.displayInlineBlock();
     this.isAddedText = false;
     this.verticalAlign('top');
-    this.param = {};
 }
 
 Div.prototype.css = function (key, value) {
@@ -20,114 +20,67 @@ Div.prototype.css = function (key, value) {
     this.param[key] = value;
     this.$.css(key, value);
     return this;
-}
+};
 
 
 Div.prototype.attr = function (key, value) {
     if (value === undefined) {
+        alert(key);
+        alert(value);
         return this.$.attr(key);
     }
 
     this.$.attr(key, value);
     return this;
-}
+};
 
 Div.prototype.id = function (value) {
-    if (value === undefined) {
-        return this.$.attr('id');
-    }
+    return this.attr('id', value);
+};
 
-    this.$.attr('id', value);
-    return this;
-}
-
-/**
- * @desc set div's class name
- * @param value
- * @returns {Div}
- */
-Div.prototype.setClass = function (value) {
-    this.attr('class', value)
-    return this;
-}
-
-/**
- * get div's Class name
- */
-Div.prototype.getClass = function () {
-    //this.$.attr('class')
-
-    return this.attr('class');
-}
-
-
-//Div.prototype.width = function (px) {
-//    if (px === undefined)
-//        return this.css('width');
-//    this.css('width', px);
-//    return this;
-//}
-
-
+Div.prototype.class = function (value) {
+    return this.attr('class', value);
+};
 
 Div.prototype.append = function () {
     $('body').append(this.$);
     return this;
-}
+};
 
 Div.prototype.appendTo = function (parent) {
     this.$.appendTo(parent.$);
     return this;
-}
+};
 
 Div.prototype.parent = function () {
     return this.$.parent().data('div');
-}
+};
 
 Div.prototype.children = function () {
     var arr = this.$.children();
     return _.map(arr, function(o){
+        console.log(o);
         return o.data('div');
     });
-}
-
-/**
- * @desc Div 객체에 parent 속성을 추가하여 이를 이용한 함수들을 구현합니다.
- * @author Yeongjin Oh
- */
-//Div.prototype.appendToParent = function (parent) {
-//    this.$.appendTo(parent.$);
-//    this.parent = parent;
-//    return this;
-//}
-//
-//Div.prototype.getParent = function () {
-//    return this.parent;
-//}
+};
 
 /**
  * @desc parent 속성을 가진 객체인 경우, parent 객체의 width의 해당 ratio만큼을 width로 설정합니다.
  * @author Yeongjin Oh
  */
-//Div.prototype.setParentWidth = function (ratio) {
-//    if (this.parent === undefined)
-//        return this;
-//
-//    var width = parseInt(this.parent.width());
-//    if (typeof ratio === 'number')
-//        width = width * ratio;
-//    return this.width(width);
-//}
-//
-//Div.prototype.setParentHeight = function (ratio) {
-//    if (this.parent === undefined)
-//        return this;
-//
-//    var height = parseInt(this.parent.height());
-//    if (typeof ratio === 'number')
-//        height *= ratio;
-//    return this.height(height);
-//}
+Div.prototype.setParentWidth = function (ratio) {
+   var width = parseInt(this.parent().width());
+   if (typeof ratio === 'number')
+       width = width * ratio;
+   return this.width(width);
+};
+
+Div.prototype.setParentHeight = function (ratio) {
+   var height = parseInt(this.parent().height());
+   if (typeof ratio === 'number')
+       height *= ratio;
+   return this.height(height);
+};
 
 /**
  * 함수를 받아 div에 적용하고, 다시 div를 리턴합니다.
@@ -136,21 +89,21 @@ Div.prototype.children = function () {
 Div.prototype.deco = function (fn) {
     fn(this);
     return this;
-}
+};
 
 Div.prototype.remove = function () {
     this.$.remove();
     return this;
-}
+};
 
 Div.prototype.detach = function () {
     this.$.detach();
     return this;
-}
+};
 
 Div.prototype.displayInlineBlock = function () {
     return this.css('display', 'inline-block');
-}
+};
 
 /**
  * @desc    set display block
@@ -160,7 +113,7 @@ Div.prototype.displayInlineBlock = function () {
 Div.prototype.displayBlock = function () {
     return this.css('display', 'block');
 
-}
+};
 
 /**
  * @desc    set display status
@@ -169,14 +122,11 @@ Div.prototype.displayBlock = function () {
  */
 Div.prototype.display = function (display) {
     return this.css('display', display);
-}
+};
 
 Div.prototype.align = function (value) {
-    if (!value)
-        this.css('text-align');
-    this.css('text-align', value);
-    return this;
-}
+    return this.css('text-align', value);
+};
 
 /**
  * @desc    set text-align center
@@ -184,9 +134,8 @@ Div.prototype.align = function (value) {
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.alignCenter = function () {
-    this.css('text-align', 'center');
-    return this;
-}
+    return this.css('text-align', 'center');
+};
 
 /**
  * @desc    set text-align right
@@ -194,16 +143,12 @@ Div.prototype.alignCenter = function () {
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.alignRight = function () {
-    this.css('text-align', 'right');
-    return this;
-}
+    return this.css('text-align', 'right');
+};
 
 Div.prototype.verticalAlign = function (value) {
-    if (!value)
-        return this.css('vertical-align');
-    this.css('vertical-align', value);
-    return this;
-}
+    return this.css('vertical-align', value);
+};
 
 Div.prototype.text = function (txt) {
     if (txt === undefined)
@@ -213,11 +158,11 @@ Div.prototype.text = function (txt) {
         this.textSize(14);
     }
     return this;
-}
+};
 
 Div.prototype.textColor = function (color) {
     return this.css('color',color);
-}
+};
 
 Div.prototype.textSize = function (px) {
     if (px === undefined)
@@ -225,7 +170,7 @@ Div.prototype.textSize = function (px) {
     this.css('font-size', px);
     this.isAddedText = true;
     return this;
-}
+};
 
 /**
  * @desc set font weight bold
@@ -233,11 +178,11 @@ Div.prototype.textSize = function (px) {
  */
 Div.prototype.textBold = function () {
     return this.css('font-weight','bold');
-}
+};
 
 Div.prototype.textNormal = function () {
     return this.css('font-weight','normal');
-}
+};
 
 /**
  * @desc set text-decoration line-through
@@ -245,7 +190,7 @@ Div.prototype.textNormal = function () {
  */
 Div.prototype.textLineThrough = function () {
     return this.css('text-decoration', 'line-through');
-}
+};
 
 /**
  * @desc remove text-decoration
@@ -253,7 +198,7 @@ Div.prototype.textLineThrough = function () {
  */
 Div.prototype.textLineNone = function () {
     return this.css('text-decoration', 'none');
-}
+};
 
 /**
  * @desc    범위를 넘어가면 text를 자른다.
@@ -261,10 +206,8 @@ Div.prototype.textLineNone = function () {
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.textClip = function() {
-    this.css('text-overflow', 'clip');
-
-    return this;
-}
+    return this.css('text-overflow', 'clip');
+};
 
 /**
  * @desc    범위를 넘어가는 text를 ...으로 표현한다.
@@ -277,7 +220,22 @@ Div.prototype.textHide = function() {
     this.css('overflow', 'hidden');
 
     return this;
-}
+};
+
+// css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
+// 'border-bottom', 'border-top'  등등 각각에 입력을 해야 할까요? (Yeongjin 09/23)
+Div.prototype.border = function (value) {
+    if (typeof value === 'string') {
+        var parse = function (num) {
+            return parseInt(num);
+        }
+        value = _.chain(value.split(' ')).map(parse).value().join('px ') + 'px';
+    }
+    else if (typeof value === 'number')
+        return this.css(key, value + 'px solid #eee');
+    return this.css('border', value);
+};
+
 
 /**
  * border와 관련된 다양한 옵션들을 자유롭게 쓸 수 있도록 바꾸었습니다.
@@ -285,113 +243,83 @@ Div.prototype.textHide = function() {
  * @param option 'color', 'bottom', 'width' 등 border-option 과 같이 css에서 정의되어있는 border property
  * example usage : border(3) == css('border','3px solid'), border('red','color) == css('border-color','red')
  *                 border(1,'bottom') == css('border-bottom','1px solid'), border(undefined,'style')==css('border-style')
+ * @autor Yeongjin Oh
  */
-
-
-Div.prototype.border = function (value, option) {
+Div.prototype.borderOption = function (value, option) {
     var key = 'border';
     if (typeof option === 'string') {
-        value = _.chain(value.split(' ')).map(parseInt).value().join('px ');
+        key += '-' + option;
     }
     else if (typeof value === 'number')
         return this.css(key, value + 'px solid #eee');
     return this.css(key, value);
-}
+};
 
-Div.prototype.borderStyle = function (c) {
-    return this.css('border-style', c);
-}
+Div.prototype.borderStyle = function (style) {
+    return this.css('border-style', style);
+};
 
 
 Div.prototype.borderColor = function (c) {
-    if (c === undefined)
-        return this.css('border-color');
-
-    this.css('border-color', c);
-    return this;
-}
+    return this.css('border-color', c);
+};
 
 Div.prototype.borderRadius = function (px) {
-    if (px === undefined)
-        return this.css('border-radius');
-    this.css('border-radius', px);
-    return this;
-}
+    return this.css('border-radius', px);
+};
 
 Div.prototype.color = function (c) {
-    if (c === undefined)
-        return this.css('background-color');
-
-    this.css('background-color', c);
-    return this;
-}
+    return this.css('background-color', c);
+};
 
 Div.prototype.width = function (px) {
-    if (px === undefined)
-        return this.css('width');
-    this.css('width', px);
-    return this;
-}
+    return this.css('width', px);
+};
 
 Div.prototype.minWidth = function (px) {
-    if (px === undefined)
-        return this.css('min-width');
-    this.css('min-width', px);
-    return this;
-}
+    return this.css('min-width', px);
+};
 
 Div.prototype.height = function (px) {
-    if (px === undefined)
-        return this.css('height');
-    this.css('height', px);
-    return this;
-}
+    return this.css('height', px);
+};
 
 Div.prototype.minHeight = function (px) {
-    if (px === undefined)
-        return this.css('min-height');
-    this.css('min-height', px);
-    return this;
-}
+    return this.css('min-height', px);
+};
 
 Div.prototype.parentWidth = function () {
-    return this.getParent().width();
-}
+    return this.parent().width();
+};
 
 
 Div.prototype.parentHeight = function () {
-    return this.getParent().height();
-}
+    return this.parent().height();
+};
 
 Div.prototype.margin = function (px) {
-    if (px === undefined)
-        return this.css('margin');
-    this.css('margin', px);
-    return this;
-}
+    return this.css('margin', px);
+};
 
 Div.prototype.marginTop = function (px) {
     return this.css('margin-top', px);
-}
+};
 
 Div.prototype.marginRight = function (px) {
     return this.css('margin-right', px);
-}
+};
 
 Div.prototype.marginBottom = function(px) {
     return this.css('margin-bottom', px);
-}
+};
 
 Div.prototype.marginLeft = function (px) {
     return this.css('margin-left', px);
-}
+};
 
 Div.prototype.padding = function (px) {
-    if (px === undefined)
-        return this.css('padding');
-    this.css('padding', px);
-    return this;
-}
+    return this.css('padding', px);
+};
 
 /**
  * @desc    left padding
@@ -400,11 +328,8 @@ Div.prototype.padding = function (px) {
  * @todo    create top, right, bottom
  */
 Div.prototype.paddingLeft = function (px) {
-    if (px === undefined)
-        return this.css('padding-left');
-    this.css('padding-left', px);
-    return this;
-}
+    return this.css('padding-left', px);
+};
 
 /**
  * @desc    set none-drag element
@@ -420,7 +345,7 @@ Div.prototype.textDragNone = function () {
     this.css('-ms-user-select', 'none');
 
     return this;
-}
+};
 
 /**
  * @desc    set mouse pointer on text
@@ -428,63 +353,44 @@ Div.prototype.textDragNone = function () {
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.textCursor = function(value) {
-    if (value === undefined)
-        return this.css('curosr');
-    this.css('cursor', value);
-    return this;
-}
+    return this.css('cursor', value);
+};
 
 Div.prototype.textCursorAuto = function() {
-    this.css('cursor', 'auto');
-    return this;
-}
+    return this.css('cursor', 'auto');
+};
 
 Div.prototype.textCursorDefault = function() {
-        this.css('cursor', 'default');
-        return this;
-}
+    return this.css('cursor', 'default');
+};
 
 Div.prototype.textCursorCrosshair = function() {
-        this.css('cursor', 'crosshair');
-        return this;
-}
+    return this.css('cursor', 'crosshair');
+};
 
 Div.prototype.textCursorPointer = function() {
-        this.css('cursor', 'pointer');
-        return this;
-}
+    return this.css('cursor', 'pointer');
+};
 
 Div.prototype.textCursorMove = function() {
-        this.css('cursor', 'move');
-        return this;
-}
-
-Div.prototype.textCursorMove = function() {
-        this.css('cursor', 'move');
-        return this;
-}
+    return this.css('cursor', 'move');
+};
 
 Div.prototype.textCursorText = function() {
-        this.css('cursor', 'text');
-        return this;
-}
+    return this.css('cursor', 'text');
+};
 
 Div.prototype.textCursorWait = function() {
-        this.css('cursor', 'wait');
-        return this;
-}
+    return this.css('cursor', 'wait');
+};
 
 Div.prototype.textCursorHelp = function() {
-        this.css('cursor', 'help');
-        return this;
-}
+    return this.css('cursor', 'help');
+};
 
 Div.prototype.overflow = function (value) {
-    if (value === undefined)
-        return this.css('overflow');
-    this.css('overflow', value);
-    return this;
-}
+    return this.css('overflow', value);
+};
 
 Div.prototype.size = function (w, h) {
     if (arguments.length == 0) {
@@ -497,7 +403,7 @@ Div.prototype.size = function (w, h) {
     this.width(w);
     this.height(h);
     return this;
-}
+};
 
 Div.prototype.offset = function (x, y) {
     if (arguments.length == 0) {
@@ -510,7 +416,7 @@ Div.prototype.offset = function (x, y) {
     });
 
     return this;
-}
+};
 
 Div.prototype.click = function (fn) {
     if (fn === undefined) {
@@ -522,12 +428,12 @@ Div.prototype.click = function (fn) {
         if (fn) fn(that, e);
     });
     return this;
-}
+};
 
 Div.prototype.draggable = function (opt) {
     this.$.draggable(opt);
     return this;
-}
+};
 
 Div.prototype.moveDown = function (y, delay) {
     var value = y >= 0 ? '+' + y : '-' + y;
@@ -535,7 +441,7 @@ Div.prototype.moveDown = function (y, delay) {
         top: value
     }, delay);
     return this;
-}
+};
 
 /**
  * @desc    hover event
@@ -592,7 +498,7 @@ Div.prototype.hoverColor = function(color1, color2) {
 Div.prototype.stop = function () {
     this.$.stop();
     return this;
-}
+};
 
 /**
  * @desc set editable at div
@@ -605,5 +511,5 @@ Div.prototype.isEditable = function (value) {
 		this.text('');
 	}
 	return this;
-}
+};
 
