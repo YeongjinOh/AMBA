@@ -18,7 +18,6 @@ Div.prototype.css = function (key, value) {
     return this;
 }
 
-
 Div.prototype.attr = function (key, value) {
     if (value === undefined) {
         return this.$.attr(key);
