@@ -27,6 +27,11 @@
     <script>
     	$(document).ready(function(){
 
+            var bold = function (div) {
+                div.border(1).color('red');
+            }
+            div().apply(bold);
+
     		var path = AB.getParameter('app');
             if(!path) {
                 div().append().text('Please make first application');
