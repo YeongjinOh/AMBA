@@ -20,6 +20,7 @@ var init_flag = true;   // 초기 입력 확인 flag
 var op_flag = false;    // operator 확인 flag
 var frac_flag = false;  // 실수 확인 flag
 
+var index;
 var token = {
     control: ['CE', 'C', '≪'],
     num: ['7', '8', '9', '4', '5', '6', '1', '2', '3'],
@@ -27,7 +28,7 @@ var token = {
     etc: ['±', '0', '.', '=']
 };
 
-for(index in token.control) {
+for (index = 0; index < token.control.length; index += 1) {
     div().size('33.3%', '25%').color('#D3D3D3').appendTo(control).text(token.control[index]).textSize('6vw')
          .hover(function(dv) {
         dv.color('#A9A9A9');
@@ -57,7 +58,7 @@ for(index in token.control) {
     });
 }
 
-for(index in token.num) {
+for (index = 0; index < token.num.length; index += 1) {
     div().size('33.3%', '25%').color('#D3D3D3').appendTo(control).text(token.num[index]).textSize('6vw')
         .hover(function(dv) {
         dv.color('#A9A9A9');
@@ -78,7 +79,7 @@ for(index in token.num) {
     });
 }
 
-for(index in token.etc) {
+for (index = 0; index < token.etc.length; index += 1) {
     div().size('25%', '100%').color('#D3D3D3').appendTo(etc).text(token.etc[index]).textSize('6vw')
         .hover(function(dv) {
         dv.color('#A9A9A9');
@@ -119,7 +120,7 @@ for(index in token.etc) {
     });
 }
 
-for(index in token.operator) {
+for (index = 0; index < token.operator.length; index += 1) {
     div().size('100%', '25%').color('#D3D3D3').appendTo(operator).text(token.operator[index]).textSize('6vw')
         .hover(function(dv) {
         dv.color('#A9A9A9');
