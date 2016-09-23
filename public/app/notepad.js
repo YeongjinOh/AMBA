@@ -12,7 +12,7 @@ var topDiv = div().append().color('white').size('100%',80).border(1).borderColor
 //현재 클릭되어있는 메모장을 보여주고 저장하자.
 var directors = div().append().color('white').size(200,600).border(1).borderColor('black').text('나의 메모장');
 
-var moms = div().append().color('white').size(300,600).border(1).borderColor('black').overflow('scroll');
+var momos = div().append().color('white').size(300,600).border(1).borderColor('black').overflow('scroll');
 var memoArea = div().append().color('white').size(300,600).border(1).borderColor('black');
 
 var bottomDiv = div().append().color('white').size('100%',100).border(1).borderColor('black');
@@ -22,7 +22,7 @@ var cntMemo;
 
 //메모할 내용 추가하기
 var addMemo = div().size(100,50).border(1).color('white').borderColor('black').text('메모장 추가').appendTo(topDiv)
-    .click(function (e) {
+    .click(function (div, e) {
 
         memoArea.isEditable(true).color('gray').text('메모하세요');
         var memo = div().appendTo(momos).size(300, 100).border(1).borderColor('black').color('red').displayBlock()
@@ -39,21 +39,17 @@ var addMemo = div().size(100,50).border(1).color('white').borderColor('black').t
                 var txt = localStorage.getItem(cntMemo);
                 memoArea.text(txt);
             });
-
         //.setClass('please')
         //random(500);
         //var contents = memoArea.text();
         //localstorage('momo1', contents);
+    }).hoverColor('blue', 'red');
 
-
-
-    }).hover(function () {
-        addMemo.color('blue')
-    }, function () {
-        addMemo.color('red')
-    })
-
-
+    //.hover(function () {
+    //    addMemo.color('blue')
+    //}, function () {
+    //    addMemo.color('red')
+    //})
 
 //메모장 저장하기
 var saveMemo = div().size(100,50).border(1).color('white').borderColor('black').text('메모장 저장')

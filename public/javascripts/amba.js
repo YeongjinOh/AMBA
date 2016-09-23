@@ -4,16 +4,20 @@ function div() {
 
 function Div() {
     this.$ = $('<div></div>');
+    this.$.data('div', this);
     this.displayInlineBlock();
     this.isAddedText = false;
     this.verticalAlign('top');
+    this.param = {};
 }
 
 Div.prototype.css = function (key, value) {
     if (value === undefined) {
-        return this.$.css(key);
+        //return this.$.css(key);
+        return this.param[key];
     }
 
+    this.param[key] = value;
     this.$.css(key, value);
     return this;
 }
@@ -25,6 +29,15 @@ Div.prototype.attr = function (key, value) {
     }
 
     this.$.attr(key, value);
+    return this;
+}
+
+Div.prototype.id = function (value) {
+    if (value === undefined) {
+        return this.$.attr('id');
+    }
+
+    this.$.attr('id', value);
     return this;
 }
 
@@ -67,49 +80,60 @@ Div.prototype.appendTo = function (parent) {
     return this;
 }
 
+Div.prototype.parent = function () {
+    return this.$.parent().data('div');
+}
+
+Div.prototype.children = function () {
+    var arr = this.$.children();
+    return _.map(arr, function(o){
+        return o.data('div');
+    });
+}
+
 /**
  * @desc Div 객체에 parent 속성을 추가하여 이를 이용한 함수들을 구현합니다.
  * @author Yeongjin Oh
  */
-Div.prototype.appendToParent = function (parent) {
-    this.$.appendTo(parent.$);
-    this.parent = parent;
-    return this;
-}
-
-Div.prototype.getParent = function () {
-    return this.parent;
-}
+//Div.prototype.appendToParent = function (parent) {
+//    this.$.appendTo(parent.$);
+//    this.parent = parent;
+//    return this;
+//}
+//
+//Div.prototype.getParent = function () {
+//    return this.parent;
+//}
 
 /**
  * @desc parent 속성을 가진 객체인 경우, parent 객체의 width의 해당 ratio만큼을 width로 설정합니다.
  * @author Yeongjin Oh
  */
-Div.prototype.setParentWidth = function (ratio) {
-    if (this.parent === undefined)
-        return this;
-
-    var width = parseInt(this.parent.width());
-    if (typeof ratio === 'number')
-        width = width * ratio;
-    return this.width(width);
-}
-
-Div.prototype.setParentHeight = function (ratio) {
-    if (this.parent === undefined)
-        return this;
-
-    var height = parseInt(this.parent.height());
-    if (typeof ratio === 'number')
-        height *= ratio;
-    return this.height(height);
-}
+//Div.prototype.setParentWidth = function (ratio) {
+//    if (this.parent === undefined)
+//        return this;
+//
+//    var width = parseInt(this.parent.width());
+//    if (typeof ratio === 'number')
+//        width = width * ratio;
+//    return this.width(width);
+//}
+//
+//Div.prototype.setParentHeight = function (ratio) {
+//    if (this.parent === undefined)
+//        return this;
+//
+//    var height = parseInt(this.parent.height());
+//    if (typeof ratio === 'number')
+//        height *= ratio;
+//    return this.height(height);
+//}
 
 /**
  * 함수를 받아 div에 적용하고, 다시 div를 리턴합니다.
  * @author Yeongjin OH
  */
-Div.prototype.apply = function (fn) {
+Div.prototype.deco = function (fn) {
     fn(this);
     return this;
 }
@@ -125,8 +149,7 @@ Div.prototype.detach = function () {
 }
 
 Div.prototype.displayInlineBlock = function () {
-    this.css('display', 'inline-block');
-    return this;
+    return this.css('display', 'inline-block');
 }
 
 /**
@@ -135,8 +158,8 @@ Div.prototype.displayInlineBlock = function () {
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.displayBlock = function () {
-    this.css('display', 'block');
-    return this;
+    return this.css('display', 'block');
+
 }
 
 /**
@@ -145,10 +168,7 @@ Div.prototype.displayBlock = function () {
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.display = function (display) {
-    if (display === undefined)
-        this.css('display');
-    this.css('display', display);
-    return this;
+    return this.css('display', display);
 }
 
 Div.prototype.align = function (value) {
@@ -266,13 +286,20 @@ Div.prototype.textHide = function() {
  * example usage : border(3) == css('border','3px solid'), border('red','color) == css('border-color','red')
  *                 border(1,'bottom') == css('border-bottom','1px solid'), border(undefined,'style')==css('border-style')
  */
+
+
 Div.prototype.border = function (value, option) {
     var key = 'border';
-    if (typeof option === 'string')
-        key += '-' + option;
-    if (typeof value === 'number')
-        return this.css(key, value + 'px solid');
+    if (typeof option === 'string') {
+        value = _.chain(value.split(' ')).map(parseInt).value().join('px ');
+    }
+    else if (typeof value === 'number')
+        return this.css(key, value + 'px solid #eee');
     return this.css(key, value);
+}
+
+Div.prototype.borderStyle = function (c) {
+    return this.css('border-style', c);
 }
 
 
@@ -491,8 +518,8 @@ Div.prototype.click = function (fn) {
     }
 
     var that = this;
-    this.$.click(function () {
-        if (fn) fn(that);
+    this.$.click(function (e) {
+        if (fn) fn(that, e);
     });
     return this;
 }
@@ -534,7 +561,27 @@ Div.prototype.hover = function(fn1, fn2) {
 
 	this.$.hover(fn1, fn2);
 	return this;
-}
+};
+
+Div.prototype.hoverColor = function(color1, color2) {
+    var that = this;
+    var fn1Func, fn2Func;
+    if (color1) {
+        fn1Func = function(){
+            that.color(color1);
+        };
+    }
+
+    if (color2) {
+        fn2Func = function(){
+            that.color(color2);
+        };
+    }
+
+    this.$.hover(fn1Func, fn2Func);
+    return this;
+};
+
 /**
  * @desc    stop animation
  * @since    2016-09-20
