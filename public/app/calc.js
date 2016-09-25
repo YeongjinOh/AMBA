@@ -6,9 +6,9 @@ var root = div().size('100%', '100%').color('#FFF0F5').append();
 
 var current = div().size('70%', '20%').marginTop('9%').marginLeft('5%').color('lightblue').appendTo(root).textCursorDefault();
 var subCurrent = div().displayBlock().size('100%', '30%').color('#F5FFFA').appendTo(current)
-                    .alignRight().textSize('3vw').textHide();
+                    .alignRight().textSize('3vw').isTextHide();
 var mainCurrent = div().displayBlock().size('100%', '70%').color('#F5FFFA').appendTo(current)
-                    .alignRight().textSize('8vw').textHide().text(0);
+                    .alignRight().textSize('8vw').isTextHide().text(0);
 
 var input = div().size('70%', '60%').marginLeft('5%').color('#D3D3D3').appendTo(root)
                  .textCursorDefault().alignCenter().textDragNone();
@@ -30,11 +30,7 @@ var token = {
 
 for (index = 0; index < token.control.length; index += 1) {
     div().size('33.3%', '25%').color('#D3D3D3').appendTo(control).text(token.control[index]).textSize('6vw')
-         .hover(function(dv) {
-        dv.color('#A9A9A9');
-    }, function(dv) {
-        dv.color('#D3D3D3');
-    }).click(function(dv) {
+         .hoverColor('#A9A9A9','#D3D3D3').click(function(dv) {
         switch (dv.text()) {
             case 'CE':
                 mainCurrent.text('0');
@@ -60,11 +56,7 @@ for (index = 0; index < token.control.length; index += 1) {
 
 for (index = 0; index < token.num.length; index += 1) {
     div().size('33.3%', '25%').color('#D3D3D3').appendTo(control).text(token.num[index]).textSize('6vw')
-        .hover(function(dv) {
-        dv.color('#A9A9A9');
-    }, function(dv) {
-        dv.color('#D3D3D3');
-    }).click(function(dv) {
+        .hoverColor('#A9A9A9', '#D3D3D3').click(function(dv) {
         if (init_flag === true) {
             mainCurrent.text('');
             init_flag = false;
@@ -81,11 +73,7 @@ for (index = 0; index < token.num.length; index += 1) {
 
 for (index = 0; index < token.etc.length; index += 1) {
     div().size('25%', '100%').color('#D3D3D3').appendTo(etc).text(token.etc[index]).textSize('6vw')
-        .hover(function(dv) {
-        dv.color('#A9A9A9');
-    }, function(dv) {
-        dv.color('#D3D3D3');
-    }).click(function(dv) {
+        .hoverColor('#A9A9A9', '#D3D3D3').click(function(dv) {
         switch (dv.text()) {
             case '±':
                 if(init_flag === false)
@@ -123,11 +111,7 @@ for (index = 0; index < token.etc.length; index += 1) {
 
 for (index = 0; index < token.operator.length; index += 1) {
     div().size('100%', '25%').color('#D3D3D3').appendTo(operator).text(token.operator[index]).textSize('6vw')
-        .hover(function(dv) {
-        dv.color('#A9A9A9');
-    }, function(dv) {
-        dv.color('#D3D3D3');
-    }).click(function(dv) {
+        .hoverColor('#A9A9A9', '#D3D3D3').click(function(dv) {
         if (init_flag === false) {
             if (op_flag === false) {
                 subCurrent.text(subCurrent.text() + ' ' + mainCurrent.text() + ' ' + dv.text());
