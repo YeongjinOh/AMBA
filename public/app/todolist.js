@@ -10,15 +10,15 @@ $(document).ready(function(){
 	var inputButton = div().size(50,bottomBarHeight).margin('auto 13px').color('yellow').appendTo(bottomBar);
 	var blank = div();
 
-	var uncheckedList = div().margin(0).minHeight(0).appendToParent(viewer).setParentWidth();
-	var checkedList = div().margin(0).minHeight(0).appendToParent(viewer).setParentWidth();
+	var uncheckedList = div().margin(0).minHeight(0).appendTo(viewer).setParentWidth();
+	var checkedList = div().margin(0).minHeight(0).appendTo(viewer).setParentWidth();
 
 	// set insert functionality
 	inputButton.click(function (e) {
 		var text = inputForm.text();
 		inputForm.text(defaultMessage);
 		var checked = false;
-		var todoWrapper = div().appendToParent(uncheckedList).setParentWidth().border('1px dotted','bottom').border('rgb(200,200,200)','color');
+		var todoWrapper = div().appendTo(uncheckedList).setParentWidth().border('1px dotted','bottom').border('rgb(200,200,200)','color');
 
 		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).textSize(18).textBold();
 

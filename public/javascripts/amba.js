@@ -240,7 +240,7 @@ Div.prototype.border = function (value) {
         value = _.chain(value.split(' ')).map(parse).value().join('px ') + 'px';
     }
     else if (typeof value === 'number')
-        return this.css(key, value + 'px solid #eee');
+        return this.css('border', value + 'px solid #eee');
     return this.css('border', value);
 };
 
