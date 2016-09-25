@@ -16,6 +16,11 @@
     "pg": "4.5.6",
     "serve-favicon": "~2.3.0",
     "stylus": "0.54.5",
-    "under_score": "^0.1.0"
+    "under_score": "^0.1.0",
+    "jsdoc": "^3.4.1",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-minify-html": "^1.0.6",
+    "gulp-uglify": "^2.0.0"
   }
 }

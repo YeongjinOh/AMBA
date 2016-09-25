@@ -1,7 +1,14 @@
+/**
+ * @desc 전역, div객체를 리턴
+ * @returns {Div}
+ */
 function div() {
     return new Div();
 }
-
+/**
+ *
+ * @constructor
+ */
 function Div() {
     this.$ = $('<div></div>');
     this.$.data('div', this);
