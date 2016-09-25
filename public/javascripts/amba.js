@@ -240,7 +240,7 @@ Div.prototype.border = function (value) {
         value = _.chain(value.split(' ')).map(parse).value().join('px ') + 'px';
     }
     else if (typeof value === 'number')
-        return this.css('border', value + 'px solid #eee');
+        return this.css('border', value + 'px solid black');
     return this.css('border', value);
 };
 
@@ -327,6 +327,16 @@ Div.prototype.marginLeft = function (px) {
 
 Div.prototype.padding = function (px) {
     return this.css('padding', px);
+};
+
+/**
+ *
+ */
+Div.prototype.getAbsoluteHeight = function () {
+    return parseInt(this.$.css('height'));
+};
+Div.prototype.getAbsoluteWidth = function () {
+    return parseInt(this.$.css('width'));
 };
 
 /**
