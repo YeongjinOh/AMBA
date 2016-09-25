@@ -1,5 +1,5 @@
 /**
- * @desc div객체를 리턴
+ * @desc 전역, div객체를 리턴
  * @returns {Div}
  */
 function div() {
