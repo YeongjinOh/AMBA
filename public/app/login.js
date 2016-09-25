@@ -3,7 +3,7 @@
  */
 
 /* PostgreSQL Module */
-var pg = require('pg');
+//var pg = require('pg');
 
 /* 전체 Layout Div 구성 */
 var top = div().append().size('100%', '15%').color('red');
@@ -42,10 +42,10 @@ var pw = div().appendTo(midCenterMidCenterMid).size('94%', '20%').color('white')
     .borderRadius('5px').borderRadius('5px').textSize('2vw').text('Password').alignCenter().isTextNoSpace().isOverflowAuto()
     .hover( function (dv) {
         if(dv.text() === 'Password')
-            dv.text('');
+            dv.text('').isTextPassword(true);
     }, function (dv) {
         if(dv.text() === '')
-            dv.text('Password');
+            dv.text('Password').isTextPassword(false);
     });
 
 var signIn = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('yellow').margin('3% 2% 3% 3%')
@@ -57,14 +57,14 @@ var signIn = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('yel
     })
     .click(function() {
         // click event - DB Insert
-        pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-            client.query('CREATE TABLE test_table (id int not null);', function(err) {
-                done();
-                if (err) {
-                    console.error(err);
-                }
-            });
-        });
+        // pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+        //     client.query('CREATE TABLE test_table (id int not null);', function(err) {
+        //         done();
+        //         if (err) {
+        //             console.error(err);
+        //         }
+        //     });
+        // });
         alert('ID: ' + id.text() + '\nPW: ' + pw.text() + '\n로그인 인증');
     });
 

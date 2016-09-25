@@ -1,14 +1,7 @@
-/**
- * @desc 전역, div객체를 리턴
- * @returns {Div}
- */
 function div() {
     return new Div();
 }
-/**
- *
- * @constructor
- */
+
 function Div() {
     this.$ = $('<div></div>');
     this.$.data('div', this);
@@ -518,7 +511,6 @@ Div.prototype.hoverColor = function(color1, color2) {
  * @author    Yoon JiSoo yjsgoon@naver.com
  * @todo    add parameter
  */
-
 Div.prototype.stop = function () {
     this.$.stop();
     return this;
@@ -535,4 +527,16 @@ Div.prototype.isEditable = function (value) {
 		this.text('');
 	}
 	return this;
+};
+
+/**
+ * @desc    password
+ * @since    2016-09-26
+ * @author    Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.isTextPassword = function(value) {
+    if(value === true)
+        return this.css('-webkit-text-security', 'disc');
+    else
+        return this.css('-webkit-text-security', false);
 };
