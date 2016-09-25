@@ -204,7 +204,7 @@ Div.prototype.textLineNone = function () {
  * @since   2016-09-22
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textClip = function() {
+Div.prototype.isTextClip = function() {
     return this.css('text-overflow', 'clip');
 };
 
@@ -213,12 +213,21 @@ Div.prototype.textClip = function() {
  * @since   2016-09-22
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textHide = function() {
+Div.prototype.isTextHide = function() {
     this.css('text-overflow', 'ellipsis');
     this.css('white-space', 'nowrap');
     this.css('overflow', 'hidden');
 
     return this;
+};
+
+/**
+ * @desc    text가 길어도 줄바꿈이 되지 않는다.
+ * @since   2016-09-25
+ * @author  Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.isTextNoSpace = function () {
+    return this.css('white-space', 'nowrap');
 };
 
 // css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
@@ -242,7 +251,7 @@ Div.prototype.border = function (value) {
  * @param option 'color', 'bottom', 'width' 등 border-option 과 같이 css에서 정의되어있는 border property
  * example usage : border(3) == css('border','3px solid'), border('red','color) == css('border-color','red')
  *                 border(1,'bottom') == css('border-bottom','1px solid'), border(undefined,'style')==css('border-style')
- * @autor Yeongjin Oh
+ * @author Yeongjin Oh
  */
 Div.prototype.borderOption = function (value, option) {
     var key = 'border';
@@ -391,6 +400,15 @@ Div.prototype.overflow = function (value) {
     return this.css('overflow', value);
 };
 
+/**
+ * @desc     Content가 넘치면 scroll을 생성한다.
+ * @since    2016-09-25
+ * @author   Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.isOverflowAuto = function() {
+    return this.css('overflow', 'auto');
+};
+
 Div.prototype.size = function (w, h) {
     if (arguments.length == 0) {
         return {
@@ -511,4 +529,3 @@ Div.prototype.isEditable = function (value) {
 	}
 	return this;
 };
-
