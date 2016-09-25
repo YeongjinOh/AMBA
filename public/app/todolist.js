@@ -18,7 +18,7 @@ $(document).ready(function(){
 		var text = inputForm.text();
 		inputForm.text(defaultMessage);
 		var checked = false;
-		var todoWrapper = div().appendTo(uncheckedList).setParentWidth().border('1px dotted','bottom').border('rgb(200,200,200)','color');
+		var todoWrapper = div().appendTo(uncheckedList).setParentWidth().borderOption('1px dotted','bottom').borderOption('rgb(200,200,200)','color');
 
 		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).textSize(18).textBold();
 
