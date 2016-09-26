@@ -3,7 +3,7 @@
  */
 
 /* PostgreSQL Module */
-//var pg = require('pg');
+// var pg = require('pg');
 
 /* 전체 Layout Div 구성 */
 var top = div().append().size('100%', '15%').color('red');
@@ -24,38 +24,38 @@ var bottom = div().append().size('100%', '15%').color('blue');
 
 /*
  ID, PW 찾기 기능 추가하기!
+ ID, PW입력할 때, hover가 아닌 현재 커서 or 키보드 입력을 파악하는 이벤트가 필요하다.
+
+ Input을 어떻게든 본따야하는데... 아......
+ Div, Input은 동작이 다른 것 같음, Div는 focus, onfocus, blur, onblur등의 함수가 바로 동작함.
  */
 
 /* 기능 구현 */
-var id = div().appendTo(midCenterMidCenterMid).size('94%', '20%').color('white').margin('2% 3% 2% 3%').isEditable(true)
-    .borderRadius('5px').borderRadius('5px').textSize('2vw').text('ID').alignCenter().isTextNoSpace().isOverflowAuto()
-    .hover( function (dv) {
-        if(dv.text() === 'ID')
-            dv.text('');
-    }, function (dv) {
-        if(dv.text() === '')
-            dv.text('ID');
-    });
+div().appendTo(midCenterMidCenterMid).size('8%', '20%').color('lightblue').margin('2% 3% 2% 5%').borderRadius('5px').textSize('3vw').text('ID').alignCenter();
+var id = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').isEditable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('ID')
+    .borderRadius('5px').textSize('3vw').alignCenter().isTextNoSpace().isOverflowAuto();
+    // .hover( function (dv) {
+    //     if(dv.text() === 'ID')
+    //         dv.text('');
+    // }, function (dv) {
+    //     if(dv.text() === '')
+    //         dv.text('ID');
+    // });
 
-// text *로 표현하기
-var pw = div().appendTo(midCenterMidCenterMid).size('94%', '20%').color('white').margin('2% 3% 2% 3%').isEditable(true)
-    .borderRadius('5px').borderRadius('5px').textSize('2vw').text('Password').alignCenter().isTextNoSpace().isOverflowAuto()
-    .hover( function (dv) {
-        if(dv.text() === 'Password')
-            dv.text('').isTextPassword(true);
-    }, function (dv) {
-        if(dv.text() === '')
-            dv.text('Password').isTextPassword(false);
-    });
+div().appendTo(midCenterMidCenterMid).size('10%', '20%').color('lightblue').margin('2% 3% 2% 3%').borderRadius('5px').textSize('3vw').text('PW ').alignCenter();
+var pw = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').isEditable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('Password')
+    .borderRadius('5px').textSize('3vw').alignCenter().isTextNoSpace().isOverflowAuto().isTextPassword(true);
+    // .hover( function (dv) {
+    //     if(dv.text() === 'Password')
+    //         dv.text('').isTextPassword(true);
+    // }, function (dv) {
+    //     if(dv.text() === '')
+    //         dv.text('Password').isTextPassword(false);
+    // });
 
 var signIn = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('yellow').margin('3% 2% 3% 3%')
     .borderRadius('5px').text('Sign-In').alignCenter().textSize('4vw').textCursorPointer().textDragNone()
-    .hover(function(dv) {
-        dv.color('blue');
-    }, function(dv) {
-        dv.color('yellow');
-    })
-    .click(function() {
+    .hoverColor('blue', 'yellow').click(function() {
         // click event - DB Insert
         // pg.connect(process.env.DATABASE_URL, function(err, client, done) {
         //     client.query('CREATE TABLE test_table (id int not null);', function(err) {
@@ -65,17 +65,12 @@ var signIn = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('yel
         //         }
         //     });
         // });
-        alert('ID: ' + id.text() + '\nPW: ' + pw.text() + '\n로그인 인증');
+        alert('ID: ' + id.text() + '\nPW: ' + pw.text() + '\n로그인 인증과정 추가');
     });
 
 var signUp = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('green').margin('3% 3% 3% 2%')
     .borderRadius('5px').text('Sign-Up').alignCenter().textSize('4vw').textCursorPointer().textDragNone()
-    .hover(function(dv) {
-        dv.color('red');
-    }, function(dv) {
-        dv.color('green');
-    })
-    .click(function() {
+    .hoverColor('red', 'green').click(function() {
         // click event - new page
         alert('회원가입 페이지로 이동');
     });

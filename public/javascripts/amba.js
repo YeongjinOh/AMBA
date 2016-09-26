@@ -533,10 +533,11 @@ Div.prototype.isEditable = function (value) {
  * @desc    password
  * @since    2016-09-26
  * @author    Yoon JiSoo yjsgoon@naver.com
+ * @todo    Source에 유연성을 추가해야 한다.
  */
 Div.prototype.isTextPassword = function(value) {
     if(value === true)
         return this.css('-webkit-text-security', 'disc');
     else
-        return this.css('-webkit-text-security', false);
+        return this.css('-webkit-text-security', 'none');
 };
