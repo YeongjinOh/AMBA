@@ -128,6 +128,15 @@ Div.prototype.align = function (value) {
 };
 
 /**
+ * @desc visibility 속성을 이용합니다. visible, hidden, collapse 등의 value를 취할 수 있습니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.visibility = function (value) {
+    return this.css('visibility', value);
+};
+
+
+/**
  * @desc    set text-align center
  * @since    2016-09-21
  * @author    Yoon JiSoo yjsgoon@naver.com
@@ -240,7 +249,7 @@ Div.prototype.border = function (value) {
         value = _.chain(value.split(' ')).map(parse).value().join('px ') + 'px';
     }
     else if (typeof value === 'number')
-        return this.css(key, value + 'px solid #eee');
+        return this.css('border', value + 'px solid black');
     return this.css('border', value);
 };
 
@@ -288,12 +297,20 @@ Div.prototype.minWidth = function (px) {
     return this.css('min-width', px);
 };
 
+Div.prototype.maxWidth = function (px) {
+    return this.css('max-width', px);
+};
+
 Div.prototype.height = function (px) {
     return this.css('height', px);
 };
 
 Div.prototype.minHeight = function (px) {
     return this.css('min-height', px);
+};
+
+Div.prototype.maxHeight = function (px) {
+    return this.css('max-height', px);
 };
 
 Div.prototype.parentWidth = function () {
@@ -327,6 +344,25 @@ Div.prototype.marginLeft = function (px) {
 
 Div.prototype.padding = function (px) {
     return this.css('padding', px);
+};
+
+Div.prototype.float = function (value) {
+    return this.css('float', value);
+};
+
+Div.prototype.clear = function (value) {
+    return this.css('clear', value);
+};
+
+
+/**
+ *
+ */
+Div.prototype.getAbsoluteHeight = function () {
+    return parseInt(this.$.css('height'));
+};
+Div.prototype.getAbsoluteWidth = function () {
+    return parseInt(this.$.css('width'));
 };
 
 /**
@@ -504,6 +540,26 @@ Div.prototype.hoverColor = function(color1, color2) {
     this.$.hover(fn1Func, fn2Func);
     return this;
 };
+
+Div.prototype.hoverTextColor = function(color1, color2) {
+    var that = this;
+    var fn1Func, fn2Func;
+    if (color1) {
+        fn1Func = function(){
+            that.textColor(color1);
+        };
+    }
+
+    if (color2) {
+        fn2Func = function(){
+            that.textColor(color2);
+        };
+    }
+
+    this.$.hover(fn1Func, fn2Func);
+    return this;
+};
+
 
 /**
  * @desc    stop animation
