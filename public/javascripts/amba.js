@@ -104,13 +104,21 @@ var getMethodName = function (propertyName) {
 };
 
 /**
- * 주어진 css property를 Div의 메서드에 추가합니다.
+ * @desc 주어진 css property를 Div의 메서드에 추가합니다.
+ *      value가 함께 주어지면 propertyValue() 와 같이 인자를 받지 않는 메서드를 생성합니다.
+ *      예를 들어, (text-align, center)가 입력으로 들어오면, textAlignCenter 메서드를 만듭니다.
  * @author Yeongjin Oh
  */
-var addCssMethod = function (propertyName) {
-    Div.prototype[getMethodName(propertyName)] = function (value) {
-        return this.css(propertyName, value);
-    };
+var addCssMethod = function (propertyName, valueName) {
+    if (valueName === undefined) {
+        Div.prototype[getMethodName(propertyName)] = function (value) {
+            return this.css(propertyName, value);
+        };
+    } else {
+        Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
+            return this.css(propertyName, valueName);
+        };
+    }
 };
 
 /**
@@ -119,243 +127,219 @@ var addCssMethod = function (propertyName) {
  */
 var addAllCssMethods = function () {
 
-    var cssProperties = [
-        "align-content",
-        "align-items",
-        "align-self",
-        "all",
-        "animation",
-        "animation-delay",
-        "animation-direction",
-        "animation-duration",
-        "animation-fill-mode",
-        "animation-iteration-count",
-        "animation-name",
-        "animation-play-state",
-        "animation-timing-function",
-        "backface-visibility",
-        "background",
-        "background-attachment",
-        "background-blend-mode",
-        "background-clip",
-        "background-color",
-        "background-image",
-        "background-origin",
-        "background-position",
-        "background-repeat",
-        "background-size",
-        "border",
-        "border-bottom",
-        "border-bottom-color",
-        "border-bottom-left-radius",
-        "border-bottom-right-radius",
-        "border-bottom-style",
-        "border-bottom-width",
-        "border-collapse",
-        "border-color",
-        "border-image",
-        "border-image-outset",
-        "border-image-repeat",
-        "border-image-slice",
-        "border-image-source",
-        "border-image-width",
-        "border-left",
-        "border-left-color",
-        "border-left-style",
-        "border-left-width",
-        "border-radius",
-        "border-right",
-        "border-right-color",
-        "border-right-style",
-        "border-right-width",
-        "border-spacing",
-        "border-style",
-        "border-top",
-        "border-top-color",
-        "border-top-left-radius",
-        "border-top-right-radius",
-        "border-top-style",
-        "border-top-width",
-        "border-width",
-        "bottom",
-        "box-shadow",
-        "box-sizing",
-        "caption-side",
-        "clear",
-        "clip",
-        "color",
-        "column-count",
-        "column-fill",
-        "column-gap",
-        "column-rule",
-        "column-rule-color",
-        "column-rule-style",
-        "column-rule-width",
-        "column-span",
-        "column-width",
-        "columns",
-        "content",
-        "counter-increment",
-        "counter-reset",
-        "cursor",
-        "direction",
-        "display",
-        "empty-cells",
-        "filter",
-        "flex",
-        "flex-basis",
-        "flex-direction",
-        "flex-flow",
-        "flex-grow",
-        "flex-shrink",
-        "flex-wrap",
-        "float",
-        "font",
-        // "@font-face",
-        "font-family",
-        "font-size",
-        "font-size-adjust",
-        "font-stretch",
-        "font-style",
-        "font-variant",
-        "font-weight",
-        "hanging-punctuation",
-        "height",
-        "justify-content",
-        // "@keyframes",
-        "left",
-        "letter-spacing",
-        "line-height",
-        "list-style",
-        "list-style-image",
-        "list-style-position",
-        "list-style-type",
-        "margin",
-        "margin-bottom",
-        "margin-left",
-        "margin-right",
-        "margin-top",
-        "max-height",
-        "max-width",
-        // "@media",
-        "min-height",
-        "min-width",
-        "nav-down",
-        "nav-index",
-        "nav-left",
-        "nav-right",
-        "nav-up",
-        "opacity",
-        "order",
-        "outline",
-        "outline-color",
-        "outline-offset",
-        "outline-style",
-        "outline-width",
-        "overflow",
-        "overflow-x",
-        "overflow-y",
-        "padding",
-        "padding-bottom",
-        "padding-left",
-        "padding-right",
-        "padding-top",
-        "page-break-after",
-        "page-break-before",
-        "page-break-inside",
-        "perspective",
-        "perspective-origin",
-        "position",
-        "quotes",
-        "resize",
-        "right",
-        "tab-size",
-        "table-layout",
-        "text-align",
-        "text-align-last",
-        "text-decoration",
-        "text-decoration-color",
-        "text-decoration-line",
-        "text-decoration-style",
-        "text-indent",
-        "text-justify",
-        "text-overflow",
-        "text-shadow",
-        "text-transform",
-        "top",
-        "transform",
-        "transform-origin",
-        "transform-style",
-        "transition",
-        "transition-delay",
-        "transition-duration",
-        "transition-property",
-        "transition-timing-function",
-        "unicode-bidi",
-        "vertical-align",
-        "visibility",
-        "white-space",
-        "width",
-        "word-break",
-        "word-spacing",
-        "word-wrap",
-        "z-index"
-    ];
-    for (var i=0; i<cssProperties.length; i++) {
-        addCssMethod(cssProperties[i]);
+    var cssProperties = {
+        "align-content" : [],
+        "align-items" : [],
+        "align-self": [],
+        "all": [],
+        "animation": [],
+        "animation-delay": [],
+        "animation-direction": [],
+        "animation-duration": [],
+        "animation-fill-mode": [],
+        "animation-iteration-count": [],
+        "animation-name": [],
+        "animation-play-state": [],
+        "animation-timing-function": [],
+        "backface-visibility": [],
+        "background": [],
+        "background-attachment": [],
+        "background-blend-mode": [],
+        "background-clip": [],
+        "background-color": [],
+        "background-image": [],
+        "background-origin": [],
+        "background-position": [],
+        "background-repeat": [],
+        "background-size": [],
+        "border": [],
+        "border-bottom": [],
+        "border-bottom-color": [],
+        "border-bottom-left-radius": [],
+        "border-bottom-right-radius": [],
+        "border-bottom-style": [],
+        "border-bottom-width": [],
+        "border-collapse": [],
+        "border-color": [],
+        "border-image": [],
+        "border-image-outset": [],
+        "border-image-repeat": [],
+        "border-image-slice": [],
+        "border-image-source": [],
+        "border-image-width": [],
+        "border-left": [],
+        "border-left-color": [],
+        "border-left-style": [],
+        "border-left-width": [],
+        "border-radius": [],
+        "border-right": [],
+        "border-right-color": [],
+        "border-right-style": [],
+        "border-right-width": [],
+        "border-spacing": [],
+        "border-style": [],
+        "border-top": [],
+        "border-top-color": [],
+        "border-top-left-radius": [],
+        "border-top-right-radius": [],
+        "border-top-style": [],
+        "border-top-width": [],
+        "border-width": [],
+        "bottom": [],
+        "box-shadow": [],
+        "box-sizing": [],
+        "caption-side": [],
+        "clear": [],
+        "clip": [],
+        "color": [],
+        "column-count": [],
+        "column-fill": [],
+        "column-gap": [],
+        "column-rule": [],
+        "column-rule-color": [],
+        "column-rule-style": [],
+        "column-rule-width": [],
+        "column-span": [],
+        "column-width": [],
+        "columns": [],
+        "content": [],
+        "counter-increment": [],
+        "counter-reset": [],
+        "cursor": ["auto", "default", "crosshair", "pointer", "move", "text", "wait", "help"],
+        "direction": [],
+        "display": ["inline", "block", "flex", "inline-block", "none"],
+        "empty-cells": [],
+        "filter": [],
+        "flex": [],
+        "flex-basis": [],
+        "flex-direction": [],
+        "flex-flow": [],
+        "flex-grow": [],
+        "flex-shrink": [],
+        "flex-wrap": [],
+        "float": [],
+        "font": [],
+        // "@font-face": [],
+        "font-family": [],
+        "font-size": [],
+        "font-size-adjust": [],
+        "font-stretch": [],
+        "font-style": [],
+        "font-variant": [],
+        "font-weight": [],
+        "hanging-punctuation": [],
+        "height": [],
+        "justify-content": [],
+        // "@keyframes": [],
+        "left": [],
+        "letter-spacing": [],
+        "line-height": [],
+        "list-style": [],
+        "list-style-image": [],
+        "list-style-position": [],
+        "list-style-type": [],
+        "margin": [],
+        "margin-bottom": [],
+        "margin-left": [],
+        "margin-right": [],
+        "margin-top": [],
+        "max-height": [],
+        "max-width": [],
+        // "@media": [],
+        "min-height": [],
+        "min-width": [],
+        "nav-down": [],
+        "nav-index": [],
+        "nav-left": [],
+        "nav-right": [],
+        "nav-up": [],
+        "opacity": [],
+        "order": [],
+        "outline": [],
+        "outline-color": [],
+        "outline-offset": [],
+        "outline-style": [],
+        "outline-width": [],
+        "overflow": [],
+        "overflow-x": [],
+        "overflow-y": [],
+        "padding": [],
+        "padding-bottom": [],
+        "padding-left": [],
+        "padding-right": [],
+        "padding-top": [],
+        "page-break-after": [],
+        "page-break-before": [],
+        "page-break-inside": [],
+        "perspective": [],
+        "perspective-origin": [],
+        "position": [],
+        "quotes": [],
+        "resize": [],
+        "right": [],
+        "tab-size": [],
+        "table-layout": [],
+        "text-align": ["left", "right", "center"],
+        "text-align-last": [],
+        "text-decoration": [],
+        "text-decoration-color": [],
+        "text-decoration-line": [],
+        "text-decoration-style": [],
+        "text-indent": [],
+        "text-justify": [],
+        "text-overflow": [],
+        "text-shadow": [],
+        "text-transform": [],
+        "top": [],
+        "transform": [],
+        "transform-origin": [],
+        "transform-style": [],
+        "transition": [],
+        "transition-delay": [],
+        "transition-duration": [],
+        "transition-property": [],
+        "transition-timing-function": [],
+        "unicode-bidi": [],
+        "vertical-align": [],
+        "visibility": [],
+        "white-space": [],
+        "width": [],
+        "word-break": [],
+        "word-spacing": [],
+        "word-wrap": [],
+        "z-index": []
+    };
+    for (property in cssProperties) {
+        addCssMethod(property);
+        for (var i=0; i<cssProperties[property].length; i++) {
+            var value = cssProperties[property][i];
+            addCssMethod(property, value);
+        }
     };
 };
 
 addAllCssMethods();
 
-Div.prototype.displayInlineBlock = function () {
-    return this.css('display', 'inline-block');
-};
-
-/**
- * @desc    set display block
- * @since    2016-09-20
- * @author    Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.displayBlock = function () {
-    return this.css('display', 'block');
-
-};
-
-
-/**
- * @desc    set text-align center
- * @since    2016-09-21
- * @author    Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.alignCenter = function () {
-    return this.css('text-align', 'center');
-};
-
-/**
- * @desc    set text-align right
- * @since    2016-09-21
- * @author    Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.alignRight = function () {
-    return this.css('text-align', 'right');
-};
 
 Div.prototype.text = function (txt) {
     if (txt === undefined)
         return this.$.text();
     this.$.text(txt);
     if (this.isAddedText === false) {
-        this.textSize(14);
+        this.fontSize(14);
     }
     return this;
 };
 
-Div.prototype.textColor = function (color) {
+Div.prototype.fontColor = function (color) {
     return this.css('color',color);
 };
 
-Div.prototype.textSize = function (px) {
+/**
+ * default size 설정을 위해 isAddedText flag를 이용하여 메서드 재정의
+ * @author Yeongjin Oh
+ */
+Div.prototype.fontSize = function (px) {
     if (px === undefined)
         return this.css('font-size');
     this.css('font-size', px);
@@ -367,11 +351,11 @@ Div.prototype.textSize = function (px) {
  * @desc set font weight bold
  * @author Yeongjin Oh
  */
-Div.prototype.textBold = function () {
+Div.prototype.fontBold = function () {
     return this.css('font-weight','bold');
 };
 
-Div.prototype.textNormal = function () {
+Div.prototype.fontNormal = function () {
     return this.css('font-weight','normal');
 };
 
@@ -494,50 +478,6 @@ Div.prototype.textDragNone = function () {
     return this;
 };
 
-/**
- * @desc    set mouse pointer on text
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textCursor = function(value) {
-    return this.css('cursor', value);
-};
-
-Div.prototype.textCursorAuto = function() {
-    return this.css('cursor', 'auto');
-};
-
-Div.prototype.textCursorDefault = function() {
-    return this.css('cursor', 'default');
-};
-
-Div.prototype.textCursorCrosshair = function() {
-    return this.css('cursor', 'crosshair');
-};
-
-Div.prototype.textCursorPointer = function() {
-    return this.css('cursor', 'pointer');
-};
-
-Div.prototype.textCursorMove = function() {
-    return this.css('cursor', 'move');
-};
-
-Div.prototype.textCursorText = function() {
-    return this.css('cursor', 'text');
-};
-
-Div.prototype.textCursorWait = function() {
-    return this.css('cursor', 'wait');
-};
-
-Div.prototype.textCursorHelp = function() {
-    return this.css('cursor', 'help');
-};
-
-Div.prototype.overflow = function (value) {
-    return this.css('overflow', value);
-};
 
 /**
  * @desc     Content가 넘치면 scroll을 생성한다.
@@ -649,13 +589,13 @@ Div.prototype.hoverTextColor = function(color1, color2) {
     var fn1Func, fn2Func;
     if (color1) {
         fn1Func = function(){
-            that.textColor(color1);
+            that.fontColor(color1);
         };
     }
 
     if (color2) {
         fn2Func = function(){
-            that.textColor(color2);
+            that.fontColor(color2);
         };
     }
 

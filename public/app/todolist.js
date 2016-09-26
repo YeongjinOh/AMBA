@@ -20,7 +20,7 @@ $(document).ready(function(){
 		var checked = false;
 		var todoWrapper = div().appendTo(uncheckedList).setParentWidth().borderOption('1px dotted','bottom').borderOption('rgb(200,200,200)','color');
 
-		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).textSize(18).textBold();
+		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).fontSize(18).fontBold();
 
 		// set effect onto todoWrapper
 		todoWrapper.hover(function () {
@@ -31,11 +31,11 @@ $(document).ready(function(){
 		.click(function (){
 			checked = !checked;
 			if (checked) {
-				todo.textLineThrough().textColor('gray').textNormal();
+				todo.textLineThrough().fontColor('gray').fontNormal();
 				todoWrapper.detach().appendTo(checkedList);
 			}
 			else {
-				todo.textLineNone().textColor('black').textBold();
+				todo.textLineNone().fontColor('black').fontBold();
 				todoWrapper.detach().appendTo(uncheckedList);
 			}
 		})

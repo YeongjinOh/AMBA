@@ -31,9 +31,9 @@ var bottom = div().append().size('100%', '15%').color('blue');
  */
 
 /* 기능 구현 */
-div().appendTo(midCenterMidCenterMid).size('8%', '20%').color('lightblue').margin('2% 3% 2% 5%').borderRadius('5px').textSize('3vw').text('ID').alignCenter();
+div().appendTo(midCenterMidCenterMid).size('8%', '20%').color('lightblue').margin('2% 3% 2% 5%').borderRadius('5px').fontSize('3vw').text('ID').textAlignCenter();
 var id = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').editable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('ID')
-    .borderRadius('5px').textSize('3vw').alignCenter().whiteSpaceNowrap().overflowAuto();
+    .borderRadius('5px').fontSize('3vw').textAlignCenter().whiteSpaceNowrap().overflowAuto();
     // .hover( function (dv) {
     //     if(dv.text() === 'ID')
     //         dv.text('');
@@ -42,9 +42,9 @@ var id = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white')
     //         dv.text('ID');
     // });
 
-div().appendTo(midCenterMidCenterMid).size('10%', '20%').color('lightblue').margin('2% 3% 2% 3%').borderRadius('5px').textSize('3vw').text('PW ').alignCenter();
+div().appendTo(midCenterMidCenterMid).size('10%', '20%').color('lightblue').margin('2% 3% 2% 3%').borderRadius('5px').fontSize('3vw').text('PW ').textAlignCenter();
 var pw = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').editable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('Password')
-    .borderRadius('5px').textSize('3vw').alignCenter().whiteSpaceNowrap().overflowAuto().isTextPassword(true);
+    .borderRadius('5px').fontSize('3vw').textAlignCenter().whiteSpaceNowrap().overflowAuto().isTextPassword(true);
     // .hover( function (dv) {
     //     if(dv.text() === 'Password')
     //         dv.text('').isTextPassword(true);
@@ -54,7 +54,7 @@ var pw = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white')
     // });
 
 var signIn = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('yellow').margin('3% 2% 3% 3%')
-    .borderRadius('5px').text('Sign-In').alignCenter().textSize('4vw').textCursorPointer().textDragNone()
+    .borderRadius('5px').text('Sign-In').textAlignCenter().fontSize('4vw').cursorPointer().textDragNone()
     .hoverColor('blue', 'yellow').click(function() {
         // click event - DB Insert
         // pg.connect(process.env.DATABASE_URL, function(err, client, done) {
@@ -69,7 +69,7 @@ var signIn = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('yel
     });
 
 var signUp = div().appendTo(midCenterMidCenterMid).size('45%', '34%').color('green').margin('3% 3% 3% 2%')
-    .borderRadius('5px').text('Sign-Up').alignCenter().textSize('4vw').textCursorPointer().textDragNone()
+    .borderRadius('5px').text('Sign-Up').textAlignCenter().fontSize('4vw').cursorPointer().textDragNone()
     .hoverColor('red', 'green').click(function() {
         // click event - new page
         alert('회원가입 페이지로 이동');
