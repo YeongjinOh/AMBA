@@ -32,16 +32,16 @@ $(document).ready(function(){
 
 
     var onAdd = function () {
-        var blockWrapper = div().appendTo(listWrapper).size('100%','100px').padding(10).borderOption('1px solid','bottom').borderOption('rgb(200,200,200)','color').color('#fafafa');
+        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%','100px').borderOption('1px solid','bottom').borderOption('rgb(200,200,200)','color').color('#fafafa');
         var removeButton = div().appendTo(blockWrapper).size(10,15).text('X').textColor('gray').float('right').marginRight(20).textCursorPointer();
         var onRemove = function () {
             clicked +=1 ;
             if (clicked > 1) {
                 blockWrapper.remove();
-                title.text('').isEditable(false);
-                description.text('').isEditable(false);
+                title.text('').editable(false);
+                description.text('').editable(false);
                 date.text('');
-                code.text('').isEditable(false);
+                code.text('').editable(false);
                 saveButton.visibility('hidden');
             } else {
                 removeButton.color('orange');
@@ -72,10 +72,10 @@ $(document).ready(function(){
             clicked = 0;
         };
         var onClick = function () {
-            title.isEditable(true).text(block.title.text());
-            description.isEditable(true).text(block.description.text());
+            title.editable(true).text(block.title.text());
+            description.editable(true).css('outline','none').text(block.description.text());
             date.text(block.date.text());
-            code.isEditable(true).text(block.code);
+            code.editable(true).text(block.code);
             saveButton.visibility('visible');
             currentBlock = block;
         }
@@ -83,7 +83,7 @@ $(document).ready(function(){
     };
 
     var addButton = div().appendTo(sidebar).size(30,30).margin(15).marginTop(40).text('+').textBold().textSize(28).textColor('green').border(1).borderColor(basicColor).borderOption('100%','radius')
-        .align('center').verticalAlign('middle').click(onAdd).textCursorPointer();
+        .textAlign('center').verticalAlign('middle').click(onAdd).textCursorPointer();
 
     var onSave = function () {
         currentBlock.title.text(title.text());
@@ -98,14 +98,14 @@ $(document).ready(function(){
     var listHeader = div().appendTo(codelist).size('100%','120px').color('#dddddd');
     var listHeaderTitle = div().appendTo(listHeader).size('100%','40px').marginTop(20).text('Code List').textSize(28).alignCenter();
     var listName = div().appendTo(listHeader).size('100%','50px').marginTop(20).text('javascript').textSize(20).textColor('gray').alignCenter();
-    var listWrapper = div().appendTo(codelist).size('100%',codelist.getAbsoluteHeight()-listHeader.getAbsoluteHeight()).borderOption('1px solid gray','top').overflow('scroll');
+    var listWrapper = div().appendTo(codelist).size('100%',codelist.heightPixel()-listHeader.heightPixel()).borderOption('1px solid gray','top').overflow('scroll');
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '60px').padding(20).borderOption('1px solid gray','bottom');
     description = div().size('600px','60px').appendTo(wrapperHeader).textSize(20).textBold().textColor('gray').overflow('scroll');
     saveButton = div().appendTo(wrapperHeader).size(50,20).padding(5).color('#05aa33').text('Save').textColor('white').alignCenter().textSize(18).verticalAlign('middle')
         .borderOption(5,'radius').float('right').visibility('hidden').click(onSave).textCursorPointer();
-    date = div().appendTo(wrapperHeader).marginTop(-10).textSize(18).textColor('gray').clear('right').float('right');
+    date = div().appendTo(wrapperHeader).marginTop(20).textSize(18).textColor('gray').clear('right').float('right');
 
     title = div().size('600px','40px').appendTo(codeWrapper).textSize(30).textBold().margin(20).textColor('#05aa33').overflow('scroll');
     code = div().appendTo(codeWrapper).size('95%', '80%').marginTop(10).padding(20).textSize(20).overflow('scroll');

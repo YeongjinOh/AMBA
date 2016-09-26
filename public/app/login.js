@@ -32,8 +32,8 @@ var bottom = div().append().size('100%', '15%').color('blue');
 
 /* 기능 구현 */
 div().appendTo(midCenterMidCenterMid).size('8%', '20%').color('lightblue').margin('2% 3% 2% 5%').borderRadius('5px').textSize('3vw').text('ID').alignCenter();
-var id = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').isEditable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('ID')
-    .borderRadius('5px').textSize('3vw').alignCenter().isTextNoSpace().isOverflowAuto();
+var id = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').editable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('ID')
+    .borderRadius('5px').textSize('3vw').alignCenter().whiteSpaceNowrap().overflowAuto();
     // .hover( function (dv) {
     //     if(dv.text() === 'ID')
     //         dv.text('');
@@ -43,8 +43,8 @@ var id = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white')
     // });
 
 div().appendTo(midCenterMidCenterMid).size('10%', '20%').color('lightblue').margin('2% 3% 2% 3%').borderRadius('5px').textSize('3vw').text('PW ').alignCenter();
-var pw = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').isEditable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('Password')
-    .borderRadius('5px').textSize('3vw').alignCenter().isTextNoSpace().isOverflowAuto().isTextPassword(true);
+var pw = div().appendTo(midCenterMidCenterMid).size('77%', '20%').color('white').margin('2% 3% 2%').editable(true) // size('94%', '20%') margin('2% 3% 2% 3%') text('Password')
+    .borderRadius('5px').textSize('3vw').alignCenter().whiteSpaceNowrap().overflowAuto().isTextPassword(true);
     // .hover( function (dv) {
     //     if(dv.text() === 'Password')
     //         dv.text('').isTextPassword(true);

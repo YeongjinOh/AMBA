@@ -1,9 +1,11 @@
 function div() {
     return new Div();
 }
+// TODO : text 속성은 span에서만.
 
 function Div() {
     this.$ = $('<div></div>');
+    this.$text = $('<span>').appendTo(this.$);
     this.$.data('div', this);
     this.param = {};
     this.displayInlineBlock();
@@ -12,15 +14,21 @@ function Div() {
 }
 
 Div.prototype.css = function (key, value) {
-    if (value === undefined) {
-        //return this.$.css(key);
+    if (value === undefined)
         return this.param[key];
-    }
-
     this.param[key] = value;
     this.$.css(key, value);
     return this;
 };
+
+Div.prototype.cssText = function (key, value) {
+    if (value === undefined)
+        return this.param[key];
+    this.param[key] = value;
+    this.$text.css(key, value);
+    return this;
+};
+
 
 Div.prototype.attr = function (key, value) {
     if (value === undefined) {
@@ -64,24 +72,6 @@ Div.prototype.children = function () {
 };
 
 /**
- * @desc parent 속성을 가진 객체인 경우, parent 객체의 width의 해당 ratio만큼을 width로 설정합니다.
- * @author Yeongjin Oh
- */
-Div.prototype.setParentWidth = function (ratio) {
-   var width = parseInt(this.parent().width());
-   if (typeof ratio === 'number')
-       width = width * ratio;
-   return this.width(width);
-};
-
-Div.prototype.setParentHeight = function (ratio) {
-   var height = parseInt(this.parent().height());
-   if (typeof ratio === 'number')
-       height *= ratio;
-   return this.height(height);
-};
-
-/**
  * 함수를 받아 div에 적용하고, 다시 div를 리턴합니다.
  * @author Yeongjin OH
  */
@@ -100,6 +90,224 @@ Div.prototype.detach = function () {
     return this;
 };
 
+/**
+ * 정규표현식을 이용하여 '-'을 없애고 '-' 뒤 첫번째 문자를 대문자로 바꿉니다.
+ * @param propName propertyName
+ * @returns methodName
+ * @author Yeongjin Oh
+ */
+var getMethodName = function (propertyName) {
+    var hyphenLowerToUpper = function (match) {
+        return match.slice(1).toUpperCase();
+    };
+    return propertyName.replace(/-[a-z]/g,hyphenLowerToUpper);
+};
+
+/**
+ * 주어진 css property를 Div의 메서드에 추가합니다.
+ * @author Yeongjin Oh
+ */
+var addCssMethod = function (propertyName) {
+    Div.prototype[getMethodName(propertyName)] = function (value) {
+        return this.css(propertyName, value);
+    };
+};
+
+/**
+ * cssProperties 배열에 정의된 모든 css property들을 Div의 메서드에 추가합니다.
+ * @author Yeongjin Oh
+ */
+var addAllCssMethods = function () {
+
+    var cssProperties = [
+        "align-content",
+        "align-items",
+        "align-self",
+        "all",
+        "animation",
+        "animation-delay",
+        "animation-direction",
+        "animation-duration",
+        "animation-fill-mode",
+        "animation-iteration-count",
+        "animation-name",
+        "animation-play-state",
+        "animation-timing-function",
+        "backface-visibility",
+        "background",
+        "background-attachment",
+        "background-blend-mode",
+        "background-clip",
+        "background-color",
+        "background-image",
+        "background-origin",
+        "background-position",
+        "background-repeat",
+        "background-size",
+        "border",
+        "border-bottom",
+        "border-bottom-color",
+        "border-bottom-left-radius",
+        "border-bottom-right-radius",
+        "border-bottom-style",
+        "border-bottom-width",
+        "border-collapse",
+        "border-color",
+        "border-image",
+        "border-image-outset",
+        "border-image-repeat",
+        "border-image-slice",
+        "border-image-source",
+        "border-image-width",
+        "border-left",
+        "border-left-color",
+        "border-left-style",
+        "border-left-width",
+        "border-radius",
+        "border-right",
+        "border-right-color",
+        "border-right-style",
+        "border-right-width",
+        "border-spacing",
+        "border-style",
+        "border-top",
+        "border-top-color",
+        "border-top-left-radius",
+        "border-top-right-radius",
+        "border-top-style",
+        "border-top-width",
+        "border-width",
+        "bottom",
+        "box-shadow",
+        "box-sizing",
+        "caption-side",
+        "clear",
+        "clip",
+        "color",
+        "column-count",
+        "column-fill",
+        "column-gap",
+        "column-rule",
+        "column-rule-color",
+        "column-rule-style",
+        "column-rule-width",
+        "column-span",
+        "column-width",
+        "columns",
+        "content",
+        "counter-increment",
+        "counter-reset",
+        "cursor",
+        "direction",
+        "display",
+        "empty-cells",
+        "filter",
+        "flex",
+        "flex-basis",
+        "flex-direction",
+        "flex-flow",
+        "flex-grow",
+        "flex-shrink",
+        "flex-wrap",
+        "float",
+        "font",
+        // "@font-face",
+        "font-family",
+        "font-size",
+        "font-size-adjust",
+        "font-stretch",
+        "font-style",
+        "font-variant",
+        "font-weight",
+        "hanging-punctuation",
+        "height",
+        "justify-content",
+        // "@keyframes",
+        "left",
+        "letter-spacing",
+        "line-height",
+        "list-style",
+        "list-style-image",
+        "list-style-position",
+        "list-style-type",
+        "margin",
+        "margin-bottom",
+        "margin-left",
+        "margin-right",
+        "margin-top",
+        "max-height",
+        "max-width",
+        // "@media",
+        "min-height",
+        "min-width",
+        "nav-down",
+        "nav-index",
+        "nav-left",
+        "nav-right",
+        "nav-up",
+        "opacity",
+        "order",
+        "outline",
+        "outline-color",
+        "outline-offset",
+        "outline-style",
+        "outline-width",
+        "overflow",
+        "overflow-x",
+        "overflow-y",
+        "padding",
+        "padding-bottom",
+        "padding-left",
+        "padding-right",
+        "padding-top",
+        "page-break-after",
+        "page-break-before",
+        "page-break-inside",
+        "perspective",
+        "perspective-origin",
+        "position",
+        "quotes",
+        "resize",
+        "right",
+        "tab-size",
+        "table-layout",
+        "text-align",
+        "text-align-last",
+        "text-decoration",
+        "text-decoration-color",
+        "text-decoration-line",
+        "text-decoration-style",
+        "text-indent",
+        "text-justify",
+        "text-overflow",
+        "text-shadow",
+        "text-transform",
+        "top",
+        "transform",
+        "transform-origin",
+        "transform-style",
+        "transition",
+        "transition-delay",
+        "transition-duration",
+        "transition-property",
+        "transition-timing-function",
+        "unicode-bidi",
+        "vertical-align",
+        "visibility",
+        "white-space",
+        "width",
+        "word-break",
+        "word-spacing",
+        "word-wrap",
+        "z-index"
+    ];
+    for (var i=0; i<cssProperties.length; i++) {
+        addCssMethod(cssProperties[i]);
+    };
+};
+
+addAllCssMethods();
+
 Div.prototype.displayInlineBlock = function () {
     return this.css('display', 'inline-block');
 };
@@ -112,27 +320,6 @@ Div.prototype.displayInlineBlock = function () {
 Div.prototype.displayBlock = function () {
     return this.css('display', 'block');
 
-};
-
-/**
- * @desc    set display status
- * @since    2016-09-20
- * @author    Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.display = function (display) {
-    return this.css('display', display);
-};
-
-Div.prototype.align = function (value) {
-    return this.css('text-align', value);
-};
-
-/**
- * @desc visibility 속성을 이용합니다. visible, hidden, collapse 등의 value를 취할 수 있습니다.
- * @author Yeongjin Oh
- */
-Div.prototype.visibility = function (value) {
-    return this.css('visibility', value);
 };
 
 
@@ -152,10 +339,6 @@ Div.prototype.alignCenter = function () {
  */
 Div.prototype.alignRight = function () {
     return this.css('text-align', 'right');
-};
-
-Div.prototype.verticalAlign = function (value) {
-    return this.css('vertical-align', value);
 };
 
 Div.prototype.text = function (txt) {
@@ -213,7 +396,7 @@ Div.prototype.textLineNone = function () {
  * @since   2016-09-22
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.isTextClip = function() {
+Div.prototype.textOverflowClip = function() {
     return this.css('text-overflow', 'clip');
 };
 
@@ -222,7 +405,7 @@ Div.prototype.isTextClip = function() {
  * @since   2016-09-22
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.isTextHide = function() {
+Div.prototype.textOverflowEllipsis = function() {
     this.css('text-overflow', 'ellipsis');
     this.css('white-space', 'nowrap');
     this.css('overflow', 'hidden');
@@ -235,7 +418,7 @@ Div.prototype.isTextHide = function() {
  * @since   2016-09-25
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.isTextNoSpace = function () {
+Div.prototype.whiteSpaceNowrap = function () {
     return this.css('white-space', 'nowrap');
 };
 
@@ -272,107 +455,27 @@ Div.prototype.borderOption = function (value, option) {
     return this.css(key, value);
 };
 
-Div.prototype.borderStyle = function (style) {
-    return this.css('border-style', style);
-};
-
-
-Div.prototype.borderColor = function (c) {
-    return this.css('border-color', c);
-};
-
-Div.prototype.borderRadius = function (px) {
-    return this.css('border-radius', px);
-};
-
 Div.prototype.color = function (c) {
     return this.css('background-color', c);
-};
-
-Div.prototype.width = function (px) {
-    return this.css('width', px);
-};
-
-Div.prototype.minWidth = function (px) {
-    return this.css('min-width', px);
-};
-
-Div.prototype.maxWidth = function (px) {
-    return this.css('max-width', px);
-};
-
-Div.prototype.height = function (px) {
-    return this.css('height', px);
-};
-
-Div.prototype.minHeight = function (px) {
-    return this.css('min-height', px);
-};
-
-Div.prototype.maxHeight = function (px) {
-    return this.css('max-height', px);
 };
 
 Div.prototype.parentWidth = function () {
     return this.parent().width();
 };
 
-
 Div.prototype.parentHeight = function () {
     return this.parent().height();
 };
 
-Div.prototype.margin = function (px) {
-    return this.css('margin', px);
-};
-
-Div.prototype.marginTop = function (px) {
-    return this.css('margin-top', px);
-};
-
-Div.prototype.marginRight = function (px) {
-    return this.css('margin-right', px);
-};
-
-Div.prototype.marginBottom = function(px) {
-    return this.css('margin-bottom', px);
-};
-
-Div.prototype.marginLeft = function (px) {
-    return this.css('margin-left', px);
-};
-
-Div.prototype.padding = function (px) {
-    return this.css('padding', px);
-};
-
-Div.prototype.float = function (value) {
-    return this.css('float', value);
-};
-
-Div.prototype.clear = function (value) {
-    return this.css('clear', value);
-};
-
-
 /**
- *
+ * height 값을 pixel로 받아옵니다.
+ * @author Yeongjin Oh
  */
-Div.prototype.getAbsoluteHeight = function () {
+Div.prototype.heightPixel = function () {
     return parseInt(this.$.css('height'));
 };
-Div.prototype.getAbsoluteWidth = function () {
+Div.prototype.widthPixel = function () {
     return parseInt(this.$.css('width'));
-};
-
-/**
- * @desc    left padding
- * @since    2016-09-20
- * @author    Yoon JiSoo yjsgoon@naver.com
- * @todo    create top, right, bottom
- */
-Div.prototype.paddingLeft = function (px) {
-    return this.css('padding-left', px);
 };
 
 /**
@@ -441,7 +544,7 @@ Div.prototype.overflow = function (value) {
  * @since    2016-09-25
  * @author   Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.isOverflowAuto = function() {
+Div.prototype.overflowAuto = function() {
     return this.css('overflow', 'auto');
 };
 
@@ -577,12 +680,10 @@ Div.prototype.stop = function () {
  * @param value
  * @returns {Div}
  */
-Div.prototype.isEditable = function (value) {
-	this.attr('contentEditable', value);
-	if(value == true){
-		this.text('');
-	}
-	return this;
+Div.prototype.editable = function (value) {
+    if(value === 'diable' || value === false)
+        return this.attr('contentEditable', false);
+     return this.attr('contentEditable', true);
 };
 
 /**

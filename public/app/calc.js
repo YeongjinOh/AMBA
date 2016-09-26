@@ -6,9 +6,9 @@ var root = div().size('100%', '100%').color('#FFF0F5').append();
 
 var current = div().size('70%', '20%').marginTop('9%').marginLeft('5%').color('lightblue').appendTo(root).textCursorDefault();
 var subCurrent = div().displayBlock().size('100%', '30%').color('#F5FFFA').appendTo(current)
-                    .alignRight().textSize('3vw').isTextHide();
+                    .alignRight().textSize('3vw').textOverflowEllipsis();
 var mainCurrent = div().displayBlock().size('100%', '70%').color('#F5FFFA').appendTo(current)
-                    .alignRight().textSize('8vw').isTextHide().text(0);
+                    .alignRight().textSize('8vw').textOverflowEllipsis().text(0);
 
 var input = div().size('70%', '60%').marginLeft('5%').color('#D3D3D3').appendTo(root)
                  .textCursorDefault().alignCenter().textDragNone();
