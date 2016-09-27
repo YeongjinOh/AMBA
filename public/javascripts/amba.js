@@ -9,6 +9,7 @@ function div() {
  * @DIV태그를 사용하기 위한 클래스
  * @constructor
  */
+
 function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>').appendTo(this.$);
@@ -18,7 +19,6 @@ function Div() {
     this.isAddedText = false;
     this.verticalAlign('top');
 }
-
 
 /**
  * @author Lights
@@ -331,7 +331,6 @@ var addAllCssMethods = function () {
         "unicode-bidi": [],
         "vertical-align": [],
         "visibility": [],
-        "white-space": [],
         "width": [],
         "word-break": [],
         "word-spacing": [],
@@ -361,7 +360,8 @@ var addAllCssMethods = function () {
         "text-justify": [],
         "text-overflow": [],
         "text-shadow": [],
-        "text-transform": []
+        "text-transform": [],
+        "white-space": [],
     }
 
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
@@ -665,14 +665,16 @@ Div.prototype.stop = function () {
 };
 
 /**
- * @desc set editable at span
+ * @desc set editable at span, text('')를 하지않으면 입력이 안됩니다
  * @todo span tag에 editable 속성을 주면 편집 공간(span)과 div의 크기가 다름.
  */
 Div.prototype.editable = function (value) {
     if(value === 'diable' || value === false)
         this.$text.attr('contentEditable', false);
-    else
+    else {
         this.$text.attr('contentEditable', true);
+        this.$.text('');
+    }
     return this;
 };
 
