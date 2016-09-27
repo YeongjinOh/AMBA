@@ -12,6 +12,31 @@ function Div() {
     this.verticalAlign('top');
 }
 
+
+/**
+ * @author Lights
+ * @desc ace에디터를 통해 가독성 높은 소스를 출력, div의 id값을 파라미터로 넘겨줘서 해당 div에 적용
+ *
+ * @returns {Div}
+ */
+Div.prototype.aceEditor = function () {
+    var editor = ace.edit(this.$.get(0));
+
+    editor.setTheme("ace/theme/monokai");
+
+    //js문법에 따라 하이라이팅을 준다
+    editor.getSession().setMode("ace/mode/javascript");
+    editor.getSession().on('change', function(e) {
+        // e.type, etc
+        //자동 저장 가능
+    });
+    editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
+    this.aceValue = editor;
+    return this;
+};
+
+
+
 Div.prototype.attr = function (key, value) {
     if (value === undefined) {
         alert(key);
