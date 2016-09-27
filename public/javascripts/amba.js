@@ -232,7 +232,7 @@ var addAllCssMethods = function () {
         "flex-grow": [],
         "flex-shrink": [],
         "flex-wrap": [],
-        "float": [],
+        "float": ["left", "right"],
         "hanging-punctuation": [],
         "height": [],
         "justify-content": [],
@@ -297,7 +297,7 @@ var addAllCssMethods = function () {
         "transition-property": [],
         "transition-timing-function": [],
         "unicode-bidi": [],
-        "vertical-align": [],
+        "vertical-align": ["middle"],
         "visibility": [],
         "white-space": [],
         "width": [],
@@ -348,7 +348,7 @@ var addAllCssMethods = function () {
             var value = cssTextProperties[property][i];
             addCssTextMethod(property, value);
         }
-    };
+    }
 };
 
 addAllCssMethods();
@@ -650,9 +650,8 @@ Div.prototype.editable = function (value) {
  * @author    Yoon JiSoo yjsgoon@naver.com
  * @todo    Source에 유연성을 추가해야 한다.
  */
-Div.prototype.isTextPassword = function(value) {
-    if(value === true)
-        return this.css('-webkit-text-security', 'disc');
-    else
+Div.prototype.textPassword = function(value) {
+    if(value === false)
         return this.css('-webkit-text-security', 'none');
+    return this.css('-webkit-text-security', 'disc');
 };
