@@ -3,25 +3,14 @@ function div() {
 }
 
 function Div() {
-    this.$ = $('<div></div>');
+    this.$ = $('<div>');
+    this.$text = $('<span>').appendTo(this.$);
     this.$.data('div', this);
     this.param = {};
     this.displayInlineBlock();
     this.isAddedText = false;
     this.verticalAlign('top');
 }
-
-Div.prototype.css = function (key, value) {
-    if (value === undefined) {
-        //return this.$.css(key);
-        return this.param[key];
-    }
-
-    this.param[key] = value;
-    this.$.css(key, value);
-    return this;
-};
-
 
 Div.prototype.attr = function (key, value) {
     if (value === undefined) {
@@ -65,24 +54,6 @@ Div.prototype.children = function () {
 };
 
 /**
- * @desc parent 속성을 가진 객체인 경우, parent 객체의 width의 해당 ratio만큼을 width로 설정합니다.
- * @author Yeongjin Oh
- */
-Div.prototype.setParentWidth = function (ratio) {
-   var width = parseInt(this.parent().width());
-   if (typeof ratio === 'number')
-       width = width * ratio;
-   return this.width(width);
-};
-
-Div.prototype.setParentHeight = function (ratio) {
-   var height = parseInt(this.parent().height());
-   if (typeof ratio === 'number')
-       height *= ratio;
-   return this.height(height);
-};
-
-/**
  * 함수를 받아 div에 적용하고, 다시 div를 리턴합니다.
  * @author Yeongjin OH
  */
@@ -101,73 +72,310 @@ Div.prototype.detach = function () {
     return this;
 };
 
-Div.prototype.displayInlineBlock = function () {
-    return this.css('display', 'inline-block');
+
+Div.prototype.css = function (key, value) {
+    if (value === undefined)
+        return this.param[key];
+    this.param[key] = value;
+    this.$.css(key, value);
+    return this;
+};
+
+Div.prototype.cssText = function (key, value) {
+    if (value === undefined)
+        return this.param[key];
+    this.param[key] = value;
+    this.$text.css(key, value);
+    return this;
 };
 
 /**
- * @desc    set display block
- * @since    2016-09-20
- * @author    Yoon JiSoo yjsgoon@naver.com
+ * 정규표현식을 이용하여 '-'을 없애고 '-' 뒤 첫번째 문자를 대문자로 바꿉니다.
+ * @param propName propertyName
+ * @returns methodName
+ * @author Yeongjin Oh
  */
-Div.prototype.displayBlock = function () {
-    return this.css('display', 'block');
-
+var getMethodName = function (propertyName) {
+    var hyphenLowerToUpper = function (match) {
+        return match.slice(1).toUpperCase();
+    };
+    return propertyName.replace(/-[a-z]/g,hyphenLowerToUpper);
 };
 
 /**
- * @desc    set display status
- * @since    2016-09-20
- * @author    Yoon JiSoo yjsgoon@naver.com
+ * @desc 주어진 css property를 Div의 메서드에 추가합니다.
+ *      value가 함께 주어지면 propertyValue() 와 같이 인자를 받지 않는 메서드를 생성합니다.
+ *      예를 들어, (text-align, center)가 입력으로 들어오면, textAlignCenter 메서드를 만듭니다.
+ * @author Yeongjin Oh
  */
-Div.prototype.display = function (display) {
-    return this.css('display', display);
-};
-
-Div.prototype.align = function (value) {
-    return this.css('text-align', value);
+var addCssMethod = function (propertyName, valueName) {
+    if (valueName === undefined) {
+        Div.prototype[getMethodName(propertyName)] = function (value) {
+            return this.css(propertyName, value);
+        };
+    } else {
+        Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
+            return this.css(propertyName, valueName);
+        };
+    }
 };
 
 /**
- * @desc    set text-align center
- * @since    2016-09-21
- * @author    Yoon JiSoo yjsgoon@naver.com
+ * @desc text를 꾸미는 css property를 Div의 span에 추가하는 메서드를 생성합니다.
+ * @author Yeongjin Oh
  */
-Div.prototype.alignCenter = function () {
-    return this.css('text-align', 'center');
+var addCssTextMethod = function (propertyName, valueName) {
+    if (valueName === undefined) {
+        Div.prototype[getMethodName(propertyName)] = function (value) {
+            return this.cssText(propertyName, value);
+        };
+    } else {
+        Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
+            return this.cssText(propertyName, valueName);
+        };
+    }
 };
 
 /**
- * @desc    set text-align right
- * @since    2016-09-21
- * @author    Yoon JiSoo yjsgoon@naver.com
+ * cssProperties 배열에 정의된 모든 css property들을 Div의 메서드에 추가합니다.
+ * @author Yeongjin Oh
  */
-Div.prototype.alignRight = function () {
-    return this.css('text-align', 'right');
+var addAllCssMethods = function () {
+
+    var cssProperties = {
+        "align-content" : [],
+        "align-items" : [],
+        "align-self": [],
+        "all": [],
+        "animation": [],
+        "animation-delay": [],
+        "animation-direction": [],
+        "animation-duration": [],
+        "animation-fill-mode": [],
+        "animation-iteration-count": [],
+        "animation-name": [],
+        "animation-play-state": [],
+        "animation-timing-function": [],
+        "backface-visibility": [],
+        "background": [],
+        "background-attachment": [],
+        "background-blend-mode": [],
+        "background-clip": [],
+        "background-color": [],
+        "background-image": [],
+        "background-origin": [],
+        "background-position": [],
+        "background-repeat": [],
+        "background-size": [],
+        "border": [],
+        "border-bottom": [],
+        "border-bottom-color": [],
+        "border-bottom-left-radius": [],
+        "border-bottom-right-radius": [],
+        "border-bottom-style": [],
+        "border-bottom-width": [],
+        "border-collapse": [],
+        "border-color": [],
+        "border-image": [],
+        "border-image-outset": [],
+        "border-image-repeat": [],
+        "border-image-slice": [],
+        "border-image-source": [],
+        "border-image-width": [],
+        "border-left": [],
+        "border-left-color": [],
+        "border-left-style": [],
+        "border-left-width": [],
+        "border-radius": [],
+        "border-right": [],
+        "border-right-color": [],
+        "border-right-style": [],
+        "border-right-width": [],
+        "border-spacing": [],
+        "border-style": [],
+        "border-top": [],
+        "border-top-color": [],
+        "border-top-left-radius": [],
+        "border-top-right-radius": [],
+        "border-top-style": [],
+        "border-top-width": [],
+        "border-width": [],
+        "bottom": [],
+        "box-shadow": [],
+        "box-sizing": [],
+        "caption-side": [],
+        "clear": [],
+        "clip": [],
+        "color": [],
+        "column-count": [],
+        "column-fill": [],
+        "column-gap": [],
+        "column-rule": [],
+        "column-rule-color": [],
+        "column-rule-style": [],
+        "column-rule-width": [],
+        "column-span": [],
+        "column-width": [],
+        "columns": [],
+        "content": [],
+        "counter-increment": [],
+        "counter-reset": [],
+        "cursor": ["auto", "default", "crosshair", "pointer", "move", "text", "wait", "help"],
+        "direction": [],
+        "display": ["inline", "block", "flex", "inline-block", "none"],
+        "empty-cells": [],
+        "filter": [],
+        "flex": [],
+        "flex-basis": [],
+        "flex-direction": [],
+        "flex-flow": [],
+        "flex-grow": [],
+        "flex-shrink": [],
+        "flex-wrap": [],
+        "float": [],
+        "hanging-punctuation": [],
+        "height": [],
+        "justify-content": [],
+        // "@keyframes": [],
+        "left": [],
+        "letter-spacing": [],
+        "line-height": [],
+        "list-style": [],
+        "list-style-image": [],
+        "list-style-position": [],
+        "list-style-type": [],
+        "margin": [],
+        "margin-bottom": [],
+        "margin-left": [],
+        "margin-right": [],
+        "margin-top": [],
+        "max-height": [],
+        "max-width": [],
+        // "@media": [],
+        "min-height": [],
+        "min-width": [],
+        "nav-down": [],
+        "nav-index": [],
+        "nav-left": [],
+        "nav-right": [],
+        "nav-up": [],
+        "opacity": [],
+        "order": [],
+        "outline": [],
+        "outline-color": [],
+        "outline-offset": [],
+        "outline-style": [],
+        "outline-width": [],
+        "overflow": [],
+        "overflow-x": [],
+        "overflow-y": [],
+        "padding": [],
+        "padding-bottom": [],
+        "padding-left": [],
+        "padding-right": [],
+        "padding-top": [],
+        "page-break-after": [],
+        "page-break-before": [],
+        "page-break-inside": [],
+        "perspective": [],
+        "perspective-origin": [],
+        "position": [],
+        "quotes": [],
+        "resize": [],
+        "right": [],
+        "tab-size": [],
+        "table-layout": [],
+        "text-align": ["left", "right", "center"],
+        "text-align-last": [],
+        "top": [],
+        "transform": [],
+        "transform-origin": [],
+        "transform-style": [],
+        "transition": [],
+        "transition-delay": [],
+        "transition-duration": [],
+        "transition-property": [],
+        "transition-timing-function": [],
+        "unicode-bidi": [],
+        "vertical-align": [],
+        "visibility": [],
+        "white-space": [],
+        "width": [],
+        "word-break": [],
+        "word-spacing": [],
+        "word-wrap": [],
+        "z-index": []
+    };
+
+    // css의 text 관련 property는 div tag가 아닌 span tag에 달기 위해 따로 처리합니다.
+    // 다만, text-align, text-align-last와 같이 text의 위치를 설정하는 property는
+    // 그 목적에 맞게 사용하기 위하여 cssProperties에 들어가 div tag의 속성으로 들어갑니다.
+    // @author Yeongjin Oh
+    var cssTextProperties = {
+        "font": [],
+        // "@font-face": [],
+        "font-family": [],
+        "font-size": [],
+        "font-size-adjust": [],
+        "font-stretch": [],
+        "font-style": [],
+        "font-variant": [],
+        "font-weight": [],
+        "text-decoration": ["line-through", "none"],
+        "text-decoration-color": [],
+        "text-decoration-line": [],
+        "text-decoration-style": [],
+        "text-indent": [],
+        "text-justify": [],
+        "text-overflow": [],
+        "text-shadow": [],
+        "text-transform": []
+    }
+
+    // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
+    for (property in cssProperties) {
+        addCssMethod(property);
+        for (var i=0; i<cssProperties[property].length; i++) {
+            var value = cssProperties[property][i];
+            addCssMethod(property, value);
+        }
+    };
+
+    // cssTextProperties안에 정의된 모든 css의 text관련 property를 Div의 메서드에 추가합니다.
+    for (property in cssTextProperties) {
+        addCssTextMethod(property);
+        for (var i=0; i<cssTextProperties[property].length; i++) {
+            var value = cssTextProperties[property][i];
+            addCssTextMethod(property, value);
+        }
+    };
 };
 
-Div.prototype.verticalAlign = function (value) {
-    return this.css('vertical-align', value);
-};
+addAllCssMethods();
 
+// TODO : editable 속성의 div에서 text 받아오기.
 Div.prototype.text = function (txt) {
     if (txt === undefined)
-        return this.$.text();
-    this.$.text(txt);
+        return this.$text.text();
+    this.$text.text(txt);
     if (this.isAddedText === false) {
-        this.textSize(14);
+        this.fontSize(14);
     }
     return this;
 };
 
-Div.prototype.textColor = function (color) {
-    return this.css('color',color);
+Div.prototype.fontColor = function (color) {
+    return this.cssText('color',color);
 };
 
-Div.prototype.textSize = function (px) {
+/**
+ * default size 설정을 위해 isAddedText flag를 이용하여 메서드 재정의
+ * @author Yeongjin Oh
+ */
+Div.prototype.fontSize = function (px) {
     if (px === undefined)
-        return this.css('font-size');
-    this.css('font-size', px);
+        return this.cssText('font-size');
+    this.cssText('font-size', px);
     this.isAddedText = true;
     return this;
 };
@@ -176,28 +384,12 @@ Div.prototype.textSize = function (px) {
  * @desc set font weight bold
  * @author Yeongjin Oh
  */
-Div.prototype.textBold = function () {
-    return this.css('font-weight','bold');
+Div.prototype.fontBold = function () {
+    return this.cssText('font-weight','bold');
 };
 
-Div.prototype.textNormal = function () {
-    return this.css('font-weight','normal');
-};
-
-/**
- * @desc set text-decoration line-through
- * @author Yeongjin Oh
- */
-Div.prototype.textLineThrough = function () {
-    return this.css('text-decoration', 'line-through');
-};
-
-/**
- * @desc remove text-decoration
- * @author Yeongjin Oh
- */
-Div.prototype.textLineNone = function () {
-    return this.css('text-decoration', 'none');
+Div.prototype.fontNormal = function () {
+    return this.cssText('font-weight','normal');
 };
 
 /**
@@ -205,8 +397,8 @@ Div.prototype.textLineNone = function () {
  * @since   2016-09-22
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textClip = function() {
-    return this.css('text-overflow', 'clip');
+Div.prototype.textOverflowClip = function() {
+    return this.cssText('text-overflow', 'clip');
 };
 
 /**
@@ -214,12 +406,21 @@ Div.prototype.textClip = function() {
  * @since   2016-09-22
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textHide = function() {
-    this.css('text-overflow', 'ellipsis');
+Div.prototype.textOverflowEllipsis = function() {
+    this.cssText('text-overflow', 'ellipsis');
     this.css('white-space', 'nowrap');
     this.css('overflow', 'hidden');
 
     return this;
+};
+
+/**
+ * @desc    text가 길어도 줄바꿈이 되지 않는다.
+ * @since   2016-09-25
+ * @author  Yoon JiSoo yjsgoon@naver.com
+ */
+Div.prototype.whiteSpaceNowrap = function () {
+    return this.css('white-space', 'nowrap');
 };
 
 // css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
@@ -232,7 +433,7 @@ Div.prototype.border = function (value) {
         value = _.chain(value.split(' ')).map(parse).value().join('px ') + 'px';
     }
     else if (typeof value === 'number')
-        return this.css(key, value + 'px solid #eee');
+        return this.css('border', value + 'px solid black');
     return this.css('border', value);
 };
 
@@ -243,7 +444,7 @@ Div.prototype.border = function (value) {
  * @param option 'color', 'bottom', 'width' 등 border-option 과 같이 css에서 정의되어있는 border property
  * example usage : border(3) == css('border','3px solid'), border('red','color) == css('border-color','red')
  *                 border(1,'bottom') == css('border-bottom','1px solid'), border(undefined,'style')==css('border-style')
- * @autor Yeongjin Oh
+ * @author Yeongjin Oh
  */
 Div.prototype.borderOption = function (value, option) {
     var key = 'border';
@@ -255,80 +456,27 @@ Div.prototype.borderOption = function (value, option) {
     return this.css(key, value);
 };
 
-Div.prototype.borderStyle = function (style) {
-    return this.css('border-style', style);
-};
-
-
-Div.prototype.borderColor = function (c) {
-    return this.css('border-color', c);
-};
-
-Div.prototype.borderRadius = function (px) {
-    return this.css('border-radius', px);
-};
-
 Div.prototype.color = function (c) {
     return this.css('background-color', c);
-};
-
-Div.prototype.width = function (px) {
-    return this.css('width', px);
-};
-
-Div.prototype.minWidth = function (px) {
-    return this.css('min-width', px);
-};
-
-Div.prototype.height = function (px) {
-    return this.css('height', px);
-};
-
-Div.prototype.minHeight = function (px) {
-    return this.css('min-height', px);
 };
 
 Div.prototype.parentWidth = function () {
     return this.parent().width();
 };
 
-
 Div.prototype.parentHeight = function () {
     return this.parent().height();
 };
 
-Div.prototype.margin = function (px) {
-    return this.css('margin', px);
-};
-
-Div.prototype.marginTop = function (px) {
-    return this.css('margin-top', px);
-};
-
-Div.prototype.marginRight = function (px) {
-    return this.css('margin-right', px);
-};
-
-Div.prototype.marginBottom = function(px) {
-    return this.css('margin-bottom', px);
-};
-
-Div.prototype.marginLeft = function (px) {
-    return this.css('margin-left', px);
-};
-
-Div.prototype.padding = function (px) {
-    return this.css('padding', px);
-};
-
 /**
- * @desc    left padding
- * @since    2016-09-20
- * @author    Yoon JiSoo yjsgoon@naver.com
- * @todo    create top, right, bottom
+ * height 값을 pixel로 받아옵니다.
+ * @author Yeongjin Oh
  */
-Div.prototype.paddingLeft = function (px) {
-    return this.css('padding-left', px);
+Div.prototype.heightPixel = function () {
+    return parseInt(this.$.css('height'));
+};
+Div.prototype.widthPixel = function () {
+    return parseInt(this.$.css('width'));
 };
 
 /**
@@ -347,49 +495,14 @@ Div.prototype.textDragNone = function () {
     return this;
 };
 
+
 /**
- * @desc    set mouse pointer on text
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
+ * @desc     Content가 넘치면 scroll을 생성한다.
+ * @since    2016-09-25
+ * @author   Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textCursor = function(value) {
-    return this.css('cursor', value);
-};
-
-Div.prototype.textCursorAuto = function() {
-    return this.css('cursor', 'auto');
-};
-
-Div.prototype.textCursorDefault = function() {
-    return this.css('cursor', 'default');
-};
-
-Div.prototype.textCursorCrosshair = function() {
-    return this.css('cursor', 'crosshair');
-};
-
-Div.prototype.textCursorPointer = function() {
-    return this.css('cursor', 'pointer');
-};
-
-Div.prototype.textCursorMove = function() {
-    return this.css('cursor', 'move');
-};
-
-Div.prototype.textCursorText = function() {
-    return this.css('cursor', 'text');
-};
-
-Div.prototype.textCursorWait = function() {
-    return this.css('cursor', 'wait');
-};
-
-Div.prototype.textCursorHelp = function() {
-    return this.css('cursor', 'help');
-};
-
-Div.prototype.overflow = function (value) {
-    return this.css('overflow', value);
+Div.prototype.overflowAuto = function() {
+    return this.css('overflow', 'auto');
 };
 
 Div.prototype.size = function (w, h) {
@@ -488,28 +601,58 @@ Div.prototype.hoverColor = function(color1, color2) {
     return this;
 };
 
+Div.prototype.hoverTextColor = function(color1, color2) {
+    var that = this;
+    var fn1Func, fn2Func;
+    if (color1) {
+        fn1Func = function(){
+            that.fontColor(color1);
+        };
+    }
+
+    if (color2) {
+        fn2Func = function(){
+            that.fontColor(color2);
+        };
+    }
+
+    this.$.hover(fn1Func, fn2Func);
+    return this;
+};
+
+
 /**
  * @desc    stop animation
  * @since    2016-09-20
  * @author    Yoon JiSoo yjsgoon@naver.com
  * @todo    add parameter
  */
-
 Div.prototype.stop = function () {
     this.$.stop();
     return this;
 };
 
 /**
- * @desc set editable at div
- * @param value
- * @returns {Div}
+ * @desc set editable at span
+ * @todo span tag에 editable 속성을 주면 편집 공간(span)과 div의 크기가 다름.
  */
-Div.prototype.isEditable = function (value) {
-	this.attr('contentEditable', value);
-	if(value == true){
-		this.text('');
-	}
-	return this;
+Div.prototype.editable = function (value) {
+    if(value === 'diable' || value === false)
+        this.$text.attr('contentEditable', false);
+    else
+        this.$text.attr('contentEditable', true);
+    return this;
 };
 
+/**
+ * @desc    password
+ * @since    2016-09-26
+ * @author    Yoon JiSoo yjsgoon@naver.com
+ * @todo    Source에 유연성을 추가해야 한다.
+ */
+Div.prototype.isTextPassword = function(value) {
+    if(value === true)
+        return this.css('-webkit-text-security', 'disc');
+    else
+        return this.css('-webkit-text-security', 'none');
+};

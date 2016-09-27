@@ -1,5 +1,11 @@
 $(document).ready(function(){
+
+	// initialize
 	var defaultMessage = 'To do';
+	Div.prototype.setParentWidth = function () {
+		return this.width(this.parent().widthPixel());
+	};
+
 	var parent = div().size('100%','100%').append();
 	var viewer = div().size(350,500).minHeight(50).color('sky').padding(10)
 	.overflow('scroll').border(1).borderColor('orange').borderRadius(20).appendTo(parent);
@@ -10,17 +16,17 @@ $(document).ready(function(){
 	var inputButton = div().size(50,bottomBarHeight).margin('auto 13px').color('yellow').appendTo(bottomBar);
 	var blank = div();
 
-	var uncheckedList = div().margin(0).minHeight(0).appendToParent(viewer).setParentWidth();
-	var checkedList = div().margin(0).minHeight(0).appendToParent(viewer).setParentWidth();
+	var uncheckedList = div().margin(0).minHeight(0).appendTo(viewer).setParentWidth();
+	var checkedList = div().margin(0).minHeight(0).appendTo(viewer).setParentWidth();
 
 	// set insert functionality
 	inputButton.click(function (e) {
 		var text = inputForm.text();
 		inputForm.text(defaultMessage);
 		var checked = false;
-		var todoWrapper = div().appendToParent(uncheckedList).setParentWidth().border('1px dotted','bottom').border('rgb(200,200,200)','color');
+		var todoWrapper = div().appendTo(uncheckedList).setParentWidth().borderOption('1px dotted','bottom').borderOption('rgb(200,200,200)','color');
 
-		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).textSize(18).textBold();
+		var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).fontSize(18).fontBold();
 
 		// set effect onto todoWrapper
 		todoWrapper.hover(function () {
@@ -31,11 +37,11 @@ $(document).ready(function(){
 		.click(function (){
 			checked = !checked;
 			if (checked) {
-				todo.textLineThrough().textColor('gray').textNormal();
+				todo.textDecorationLineThrough().fontColor('gray').fontNormal();
 				todoWrapper.detach().appendTo(checkedList);
 			}
 			else {
-				todo.textLineNone().textColor('black').textBold();
+				todo.textDecorationNone().fontColor('black').fontBold();
 				todoWrapper.detach().appendTo(uncheckedList);
 			}
 		})

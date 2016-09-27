@@ -24,7 +24,7 @@ var cntMemo;
 var addMemo = div().size(100,50).border(1).color('white').borderColor('black').text('메모장 추가').appendTo(topDiv)
     .click(function (div, e) {
 
-        memoArea.isEditable(true).color('gray').text('메모하세요');
+        memoArea.editable(true).color('gray').text('메모하세요');
         var memo = div().appendTo(momos).size(300, 100).border(1).borderColor('black').color('red').displayBlock()
             .setClass('test' + random(500))
             .hover(function () {
