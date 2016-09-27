@@ -135,7 +135,6 @@ Div.prototype.visibility = function (value) {
     return this.css('visibility', value);
 };
 
-
 /**
  * @desc    set text-align center
  * @since    2016-09-21
