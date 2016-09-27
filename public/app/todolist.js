@@ -1,5 +1,11 @@
 $(document).ready(function(){
+
+	// initialize
 	var defaultMessage = 'To do';
+	Div.prototype.setParentWidth = function () {
+		return this.width(this.parent().widthPixel());
+	};
+
 	var parent = div().size('100%','100%').append();
 	var viewer = div().size(350,500).minHeight(50).color('sky').padding(10)
 	.overflow('scroll').border(1).borderColor('orange').borderRadius(20).appendTo(parent);
@@ -31,11 +37,11 @@ $(document).ready(function(){
 		.click(function (){
 			checked = !checked;
 			if (checked) {
-				todo.textLineThrough().fontColor('gray').fontNormal();
+				todo.textDecorationLineThrough().fontColor('gray').fontNormal();
 				todoWrapper.detach().appendTo(checkedList);
 			}
 			else {
-				todo.textLineNone().fontColor('black').fontBold();
+				todo.textDecorationNone().fontColor('black').fontBold();
 				todoWrapper.detach().appendTo(uncheckedList);
 			}
 		})

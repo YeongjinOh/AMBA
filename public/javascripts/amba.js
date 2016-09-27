@@ -1,10 +1,9 @@
 function div() {
     return new Div();
 }
-// TODO : text 속성은 span에서만.
 
 function Div() {
-    this.$ = $('<div></div>');
+    this.$ = $('<div>');
     this.$text = $('<span>').appendTo(this.$);
     this.$.data('div', this);
     this.param = {};
@@ -12,23 +11,6 @@ function Div() {
     this.isAddedText = false;
     this.verticalAlign('top');
 }
-
-Div.prototype.css = function (key, value) {
-    if (value === undefined)
-        return this.param[key];
-    this.param[key] = value;
-    this.$.css(key, value);
-    return this;
-};
-
-Div.prototype.cssText = function (key, value) {
-    if (value === undefined)
-        return this.param[key];
-    this.param[key] = value;
-    this.$text.css(key, value);
-    return this;
-};
-
 
 Div.prototype.attr = function (key, value) {
     if (value === undefined) {
@@ -90,6 +72,23 @@ Div.prototype.detach = function () {
     return this;
 };
 
+
+Div.prototype.css = function (key, value) {
+    if (value === undefined)
+        return this.param[key];
+    this.param[key] = value;
+    this.$.css(key, value);
+    return this;
+};
+
+Div.prototype.cssText = function (key, value) {
+    if (value === undefined)
+        return this.param[key];
+    this.param[key] = value;
+    this.$text.css(key, value);
+    return this;
+};
+
 /**
  * 정규표현식을 이용하여 '-'을 없애고 '-' 뒤 첫번째 문자를 대문자로 바꿉니다.
  * @param propName propertyName
@@ -117,6 +116,22 @@ var addCssMethod = function (propertyName, valueName) {
     } else {
         Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
             return this.css(propertyName, valueName);
+        };
+    }
+};
+
+/**
+ * @desc text를 꾸미는 css property를 Div의 span에 추가하는 메서드를 생성합니다.
+ * @author Yeongjin Oh
+ */
+var addCssTextMethod = function (propertyName, valueName) {
+    if (valueName === undefined) {
+        Div.prototype[getMethodName(propertyName)] = function (value) {
+            return this.cssText(propertyName, value);
+        };
+    } else {
+        Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
+            return this.cssText(propertyName, valueName);
         };
     }
 };
@@ -218,15 +233,6 @@ var addAllCssMethods = function () {
         "flex-shrink": [],
         "flex-wrap": [],
         "float": [],
-        "font": [],
-        // "@font-face": [],
-        "font-family": [],
-        "font-size": [],
-        "font-size-adjust": [],
-        "font-stretch": [],
-        "font-style": [],
-        "font-variant": [],
-        "font-weight": [],
         "hanging-punctuation": [],
         "height": [],
         "justify-content": [],
@@ -281,15 +287,6 @@ var addAllCssMethods = function () {
         "table-layout": [],
         "text-align": ["left", "right", "center"],
         "text-align-last": [],
-        "text-decoration": [],
-        "text-decoration-color": [],
-        "text-decoration-line": [],
-        "text-decoration-style": [],
-        "text-indent": [],
-        "text-justify": [],
-        "text-overflow": [],
-        "text-shadow": [],
-        "text-transform": [],
         "top": [],
         "transform": [],
         "transform-origin": [],
@@ -309,6 +306,33 @@ var addAllCssMethods = function () {
         "word-wrap": [],
         "z-index": []
     };
+
+    // css의 text 관련 property는 div tag가 아닌 span tag에 달기 위해 따로 처리합니다.
+    // 다만, text-align, text-align-last와 같이 text의 위치를 설정하는 property는
+    // 그 목적에 맞게 사용하기 위하여 cssProperties에 들어가 div tag의 속성으로 들어갑니다.
+    // @author Yeongjin Oh
+    var cssTextProperties = {
+        "font": [],
+        // "@font-face": [],
+        "font-family": [],
+        "font-size": [],
+        "font-size-adjust": [],
+        "font-stretch": [],
+        "font-style": [],
+        "font-variant": [],
+        "font-weight": [],
+        "text-decoration": ["line-through", "none"],
+        "text-decoration-color": [],
+        "text-decoration-line": [],
+        "text-decoration-style": [],
+        "text-indent": [],
+        "text-justify": [],
+        "text-overflow": [],
+        "text-shadow": [],
+        "text-transform": []
+    }
+
+    // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
     for (property in cssProperties) {
         addCssMethod(property);
         for (var i=0; i<cssProperties[property].length; i++) {
@@ -316,15 +340,24 @@ var addAllCssMethods = function () {
             addCssMethod(property, value);
         }
     };
+
+    // cssTextProperties안에 정의된 모든 css의 text관련 property를 Div의 메서드에 추가합니다.
+    for (property in cssTextProperties) {
+        addCssTextMethod(property);
+        for (var i=0; i<cssTextProperties[property].length; i++) {
+            var value = cssTextProperties[property][i];
+            addCssTextMethod(property, value);
+        }
+    };
 };
 
 addAllCssMethods();
 
-
+// TODO : editable 속성의 div에서 text 받아오기.
 Div.prototype.text = function (txt) {
     if (txt === undefined)
-        return this.$.text();
-    this.$.text(txt);
+        return this.$text.text();
+    this.$text.text(txt);
     if (this.isAddedText === false) {
         this.fontSize(14);
     }
@@ -332,7 +365,7 @@ Div.prototype.text = function (txt) {
 };
 
 Div.prototype.fontColor = function (color) {
-    return this.css('color',color);
+    return this.cssText('color',color);
 };
 
 /**
@@ -341,8 +374,8 @@ Div.prototype.fontColor = function (color) {
  */
 Div.prototype.fontSize = function (px) {
     if (px === undefined)
-        return this.css('font-size');
-    this.css('font-size', px);
+        return this.cssText('font-size');
+    this.cssText('font-size', px);
     this.isAddedText = true;
     return this;
 };
@@ -352,27 +385,11 @@ Div.prototype.fontSize = function (px) {
  * @author Yeongjin Oh
  */
 Div.prototype.fontBold = function () {
-    return this.css('font-weight','bold');
+    return this.cssText('font-weight','bold');
 };
 
 Div.prototype.fontNormal = function () {
-    return this.css('font-weight','normal');
-};
-
-/**
- * @desc set text-decoration line-through
- * @author Yeongjin Oh
- */
-Div.prototype.textLineThrough = function () {
-    return this.css('text-decoration', 'line-through');
-};
-
-/**
- * @desc remove text-decoration
- * @author Yeongjin Oh
- */
-Div.prototype.textLineNone = function () {
-    return this.css('text-decoration', 'none');
+    return this.cssText('font-weight','normal');
 };
 
 /**
@@ -381,7 +398,7 @@ Div.prototype.textLineNone = function () {
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.textOverflowClip = function() {
-    return this.css('text-overflow', 'clip');
+    return this.cssText('text-overflow', 'clip');
 };
 
 /**
@@ -390,7 +407,7 @@ Div.prototype.textOverflowClip = function() {
  * @author  Yoon JiSoo yjsgoon@naver.com
  */
 Div.prototype.textOverflowEllipsis = function() {
-    this.css('text-overflow', 'ellipsis');
+    this.cssText('text-overflow', 'ellipsis');
     this.css('white-space', 'nowrap');
     this.css('overflow', 'hidden');
 
@@ -616,14 +633,15 @@ Div.prototype.stop = function () {
 };
 
 /**
- * @desc set editable at div
- * @param value
- * @returns {Div}
+ * @desc set editable at span
+ * @todo span tag에 editable 속성을 주면 편집 공간(span)과 div의 크기가 다름.
  */
 Div.prototype.editable = function (value) {
     if(value === 'diable' || value === false)
-        return this.attr('contentEditable', false);
-     return this.attr('contentEditable', true);
+        this.$text.attr('contentEditable', false);
+    else
+        this.$text.attr('contentEditable', true);
+    return this;
 };
 
 /**
