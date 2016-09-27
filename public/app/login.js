@@ -2,10 +2,8 @@
  * Created by JiSoo on 2016-09-25.
  */
 
-/* PostgreSQL Module */
-// var pg = require('pg');
-
 var http = require('http');
+
 var options = {
     host: 'soma-amba.herokuapp.com',
     // host: '127.0.0.1',
@@ -54,12 +52,12 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
     dv.fontColor('white');
 }, function(dv) {
     dv.fontColor('black');
-}).click( function() {
-        //alert('Username: ' + username.text() + '\nPassword: ' + password.text());'
-    var req = http.request(options, function(response){
-        var str = '';
-        response.on('data', function(chunk){
-            str += chunk;
+        }).click( function() {
+            //alert('Username: ' + username.text() + '\nPassword: ' + password.text());'
+            var req = http.request(options, function(response){
+                var str = '';
+                response.on('data', function(chunk){
+                    str += chunk;
         });
         response.on('end', function(){
             console.log(str);

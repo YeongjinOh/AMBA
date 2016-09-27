@@ -17,7 +17,6 @@
     "gulp-jsdoc3": "^1.0.0",
     "gulp-minify-html": "^1.0.6",
     "gulp-uglify": "^2.0.0",
-    "http": "0.0.0",
     "jsdoc": "^3.4.1",
     "morgan": "~1.7.0",
     "pg": "4.5.6",
