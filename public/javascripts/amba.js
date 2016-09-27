@@ -1,7 +1,14 @@
+/**
+ * @desc Div객체를 불러와 전역으로 사용
+ * @returns {Div}
+ */
 function div() {
     return new Div();
 }
-
+/**
+ * @DIV태그를 사용하기 위한 클래스
+ * @constructor
+ */
 function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>').appendTo(this.$);
