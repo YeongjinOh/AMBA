@@ -2,18 +2,8 @@
  * Created by JiSoo on 2016-09-25.
  */
 
-var http = require('http');
-
-var options = {
-    host: 'soma-amba.herokuapp.com',
-    // host: '127.0.0.1',
-    path: '/login',
-    port: '5000',
-    method: 'GET'
-};
-
 var topDiv = div().append().size('100%', '10%').color('#D3D3D3');
-div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('sign-in').fontBold().fontSize('150%').verticalAlignMiddle()
+div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('sign-in').fontBold().fontSize('150%')
     .textAlignCenter().textDragNone().cursorPointer().hover( function(dv) {
     dv.color('#A9A9A9');
     dv.fontColor('white');
@@ -24,7 +14,7 @@ div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('s
     alert('로그인 화면으로');
 });//.verticalAlignMiddle();
 
-div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('sign-up').fontBold().fontSize('150%').verticalAlignMiddle()
+div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('sign-up').fontBold().fontSize('150%')
     .textAlignCenter().textDragNone().cursorPointer().hover( function(dv) {
     dv.color('#A9A9A9');
     dv.fontColor('white');
@@ -52,22 +42,17 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
     dv.fontColor('white');
 }, function(dv) {
     dv.fontColor('black');
-        }).click( function() {
-            //alert('Username: ' + username.text() + '\nPassword: ' + password.text());'
-            var req = http.request(options, function(response){
-                var str = '';
-                response.on('data', function(chunk){
-                    str += chunk;
+}).click( function() {
+    $.post( "http://localhost:5000/autho", { username: username.text(), password: password.text() })
+        .done(function( data ) {
+            console.log(data);
         });
-        response.on('end', function(){
-            console.log(str);
-        });
-    });
-    req.end();
+    // $.get("http://localhost:5000/autho", function(data) {
+    //    console.log(data);
+    // });
 });
 
 var bottomDiv = div().append().size('100%', '10%').color('#D3D3D3');
-
 
 
 
