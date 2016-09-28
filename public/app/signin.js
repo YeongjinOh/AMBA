@@ -37,9 +37,16 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
 }).click( function() {
     alert('Username: ' + username.text() + '\nPassword: ' + password.text());
     // $.post("http://soma-amba.herokuapp.com/signin", { username: username.text(), password: password.text() })
-    //     .done(function( data ) {
+    //     .done( function(data) {
     //         localStorage.setItem('token', data);
-    //     });
+    //      });
+    $.get("http://soma-amba.herokuapp.com/users", { token: localStorage.getItem('token') })
+        .done( function(data) {
+            if(data.type === true) {
+                alert('로그인 인증 성공!!');
+            } else
+                alert('로그인 인증 실패!!');
+        });
 });
 
 var bottomDiv = div().append().size('100%', '10%').color('#D3D3D3');

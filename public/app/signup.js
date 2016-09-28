@@ -48,7 +48,7 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
             if (data.type === true) {
                 $.post("http://soma-amba.herokuapp.com/session", { username: username.text(), password: password.text() })
                     .done( function(data) {
-                        console.log(data);
+                        localStorage.setItem('token', data);
                     });
             } else
                 alert('username duplication!!');

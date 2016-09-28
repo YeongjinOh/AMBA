@@ -6,16 +6,18 @@ var config = require('../config');
 
 /* 기존 사용자 정보를 얻는다. */
 router.get('/', function(req, res, next) {
-  if (!req.body.auth)
+  if (!req.body.token)
     return res.send(401);
 
-  var auth = jwt.decode(req.body.auth, config.secret);
-  db.one("select * from users_tb where username_cd = $1;", [auth.username])
-      .then( function(data) {
-        res.json(data);
+  var token = jwt.decode(req.body.token, config.secret);
+  db.one("select * from users_tb where username_cd = $1;", [token.username])
+      .then( function() {
+        res.send({
+            type: true
+        });
       })
       .catch( function(err) {
-        res.json(err);
+        res.send(err);
       });
 });
 
