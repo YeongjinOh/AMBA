@@ -21,6 +21,7 @@
     "jsdoc": "^3.4.1",
     "morgan": "~1.7.0",
     "pg": "4.5.6",
+    "pg-promise": "^5.3.3",
     "serve-favicon": "~2.3.0",
     "stylus": "0.54.5",
     "under_score": "^0.1.0"

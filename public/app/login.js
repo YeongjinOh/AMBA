@@ -43,13 +43,11 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
 }, function(dv) {
     dv.fontColor('black');
 }).click( function() {
-    $.post( "http://localhost:5000/autho", { username: username.text(), password: password.text() })
+    alert('Username: ' + username.text() + '\nPassword: ' + password.text());
+    $.post( "http://localhost:5000/authenticate", { username: username.text(), password: password.text() })
         .done(function( data ) {
             console.log(data);
         });
-    // $.get("http://localhost:5000/autho", function(data) {
-    //    console.log(data);
-    // });
 });
 
 var bottomDiv = div().append().size('100%', '10%').color('#D3D3D3');
