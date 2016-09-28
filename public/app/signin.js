@@ -11,7 +11,7 @@ div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('s
     dv.color('#D3D3D3');
     dv.fontColor('black');
 }).click( function() {
-    $(location).attr('href', 'http://localhost:5000/?app=signup');
+    $(location).attr('href', 'http://soma-amba.herokuapp.com/?app=signup');
 });
 
 div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('sign-in').fontBold().fontSize('200%')
@@ -36,7 +36,7 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
     dv.fontColor('black');
 }).click( function() {
     alert('Username: ' + username.text() + '\nPassword: ' + password.text());
-    $.post("http://localhost:5000/signin", { username: username.text(), password: password.text() })
+    $.post("http://soma-amba.herokuapp.com/signin", { username: username.text(), password: password.text() })
         .done(function( data ) {
             localStorage.setItem('token', data);
         });
