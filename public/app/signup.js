@@ -35,12 +35,22 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
 }, function(dv) {
     dv.fontColor('black');
 }).click( function() {
-    alert('Username: ' + username.text() + '\nPassword: ' + password.text());
-    $.post( "http://soma-amba.herokuapp.com/signup", { username: username.text(), password: password.text() })
-        .done(function( data ) {
-            if(data.type === true)
-                localStorage.setItem('token', data);
-            else
+    // alert('Username: ' + username.text() + '\nPassword: ' + password.text());
+    // $.post( "http://soma-amba.herokuapp.com/signup", { username: username.text(), password: password.text() })
+    //     .done(function( data ) {
+    //         if(data.type === true)
+    //             localStorage.setItem('token', data);
+    //         else
+    //             alert('username duplication!!');
+    //     });
+    $.post("http://soma-amba.herokuapp.com/users", { username: username.text(), password: password.text() })
+        .done( function(data) {
+            if (data.type === true) {
+                $.post("http://soma-amba.herokuapp.com/session", { username: username.text(), password: password.text() })
+                    .done( function(data) {
+                        console.log(data);
+                    });
+            } else
                 alert('username duplication!!');
         });
 });

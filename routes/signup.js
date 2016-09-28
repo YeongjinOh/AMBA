@@ -9,7 +9,7 @@ var router = express.Router();
 
 var crypto = require('crypto');
 
-var db = require('../models/db');
+var db = require('../db');
 
 var autho = {
     username: undefined,

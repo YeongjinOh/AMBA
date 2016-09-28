@@ -4,7 +4,7 @@
 var express = require('express');
 var router = express.Router();
 
-var db = require('../models/db');
+var db = require('../db');
 
 router.post('/', function(req, res) {
     db.one("select * from users_tb where username_cd = $1 and password_nm = $2;", [req.body.username, req.body.password])
