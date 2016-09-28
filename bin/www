@@ -20,6 +20,56 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+
+var Primus = require('primus');
+var options = {
+  transformer: "engine.io"
+};
+primus = new Primus(server,options);
+
+
+//클라이언트에서 primus라이브러리를 사용하기 위한 용도
+//primus.save(__dirname +'/primus.js');
+
+//현재 연결된 소켓들
+var sparks = [];
+var count = 0;
+
+
+primus.on('connection',function(spark){
+  console.log('connected!');
+  //클라이언트에 이름을 할당해준다.
+  spark.write({action: 'new', message: {nickname: 'GUEST-'+count}});
+  //소켓객체들을 저장한다
+  sparks['GUEST-'+count] = spark;
+  //소켓별로 이름 할당
+  spark._nickname = 'GUEST-'+count;
+  count++;
+
+  spark.on('data', function(data){
+    var action = data.action;
+
+    //메시지를 전송!!
+    if('send_msg' == action){
+      var msgObj = {action: 'broadcast_msg',
+        message: {msg: spark._nickname + ' : '+ data.message.msg}
+      };
+      //primus.emits();
+      primus.write(msgObj);
+
+    }
+  });
+});
+
+/**
+ * 데이터를 받을때는 무조건 on('data') 이벤트를 통해서 받을수가 있고
+ * 데이터를 보낼때는 무조건 write()함수를 사용해서 보낼수있다
+ * json형태로 데이터를 보낼수 있는데 여기서 명명을 해서 클라이언트와 서버의 이벤트를 전달해 줄수있다.
+ * action이라는 변수는 어떤 기능을 할지
+ * message라는 변수는 어떤 변수를 전달할지 보낸준다.
+ *
+ */
+
 /**
  * Listen on provided port, on all network interfaces.
  */
