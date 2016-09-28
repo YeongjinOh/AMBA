@@ -36,7 +36,7 @@ gulp.task('combine-js', function () {
 gulp.task('compress-html', function () {
     return gulp.src('public/index.html')
         .pipe(minifyhtml())
-        .pipe(gulp.dest('public.dist/html'));
+        .pipe(gulp.dest('public/dist/html'));
 });
 
 gulp.task('default', ['combine-js', 'compress-html', 'jsdoc'])

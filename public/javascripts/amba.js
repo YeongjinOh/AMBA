@@ -9,6 +9,7 @@ function div() {
  * @DIV태그를 사용하기 위한 클래스
  * @constructor
  */
+
 function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>').appendTo(this.$);
@@ -331,7 +332,6 @@ var addAllCssMethods = function () {
         "unicode-bidi": [],
         "vertical-align": ["middle"],
         "visibility": [],
-        "white-space": [],
         "width": [],
         "word-break": [],
         "word-spacing": [],
@@ -361,7 +361,8 @@ var addAllCssMethods = function () {
         "text-justify": [],
         "text-overflow": [],
         "text-shadow": [],
-        "text-transform": []
+        "text-transform": [],
+        "white-space": [],
     }
 
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
@@ -665,14 +666,16 @@ Div.prototype.stop = function () {
 };
 
 /**
- * @desc set editable at span
+ * @desc set editable at span, text('')를 하지않으면 입력이 안됩니다
  * @todo span tag에 editable 속성을 주면 편집 공간(span)과 div의 크기가 다름.
  */
 Div.prototype.editable = function (value) {
-    if(value === 'diable' || value === false)
+    if(value === 'disable' || value === false)
         this.$text.attr('contentEditable', false);
-    else
+    else {
         this.$text.attr('contentEditable', true);
+        //this.$.text('');
+    }
     return this;
 };
 
@@ -687,3 +690,103 @@ Div.prototype.textPassword = function(value) {
         return this.css('-webkit-text-security', 'none');
     return this.css('-webkit-text-security', 'disc');
 };
+
+
+function sock(){
+    return new Sock();
+}
+
+function Sock() {
+    this.primus = Primus.connect();
+
+    //처음 접속하면 서버로부터 이름을 할당 받는다.
+    primus.on('data', function (data) {
+        var action = data.action;
+        if('new' === action){
+
+            //var nickname = data.message.nickname;
+            //this.$.text(nickname);
+        }
+    });
+    //primus객체를 사용하기위해 프로퍼티로 넣어준다.
+    //this.primus = primus;
+    //return this;
+}
+
+
+
+sock.prototype.new = function () {
+    this.primus.on('data', function (data) {
+        var action = data.action;
+        if('new' === action){
+            var nickname = data.message.nickname;
+            this.$.text(nickname);
+        }
+    });
+    return this;
+}
+
+
+
+
+/**
+ * @desc 소켓연결을 하고 서버로부터 이름을 할당받는다. 언제할당받고 이름을 명명할지 고민할 필요가 있다.
+ * @author Lightsoo
+ * @returns {Div}
+ */
+
+Div.prototype.primus = function () {
+    var primus = Primus.connect();
+    //처음 접속하면 서버로부터 이름을 할당 받는다.
+    //primus.on('data', function (data) {
+    //    var action = data.action;
+    //    if('new' === action){
+    //        var nickname = data.message.nickname;
+    //        this.text(nickname);
+    //    }
+    //});
+    //primus객체를 사용하기위해 프로퍼티로 넣어준다.이렇게 하면 디브별로 primus객체를 가지게 되버려....
+    this.primus = primus;
+    return this;
+}
+
+/**
+ * @desc 클릭 이벤트 | 엔터 키 이벤트가 발생하였을때, editable div의 텍스트 내용을 파라미터로 받아와서 전송
+ * @param msg {string} - 서버에 보내기 위한 문자
+ * @returns {Div}
+ */
+Div.prototype.sendMsg = function (msg) {
+    this.primus.write({
+        action : 'send_msg',
+        message : {
+            msg : msg
+        }
+    })
+    //this.$.text('');
+    return this;
+}
+
+
+/**
+ * @desc 메시지를 받은 경우, 서버로부터 받은 메시지를 div의 텍스트에 적용하자.
+ * 문자를 받을때 마다 div를 추가할테니 텍스트 적용만 하면 된다.
+ * @returns {Div}
+ */
+Div.prototype.reciedMsg = function () {
+    this.primus.on('on', function (data) {
+        var action = data.action;
+        var msg = data.message.msg;
+        var nickname = data.message.nickname;
+        if('new' === action){
+            //var nickname = data.message.nickname;
+            this.$.text(nickname);
+        }
+
+        if('broadcast_msg' == action) {
+            //console.log(data.message.msg);
+            //$('#msgs').append(data.message.msg+'<BR>');
+            this.text(msg);
+        }
+    });
+    return this;
+}
