@@ -43,9 +43,9 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
     $.get("http://soma-amba.herokuapp.com/users", { token: localStorage.getItem('token') })
         .done( function(data) {
             if(data.type === true) {
-                alert('로그인 인증 성공!!');
+                alert('signin success');
             } else
-                alert('로그인 인증 실패!!');
+                alert('signin fail');
         });
 });
 

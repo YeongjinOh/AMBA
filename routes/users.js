@@ -6,10 +6,10 @@ var config = require('../config');
 
 /* 기존 사용자 정보를 얻는다. */
 router.get('/', function(req, res, next) {
-  if (!req.body.token)
+  if (!req.query.token)
     return res.send(401);
 
-  var token = jwt.decode(req.body.token, config.secret);
+  var token = jwt.decode(req.query.token, config.secret);
   db.one("select * from users_tb where username_cd = $1;", [token.username])
       .then( function() {
         res.send({
