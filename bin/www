@@ -35,7 +35,6 @@ primus = new Primus(server,options);
 var sparks = [];
 var count = 0;
 
-
 primus.on('connection',function(spark){
   console.log('connected!');
   //클라이언트에 이름을 할당해준다.
@@ -51,7 +50,8 @@ primus.on('connection',function(spark){
 
     //메시지를 전송!!
     if('send_msg' == action){
-      var msgObj = {action: 'broadcast_msg',
+      var msgObj = {
+        action: 'broadcast_msg',
         message: {msg: spark._nickname + ' : '+ data.message.msg}
       };
       //primus.emits();
