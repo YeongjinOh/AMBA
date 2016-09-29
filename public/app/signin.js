@@ -35,11 +35,6 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
 }, function(dv) {
     dv.fontColor('black');
 }).click( function() {
-    alert('Username: ' + username.text() + '\nPassword: ' + password.text());
-    // $.post("http://soma-amba.herokuapp.com/signin", { username: username.text(), password: password.text() })
-    //     .done( function(data) {
-    //         localStorage.setItem('token', data);
-    //      });
     $.get("http://soma-amba.herokuapp.com/users", { token: localStorage.getItem('token') })
         .done( function(data) {
             if(data.type === true) {

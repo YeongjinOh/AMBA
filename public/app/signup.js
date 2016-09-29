@@ -15,7 +15,7 @@ div().appendTo(topDiv).size('10%', '100%').color('#D3D3D3').floatRight().text('s
     dv.fontColor('black');
 }).click( function() {
     $(location).attr('href', 'http://soma-amba.herokuapp.com/?app=signin');
-});//.verticalAlignMiddle();
+});
 
 div().appendTo(topDiv).size('60%', '100%').color('#D3D3D3').floatRight().text('AMBA').fontBold().fontSize('400%')
     .fontColor('blue').textAlignCenter().textDragNone().cursorDefault();
@@ -35,14 +35,6 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
 }, function(dv) {
     dv.fontColor('black');
 }).click( function() {
-    // alert('Username: ' + username.text() + '\nPassword: ' + password.text());
-    // $.post( "http://soma-amba.herokuapp.com/signup", { username: username.text(), password: password.text() })
-    //     .done(function( data ) {
-    //         if(data.type === true)
-    //             localStorage.setItem('token', data);
-    //         else
-    //             alert('username duplication!!');
-    //     });
     $.post("http://soma-amba.herokuapp.com/users", { username: username.text(), password: password.text() })
         .done( function(data) {
             if (data.type === true) {
@@ -53,6 +45,7 @@ div().appendTo(midDiv).displayBlock().size('80%', '8%').marginTop('4%').marginLe
                     });
             } else
                 alert('username duplication!!');
+            $(location).attr('href', 'http://soma-amba.herokuapp.com/?app=signin');
         });
 });
 
