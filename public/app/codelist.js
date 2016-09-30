@@ -2,7 +2,8 @@ $(document).ready(function () {
 
     // initialize variables
     var basicColor = '#11bb55';
-    var username = "yeongjinoh";
+    var username = prompt("Enter your username").toLowerCase();
+    console.log(username);
     // var editFlag = false;
     var currentBlock, currentId, title, description, date, code, saveButton;
 
@@ -206,7 +207,7 @@ $(document).ready(function () {
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '120px').color('#dddddd');
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(20).text('Code List').fontSize(28).textAlignCenter();
-    var listName = div().appendTo(listHeader).size('100%', '50px').marginTop(20).text('javascript').fontSize(20).fontColor('gray').textAlignCenter();
+    var listName = div().appendTo(listHeader).size('100%', '50px').marginTop(20).text(username).fontSize(20).fontColor('gray').textAlignCenter();
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll');
 
     // design codeWrapper

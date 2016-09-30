@@ -22,6 +22,12 @@ function getParams(url){
 
 router.get('/index/get', function (req, res, next) {
     var params =  getParams(req.url);
+    console.log(params);
+    // create directory of username if doesn't exist
+    var dir = strformat(path, params);
+    if (!fs.existsSync(dir))
+        fs.mkdirSync(dir);
+
     var file = strformat(path+'index.json', params);
     jsonfile.readFile(file, function(err, obj) {
         if (err) {
