@@ -2,8 +2,12 @@ var express = require('express');
 var router = express.Router();
 
 var strformat = require('strformat');
-var jsonfile = require('jsonfile')
+var jsonfile = require('jsonfile');
 var path = './datas/{username}/';
+var fs = require('fs');
+
+
+
 
 // get parameters from given url
 function getParams(url){
@@ -62,6 +66,15 @@ router.post('/code/update', function(req, res, next) {
         if (err)
             console.error(err);
     });
+
+    // TODO:error handling
+    res.send();
+});
+
+
+router.post('/code/delete', function(req, res, next) {
+    var file = strformat(path+'data{id}.json', req.body);
+    fs.unlinkSync(file);
 
     // TODO:error handling
     res.send();

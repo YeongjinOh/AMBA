@@ -10,6 +10,7 @@ $(document).ready(function () {
     var sidebar = div().appendTo(parent).size('5%', '100%');
     var codelist = div().appendTo(parent).size('25%', '100%').border(1);
     var codeWrapper = div().appendTo(parent).size('65%', '100%').padding(20);
+    var blank = div();
 
     // design sidebar
 
@@ -32,28 +33,6 @@ $(document).ready(function () {
     }
 
 
-    // define code factory
-    var codeFactory = {
-        get: function (id, next) {
-            $.get("/codes/code/get", {username: username, id: id})
-                .done(next);
-        },
-        update: function (obj) {
-            $.post("/codes/code/update", {
-                username: username,
-                id: 3,
-                title: title.text(),
-                date: curDate,
-                desc: description.text(),
-                code: code.text()
-            })
-                .done(function () {
-                    alert("save successfully!");
-                });
-        }
-    };
-
-
     // define index manager
     var IdManager = function () {
 
@@ -62,7 +41,9 @@ $(document).ready(function () {
             $.get("/codes/index/get", {username: username})
                 .done(function (data) {
                     index = data['index[]'];
-                    if (typeof index == "string")
+                    if (index === undefined)
+                        index = [];
+                    else if (typeof index == "string")
                         index = [index];
                 })
                 .done(function () {
@@ -81,6 +62,16 @@ $(document).ready(function () {
             return Number(index[index.length - 1]) + 1;
         };
 
+        this.removeIndex = function (id) {
+            for (var i=0; i<index.length; i++) {
+                if (index[i] == id) {
+                    index.splice(i,1);
+                    break;
+                }
+            }
+            this.updateIndex();
+        };
+
         this.pushIndex = function (idx) {
             index.push(idx);
             // this.updateIndex();
@@ -90,26 +81,26 @@ $(document).ready(function () {
     // initialize id manager, block manager
     var idManager = new IdManager();
 
+
     // codelist에 새로운 block을 추가하고, 이를 리턴하는 함수
     var newBlock = function (id) {
         var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color').color('#fafafa');
+
+        // remove functionality
         var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').marginRight(20).cursorPointer();
         var onRemove = function () {
-            clicked += 1;
-            if (clicked > 1) {
-                blockWrapper.remove();
-                title.text('').editable(false);
-                description.text('').editable(false);
-                date.text('');
-                code.text('').editable(false);
-                saveButton.visibility('hidden');
-            } else {
-                removeButton.color('orange');
-            }
+            blockWrapper.remove();
+            title.text('').editable(false);
+            description.text('').editable(false);
+            date.text('');
+            code.text('').editable(false);
+            saveButton.visibility('hidden');
+            idManager.removeIndex(id);
+            blank.appendTo(parent);
+            deleteBlock(id);
         };
         removeButton.click(onRemove);
 
-        var clicked = 0;
         var block = {
             title: div().appendTo(blockWrapper).size('100%', '30px').text('Title').fontSize(20).fontColor('#333333').fontBold(),
             date: div().appendTo(blockWrapper).size('100%', '15px').text(getCurrentDate()).fontSize(12).fontColor('gray'),
@@ -153,9 +144,8 @@ $(document).ready(function () {
         saveBlock(id, block);
     };
 
-    var addButton = div().appendTo(sidebar).size(30, 30).margin(15).marginTop(40).text('+').fontBold().fontSize(28).fontColor('green').border(1).borderColor(basicColor).borderOption('100%', 'radius')
-        .textAlign('center').verticalAlign('middle').click(onAdd).cursorPointer();
 
+    // post를 보내 file system에 block을 저장.
     var saveBlock = function (id, block) {
 
         $.post("/codes/code/update", {
@@ -169,6 +159,13 @@ $(document).ready(function () {
             .done(function () {
                 idManager.updateIndex();
             });
+    };
+
+    var deleteBlock = function (id) {
+        $.post("/codes/code/delete", {
+            username: username,
+            id: id
+        });
     };
 
     var onSave = function () {
@@ -201,6 +198,10 @@ $(document).ready(function () {
     };
     idManager.getIndex(getAllBlocks);
 
+
+    // design sidebar
+    var addButton = div().appendTo(sidebar).size(30, 30).margin(15).marginTop(40).text('+').fontBold().fontSize(28).fontColor('green').border(1).borderColor(basicColor).borderOption('100%', 'radius')
+        .textAlign('center').verticalAlign('middle').click(onAdd).cursorPointer();
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '120px').color('#dddddd');
