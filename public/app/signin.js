@@ -20,22 +20,16 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
 },  function (dv) {
     dv.fontColor('white');
 }).click( function () {
-    alert('aaa');
+    $.get("http://soma-amba.herokuapp.com/users/login", { email: email.text(), password: password.text() })
+        .done(function (data) {
+            if( data.resultCode === 0) {
+                alert('signin success');
+                localStorage.setItem('aauth', data.aauth);
+                localStorage.setItem('ainfo', data.ainfo);
+                $(location).attr('href', '/?app=codelist');
+            }
+        });
 });
-
-//     $.post("http://soma-amba.herokuapp.com/session", { username: username.text(), password: password.text() })
-//         .done( function(data) {
-//             localStorage.setItem('token', data);
-//         });
-//     $.get("http://soma-amba.herokuapp.com/users", { token: localStorage.getItem('token') })
-//         .done( function(data) {
-//             if (data.type === true) {
-//                 alert('signin success');
-//                 $(location).attr('href', 'http://soma-amba.herokuapp.com/?app=codelist');
-//             }
-//             else
-//                 alert('signin fail');
-//         });
 
 div().appendTo(form).displayBlock().size('50px', '20px').float('right').marginRight('15px').marginTop('10px').textAlignRight().color('#4c00e6').text('Sign Up').fontSize('13px').fontColor('white').fontBold().textDragNone().cursorPointer().hover(function (dv) {
     dv.fontColor('black');

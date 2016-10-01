@@ -45,5 +45,5 @@ div().appendTo(form).displayBlock().size('50px', '20px').float('right').marginRi
 },  function (dv) {
     dv.fontColor('white');
 }).click( function () {
-    $(location).attr('href', '?app=signin');
+    $(location).attr('href', '/?app=signin');
 });
