@@ -3,7 +3,6 @@
  */
 var primus = Primus.connect()
 
-
 div().append().text('Send message').displayBlock();
 div().append().text('NAME : ');
 var nickname = div().append();
@@ -14,7 +13,8 @@ var submitDiv = div().append().border(1).borderColor('black').size('400', '50').
         primus.write({
            action : 'send_msg',
             message : {
-                msg : inputDiv.text()
+                msg : inputDiv.text(),
+                username : nickname.text()
             }
         });
         inputDiv.text('');
@@ -30,8 +30,9 @@ primus.on('data', function (data){
     }
 
     if('broadcast_msg' == action) {
-        console.log(data.message.msg);
         var msg = data.message.msg;
+        //var username = data.message.username;
+        var temp = username + msg;
         var recievedMsg = div().size('100%', '60').text(msg).border(1).borderColor('black');
         recievedMsg.appendTo(chatList);
     }

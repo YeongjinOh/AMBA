@@ -362,8 +362,8 @@ var addAllCssMethods = function () {
         "text-overflow": [],
         "text-shadow": [],
         "text-transform": [],
-        "white-space": [],
-    }
+        "white-space": []
+    };
 
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
     for (property in cssProperties) {
@@ -372,7 +372,7 @@ var addAllCssMethods = function () {
             var value = cssProperties[property][i];
             addCssMethod(property, value);
         }
-    };
+    }
 
     // cssTextProperties안에 정의된 모든 css의 text관련 property를 Div의 메서드에 추가합니다.
     for (property in cssTextProperties) {
