@@ -38,9 +38,9 @@ router.post('/login', function (req, res, next) {
 
 /* 새로운 사용자를 생성한다. */
 router.post('/regist', function(req, res, next) {
-    var password = crypto.createHmac('sha256', config.pwSecret).update(req.body.password).digest('base64');
+    // var password = crypto.createHmac('sha256', config.pwSecret).update(req.body.password).digest('base64');
 
-    db.none("insert into users(email, password, username, ipt_date, upt_date) values($1, $2, $3, now(), now());", [req.body.email, password, req.body.username])
+    db.none("insert into users(email, password, username, ipt_date, upt_date) values($1, $2, $3, now(), now());", [req.body.email, req.body.password, req.body.username])
         .then(function () {
             res.json({
                 resultCode: 0
