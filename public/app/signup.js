@@ -30,7 +30,7 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
 },  function (dv) {
     dv.fontColor('white');
 }).click( function () {
-    $.post('/users', { username: username.text(), email: email.text(), password: password.text() })
+    $.post('/users/regist', { username: username.text(), email: email.text(), password: password.text() })
         .done(function (data) {
             if (data.resultCode === 0)
                 alert('success');
