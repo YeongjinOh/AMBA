@@ -35,7 +35,7 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
             if (data.resultCode === 0)
                 alert('success');
             else
-                alert(msg);
+                alert(data.msg);
         });
 });
 

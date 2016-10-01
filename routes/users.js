@@ -35,12 +35,12 @@ router.post('/login', function (req, res, next) {
     db.one("select * from users where email = $1;", [req.body.email])
         .then(function (data) {
             if (data.password === req.body.password) {
-                var token = crypto.createHmac('sha256', config.secret).update(data.username + '.' + data.status).digest('base64');
+                var token = crypto.createHmac('sha256', config.secret).update(data.uid + '.' + data.status).digest('base64');
                 res.json({
                     resultCode: 0,
                     aauth: token,
                     ainfo: {
-                        aname: data.name
+                        aname: data.username
                     }
                 });
             }
@@ -59,7 +59,8 @@ router.post('/login', function (req, res, next) {
 
 /* 새로운 사용자를 생성한다. */
 router.post('/regist', function(req, res, next) {
-    db.none("insert into users(email, password, username, ipt_date, upt_date) values($1, $2, $3, now(), now());", [req.body.email, req.body.password, req.body.username])
+    var password = crypto.createHmac('sha256', config.pwSecret).update(req.body.password);
+    db.none("insert into users(email, password, username, ipt_date, upt_date) values($1, $2, $3, now(), now());", [req.body.email, password, req.body.username])
         .then(function () {
             res.json({
                 resultCode: 0

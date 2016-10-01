@@ -27,7 +27,8 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
                 localStorage.setItem('aauth', data.aauth);
                 localStorage.setItem('ainfo', data.ainfo);
                 $(location).attr('href', '/?app=codelist');
-            }
+            } else
+                alert(data.msg);
         });
 });
 
