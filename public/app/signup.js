@@ -11,7 +11,7 @@ div().appendTo(form).displayBlock().size('240px', '60px').margin('auto').color('
 
 div().appendTo(form).displayBlock().size('270px', '20px').margin('auto').marginTop('20px').color('#4c00e6')
     .text('Name').fontSize('15px').fontColor('white').textDragNone().cursorDefault();
-var name = div().appendTo(form).displayBlock().size('270px', '30px').margin('auto').marginTop('5px').color('white')
+var username = div().appendTo(form).displayBlock().size('270px', '30px').margin('auto').marginTop('5px').color('white')
     .borderRadius(5).boxShadow('5px 5px 5px black').text('').editable().fontSize('20px').cursorText();
 
 div().appendTo(form).displayBlock().size('270px', '20px').margin('auto').marginTop('15px').color('#4c00e6')
@@ -30,7 +30,7 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
 },  function (dv) {
     dv.fontColor('white');
 }).click( function () {
-    $.post('/users', { name: name.text(), email: email.text(), password: password.text() })
+    $.post('/users', { username: username.text(), email: email.text(), password: password.text() })
         .done(function (data) {
             if (data.resultCode === 0)
                 alert('success');
