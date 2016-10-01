@@ -4,6 +4,6 @@
 
 // HS256의 key
 module.exports = {
-    DATABASE_URL: 'postgres://eynernjlrihgzw:2cSSchyFA0jNj0etElZ574Y0z2@ec2-54-243-54-21.compute-1.amazonaws.com:5432/d1o7q84tkif5t0',
-    secret: 'ambasecret'
+    DATABASE_URL: 'postgres://hvjtfaypaiynco:H2pXM9K6CeYw43Q9S7vtfuEhHJ@ec2-23-21-234-218.compute-1.amazonaws.com:5432/d3fsaplc6og7fm',
+    secret: '!amba@secret#'
 };
