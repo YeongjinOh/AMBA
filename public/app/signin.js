@@ -9,10 +9,10 @@ div().appendTo(form).displayBlock().size('240px', '60px').margin('auto').color('
      .fontColor('white').textAlignCenter().textDragNone().cursorDefault();
 
 div().appendTo(form).displayBlock().size('270px', '20px').margin('auto').marginTop('20px').color('#4c00e6').text('Email').fontSize('15px').fontColor('white').textDragNone().cursorDefault();
-var email = div().appendTo(form).displayBlock().size('270px', '30px').margin('auto').marginTop('5px').color('white').borderRadius(5).boxShadow('5px 5px 5px black').editable().fontSize('20px').cursorText();
+var email = div().appendTo(form).displayBlock().size('270px', '30px').margin('auto').marginTop('5px').color('white').borderRadius(5).boxShadow('5px 5px 5px black').text('').editable().fontSize('20px').cursorText();
 
 div().appendTo(form).displayBlock().size('270px', '20px').margin('auto').marginTop('15px').color('#4c00e6').text('Password').fontSize('15px').fontColor('white').textDragNone().cursorDefault();
-var password = div().appendTo(form).displayBlock().size('270px', '30px').margin('auto').marginTop('5px').color('white').borderRadius(5).boxShadow('5px 5px 5px black').editable().textPassword().fontSize('20px').cursorText();
+var password = div().appendTo(form).displayBlock().size('270px', '30px').margin('auto').marginTop('5px').color('white').borderRadius(5).boxShadow('5px 5px 5px black').text('').editable().textPassword().fontSize('20px').cursorText();
 
 div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginTop('30px').color('#1a53ff').borderRadius(5).boxShadow('5px 5px 5px black')
     .text('Sign In').textAlignCenter().fontSize('25px').fontColor('white').fontBold().textDragNone().cursorPointer().hover(function (dv) {
