@@ -32,9 +32,10 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
 }).click( function () {
     $.post('/users/regist', { username: username.text(), email: email.text(), password: password.text() })
         .done(function (data) {
-            if (data.resultCode === 0)
+            if (data.resultCode === 0) {
                 alert('success');
-            else
+                $(location).attr('href', '/?app=signin');
+            } else
                 alert(data.msg);
         });
 });
