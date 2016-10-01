@@ -32,9 +32,10 @@ var config = require('../config');
 
 /* 사용자의 새로운 토큰을 생성한다. */
 router.post('/login', function (req, res, next) {
+    var password = crypto.createHmac('sha256', config.pwSecret).update(req.body.password);
     db.one("select * from users where email = $1;", [req.body.email])
         .then(function (data) {
-            if (data.password === req.body.password) {
+            if (data.password === password) {
                 var token = crypto.createHmac('sha256', config.secret).update(data.uid + '.' + data.status).digest('base64');
                 res.json({
                     resultCode: 0,
