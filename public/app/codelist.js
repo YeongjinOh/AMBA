@@ -3,14 +3,16 @@ $(document).ready(function () {
     // initialize variables
     var basicColor = '#11bb55';
     var username = prompt("Enter your username").toLowerCase();
-    console.log(username);
-    // var editFlag = false;
     var currentBlock, currentId, title, description, date, code, saveButton;
 
-    var parent = div().append().size('100%', '100%');
-    var sidebar = div().appendTo(parent).size('5%', '100%');
-    var codelist = div().appendTo(parent).size('25%', '100%').border(1);
-    var codeWrapper = div().appendTo(parent).size('65%', '100%').padding(20);
+    var parent = div().append().size(outerWidth, outerHeight);
+
+    var sidebar = div().appendTo(parent).size('5%', outerHeight).color('white');
+    var content = div().appendTo(parent).size('95%',outerHeight);
+    var projectList = div().appendTo(content).zIndex(-1).size('30%',outerHeight).border(1).borderOption('#aaaaaa','color');
+        projectList.color('#eaeaea').position('absolute').left(content.positionLeft()).top(content.positionTop()).opacity(0);
+    var codelist = div().appendTo(content).zIndex('1').size('25%', outerHeight).border(1).borderOption('#aaaaaa','color');
+    var codeWrapper = div().appendTo(content).zIndex('1').size('65%', outerHeight).padding(20).color('white');
     var blank = div();
 
     // design sidebar
@@ -199,16 +201,44 @@ $(document).ready(function () {
     };
     idManager.getIndex(getAllBlocks);
 
+    // create project list
+
+    var projectHide=true;
+    var onProject = function () {
+
+        projectHide = !projectHide;
+        if(projectHide)
+            projectList.animate({opacity:0,'z-index':-1},300);
+        else {
+            projectList.zIndex(2);
+            projectList.animate({opacity:1},300);
+        }
+
+
+    };
+
+    var decoButton = function (div) {
+        div.size(30, 30).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius')
+            .fontBold().fontSize(28).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
+    };
 
     // design sidebar
-    var addButton = div().appendTo(sidebar).size(30, 30).margin(15).marginTop(40).text('+').fontBold().fontSize(28).fontColor('green').border(1).borderColor(basicColor).borderOption('100%', 'radius')
-        .textAlign('center').verticalAlign('middle').click(onAdd).cursorPointer();
+    var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(40).text('+').click(onAdd);
+    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P').click(onProject);
+
+
+    // design projectlist
+    var projectHeader = div().appendTo(projectList).size('100%', '150px').color('#bbbbbb');
+    var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(40).text('Project List').fontSize(28).textAlignCenter();
+    var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text('project').fontSize(22).fontColor('gray').textAlignCenter();
+    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll');
+
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '120px').color('#dddddd');
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(20).text('Code List').fontSize(28).textAlignCenter();
-    var listName = div().appendTo(listHeader).size('100%', '50px').marginTop(20).text(username).fontSize(20).fontColor('gray').textAlignCenter();
-    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll');
+    var listName = div().appendTo(listHeader).size('100%', '50px').marginTop(20).text(username).fontSize(20).fontColor('darkgray').textAlignCenter();
+    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll').color('white');
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '60px').padding(20).borderOption('1px solid gray', 'bottom');
