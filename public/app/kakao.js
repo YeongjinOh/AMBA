@@ -72,7 +72,7 @@ primus.on('data', function (data){
         //topDiv.text(username);
         //$('#nickname').val(data.message.nickname);
     }
-
+sd
     if('broadcast_msg' == action) {
         var msg = data.message.msg;
         var username = data.message.username;
