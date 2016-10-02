@@ -12,7 +12,7 @@ function div() {
 
 function Div() {
     this.$ = $('<div>');
-    this.$text = $('<span>').appendTo(this.$);
+    this.$text = $('<span>');
     this.$.data('div', this);
     this.param = {};
     this.displayInlineBlock();
@@ -392,25 +392,19 @@ Div.prototype.text = function (txt) {
         return this.$text.text();
     this.$text.text(txt);
     if (this.isAddedText === false) {
-        this.fontSize(14);
+        this.isAddedText = true;
+        this.$text.appendTo(this.$);
+
+        // text를 입력하기 전에 font-size를 설정하였는지 확인합니다.
+        // 그렇지 않다면, default size 14를 줍니다.
+        if (this.param['font-size'] === undefined)
+            this.fontSize(14);
     }
     return this;
 };
 
 Div.prototype.fontColor = function (color) {
     return this.cssText('color',color);
-};
-
-/**
- * default size 설정을 위해 isAddedText flag를 이용하여 메서드 재정의
- * @author Yeongjin Oh
- */
-Div.prototype.fontSize = function (px) {
-    if (px === undefined)
-        return this.cssText('font-size');
-    this.cssText('font-size', px);
-    this.isAddedText = true;
-    return this;
 };
 
 /**
