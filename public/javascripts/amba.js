@@ -362,7 +362,7 @@ var addAllCssMethods = function () {
         "text-overflow": [],
         "text-shadow": [],
         "text-transform": [],
-        "white-space": []
+        "white-space": ['inherit', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap']
     };
 
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
@@ -668,7 +668,7 @@ Div.prototype.editable = function (value) {
         this.$text.attr('contentEditable', false);
     else {
         this.$text.attr('contentEditable', true);
-        //this.$.text('');
+        //this.$text('');
     }
     return this;
 };
