@@ -25,7 +25,6 @@ var server = http.createServer(app);
 
 
 
-/*
 var redis = require('redis');
 var Primus = require('primus');
 var options = {
@@ -42,21 +41,24 @@ var count = 0;
 var sub = redis.createClient();
 var pub = redis.createClient();
 
-/!**
+/**
  * client가 server에 처음 접속하면 join이벤트로 채널에 가입을 하고 new이벤트로 이름을 할당받는다.
  * client로부터 send_msg이벤트가 발생하면 server에서는 해당 채털로 메시지를 전달하고
  * sub.on('message', func)에서 채널과 메시지를 파라미터로 전달받아
  * 해당 채널로 메시지를 전달하는 로직인데...
- *!/
+ */
 //sub.subscribe('publishChannel');
 //app/kakao용
 primus.on('connection',function(spark){
 
 //나중에는 세션으로 유저정보를 받으면 될듯하다.
+
   var currentSpark = spark;
   console.log('connected!');
   //클라이언트에 이름을 할당해준다.
+
   spark.write({action: 'new', message: {nickname: 'GUEST-'+count}});
+
   //소켓객체들을 저장한다
   //sparks['GUEST-'+count] = spark;
   //소켓별로 이름 할당
@@ -67,20 +69,18 @@ primus.on('connection',function(spark){
   sub.on('subscribe', function (channel, count) {
     console.log('Subscribed on channel:', channel, ', count:', count);
   });
-  /!**
+  /**
    * 채널에 가입되어있는 spark들을 알아야될것 같은데.
    * Redis에서 server로 메시지를 보낼 것을 기다리고 있다가
    * 메시지가 왔을 때, 소켓을 이용해서 브라우저로 메시지를 전달한다.
    *
    * !send_msg이벤트를 통해 채널에 메시지가 전달되면
    * 채널에 있는 소켓을 순회하는것 같다.
-   *!/
+   */
     //pub.publish()를 호출하면 여기로 넘어간다
   sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
     console.log("sub channel " + channel + ": " + message);
     if(channel == 'publishChannel'){
-
-
       //var msgObj = {
       //  action: 'broadcast_msg',
       //  message: {msg: spark._nickname + ' : '+ data.message.msg}
@@ -104,21 +104,19 @@ primus.on('connection',function(spark){
       //
       //});
       var temp = JSON.parse(message);
-
+      console.log("temp : ",temp);
       var msg = temp.msg;
       var username = temp.username;
-      console.log("msg : " + msg + ", username : ", + username);
-      console.log("current : "+ currentSpark._nickname + ",  spark : " + spark._nickname);
-      if(spark._nickname === currentSpark._nickname){
-
+      console.log("msg : " + msg + ", username : ", username);
+      if(spark._nickname != username){
+        spark.write({
+          action : 'broadcast_msg',
+          message : {
+            username : username,
+            msg : msg
+          }
+        });
       }
-      spark.write({
-        action : 'broadcast_msg',
-        message : {
-          username : username,
-          msg : msg
-        }
-      });
     }
   });
 
@@ -151,7 +149,7 @@ primus.on('connection',function(spark){
       pub.publish('publishChannel', reply);
     }
   });
-});*/
+});
 
 //
 // app/chatting용!
