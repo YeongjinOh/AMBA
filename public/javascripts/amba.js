@@ -12,7 +12,7 @@ function div() {
 
 function Div() {
     this.$ = $('<div>');
-    this.$text = $('<span>').appendTo(this.$);
+    this.$text = $('<span>');
     this.$.data('div', this);
     this.param = {};
     this.displayInlineBlock();
@@ -75,6 +75,9 @@ Div.prototype.appendTo = function (parent) {
 };
 
 Div.prototype.parent = function () {
+    // console.log('parent');
+    // console.log(this);
+    // console.log(this.$.parent().data('div'));
     return this.$.parent().data('div');
 };
 
@@ -91,7 +94,8 @@ Div.prototype.children = function () {
  * @author Yeongjin OH
  */
 Div.prototype.deco = function (fn) {
-    fn(this);
+    if (typeof fn === "function")
+        fn(this);
     return this;
 };
 
@@ -299,7 +303,7 @@ var addAllCssMethods = function () {
         "outline-offset": [],
         "outline-style": [],
         "outline-width": [],
-        "overflow": [],
+        "overflow": ['hidden'],
         "overflow-x": [],
         "overflow-y": [],
         "padding": [],
@@ -359,11 +363,11 @@ var addAllCssMethods = function () {
         "text-decoration-style": [],
         "text-indent": [],
         "text-justify": [],
-        "text-overflow": [],
+        "text-overflow": ['clip', 'ellipsis'],
         "text-shadow": [],
         "text-transform": [],
-        "white-space": [],
-    }
+        "white-space": ['inherit', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap']
+    };
 
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
     for (property in cssProperties) {
@@ -372,7 +376,7 @@ var addAllCssMethods = function () {
             var value = cssProperties[property][i];
             addCssMethod(property, value);
         }
-    };
+    }
 
     // cssTextProperties안에 정의된 모든 css의 text관련 property를 Div의 메서드에 추가합니다.
     for (property in cssTextProperties) {
@@ -392,25 +396,19 @@ Div.prototype.text = function (txt) {
         return this.$text.text();
     this.$text.text(txt);
     if (this.isAddedText === false) {
-        this.fontSize(14);
+        this.isAddedText = true;
+        this.$text.appendTo(this.$);
+
+        // text를 입력하기 전에 font-size를 설정하였는지 확인합니다.
+        // 그렇지 않다면, default size 14를 줍니다.
+        if (this.param['font-size'] === undefined)
+            this.fontSize(14);
     }
     return this;
 };
 
 Div.prototype.fontColor = function (color) {
     return this.cssText('color',color);
-};
-
-/**
- * default size 설정을 위해 isAddedText flag를 이용하여 메서드 재정의
- * @author Yeongjin Oh
- */
-Div.prototype.fontSize = function (px) {
-    if (px === undefined)
-        return this.cssText('font-size');
-    this.cssText('font-size', px);
-    this.isAddedText = true;
-    return this;
 };
 
 /**
@@ -423,37 +421,6 @@ Div.prototype.fontBold = function () {
 
 Div.prototype.fontNormal = function () {
     return this.cssText('font-weight','normal');
-};
-
-/**
- * @desc    범위를 넘어가면 text를 자른다.
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textOverflowClip = function() {
-    return this.cssText('text-overflow', 'clip');
-};
-
-/**
- * @desc    범위를 넘어가는 text를 ...으로 표현한다.
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textOverflowEllipsis = function() {
-    this.cssText('text-overflow', 'ellipsis');
-    this.css('white-space', 'nowrap');
-    this.css('overflow', 'hidden');
-
-    return this;
-};
-
-/**
- * @desc    text가 길어도 줄바꿈이 되지 않는다.
- * @since   2016-09-25
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.whiteSpaceNowrap = function () {
-    return this.css('white-space', 'nowrap');
 };
 
 // css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
@@ -494,12 +461,28 @@ Div.prototype.color = function (c) {
 };
 
 Div.prototype.parentWidth = function () {
-    return this.parent().width();
+    return this.parent().widthPixel();
 };
 
 Div.prototype.parentHeight = function () {
-    return this.parent().height();
+    return this.parent().heightPixel();
 };
+
+/**
+ * @desc jquery position을 이용해서, left의 좌표를 받아옵니다.
+ * @author Yoengjin Oh
+ */
+Div.prototype.positionLeft = function () {
+    return this.$.position().left;
+};
+
+/**
+ * @desc jquery position을 이용해서, top의 좌표를 받아옵니다.
+ * @author Yoengjin Oh
+ */
+Div.prototype.positionTop = function () {
+    return this.$.position().top;
+}
 
 /**
  * height 값을 pixel로 받아옵니다.
@@ -590,6 +573,19 @@ Div.prototype.moveDown = function (y, delay) {
 };
 
 /**
+ * @desc jquery animate 메서드를 이용하여 애니메이션 효과를 적용합니다.
+ * @param properties animation을 적용할 property와 value들을 가진 object입니다.
+ *        예를 들어, { width: "70%", opacity: 0.4, marginLeft: "0.6in", fontSize: "3em", borderWidth: "10px" }
+ *        와 같은 object가 될 수 있습니다.
+ * @param duration animation이 수행되는 시간
+ * @author Yeongjin Oh
+ */
+Div.prototype.animate = function (properties, duration) {
+    this.$.animate(properties, duration);
+    return this;
+};
+
+/**
  * @desc    hover event
  * @since    2016-09-20
  * @author    Yoon JiSoo yjsgoon@naver.com
@@ -674,7 +670,7 @@ Div.prototype.editable = function (value) {
         this.$text.attr('contentEditable', false);
     else {
         this.$text.attr('contentEditable', true);
-        //this.$.text('');
+        //this.$text('');
     }
     return this;
 };
@@ -690,103 +686,3 @@ Div.prototype.textPassword = function(value) {
         return this.css('-webkit-text-security', 'none');
     return this.css('-webkit-text-security', 'disc');
 };
-
-
-function sock(){
-    return new Sock();
-}
-
-function Sock() {
-    this.primus = Primus.connect();
-
-    //처음 접속하면 서버로부터 이름을 할당 받는다.
-    primus.on('data', function (data) {
-        var action = data.action;
-        if('new' === action){
-
-            //var nickname = data.message.nickname;
-            //this.$.text(nickname);
-        }
-    });
-    //primus객체를 사용하기위해 프로퍼티로 넣어준다.
-    //this.primus = primus;
-    //return this;
-}
-
-
-
-sock.prototype.new = function () {
-    this.primus.on('data', function (data) {
-        var action = data.action;
-        if('new' === action){
-            var nickname = data.message.nickname;
-            this.$.text(nickname);
-        }
-    });
-    return this;
-}
-
-
-
-
-/**
- * @desc 소켓연결을 하고 서버로부터 이름을 할당받는다. 언제할당받고 이름을 명명할지 고민할 필요가 있다.
- * @author Lightsoo
- * @returns {Div}
- */
-
-Div.prototype.primus = function () {
-    var primus = Primus.connect();
-    //처음 접속하면 서버로부터 이름을 할당 받는다.
-    //primus.on('data', function (data) {
-    //    var action = data.action;
-    //    if('new' === action){
-    //        var nickname = data.message.nickname;
-    //        this.text(nickname);
-    //    }
-    //});
-    //primus객체를 사용하기위해 프로퍼티로 넣어준다.이렇게 하면 디브별로 primus객체를 가지게 되버려....
-    this.primus = primus;
-    return this;
-}
-
-/**
- * @desc 클릭 이벤트 | 엔터 키 이벤트가 발생하였을때, editable div의 텍스트 내용을 파라미터로 받아와서 전송
- * @param msg {string} - 서버에 보내기 위한 문자
- * @returns {Div}
- */
-Div.prototype.sendMsg = function (msg) {
-    this.primus.write({
-        action : 'send_msg',
-        message : {
-            msg : msg
-        }
-    })
-    //this.$.text('');
-    return this;
-}
-
-
-/**
- * @desc 메시지를 받은 경우, 서버로부터 받은 메시지를 div의 텍스트에 적용하자.
- * 문자를 받을때 마다 div를 추가할테니 텍스트 적용만 하면 된다.
- * @returns {Div}
- */
-Div.prototype.reciedMsg = function () {
-    this.primus.on('on', function (data) {
-        var action = data.action;
-        var msg = data.message.msg;
-        var nickname = data.message.nickname;
-        if('new' === action){
-            //var nickname = data.message.nickname;
-            this.$.text(nickname);
-        }
-
-        if('broadcast_msg' == action) {
-            //console.log(data.message.msg);
-            //$('#msgs').append(data.message.msg+'<BR>');
-            this.text(msg);
-        }
-    });
-    return this;
-}
