@@ -20,7 +20,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
-
+// var redis = require('redis');
 
 
 //var redis = require('redis');
@@ -36,6 +36,8 @@ primus = new Primus(server,options);
 
 //현재 연결된 소켓들
 var count = 0;
+//var sub = redis.createClient();
+//var pub = redis.createClient();
 
 /**
  * client가 server에 처음 접속하면 join이벤트로 채널에 가입을 하고 new이벤트로 이름을 할당받는다.
@@ -77,28 +79,6 @@ primus.on('connection',function(spark){
   sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
     console.log("sub channel " + channel + ": " + message);
     if(channel == 'publishChannel'){
-      //var msgObj = {
-      //  action: 'broadcast_msg',
-      //  message: {msg: spark._nickname + ' : '+ data.message.msg}
-      //};
-      //커넥션 되어있는 모든 소켓에 전송
-      //primus.write(msgObj);
-
-      //forEach()를 사용해서 특정 그룹핑을 해서 spark를 구별해서 전송이 가능하다
-      //그래서 나는 현재 스파크랑 primus의 소켓들을 비교해서 emits를 구현했는데 이게 잘한 방법 인지는 모르겠다
-      //primus.forEach(function (spark, id, connections) {
-      //  if(spark._nickname === currentSpark._nickname)
-      //    return ;
-      //
-      //  spark.write({
-      //    action : 'broadcast_msg',
-      //    message : {
-      //      username : currentSpark._nickname,
-      //      msg : message
-      //    }
-      //  })
-      //
-      //});
       var temp = JSON.parse(message);
       console.log("temp : ",temp);
       var msg = temp.msg;
@@ -138,8 +118,6 @@ primus.on('connection',function(spark){
         username : username,
         msg: msg
       });
-
-
       //나중에는 data.message.room 같이 받아서 'publishData'에 room 이름을 넣으면 된다
       //publish할때 객체형을 전달할수 없다.
       pub.publish('publishChannel', reply);

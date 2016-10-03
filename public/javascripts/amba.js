@@ -366,7 +366,7 @@ var addAllCssMethods = function () {
         "text-overflow": ['clip', 'ellipsis'],
         "text-shadow": [],
         "text-transform": [],
-        "white-space": ['inherit', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap']
+        "white-space": ['inherit', 'normal', 'nowrap', 'pre', 'pre-line', 'per-wrap']
     };
 
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
@@ -674,6 +674,8 @@ Div.prototype.editable = function (value) {
     }
     return this;
 };
+
+
 
 /**
  * @desc    password

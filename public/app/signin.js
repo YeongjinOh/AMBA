@@ -30,7 +30,7 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
             if( data.resultCode === 0) {
                 alert('signin success');
                 localStorage.setItem('aauth', data.aauth);
-                localStorage.setItem('ainfo', data.ainfo);
+                localStorage.setItem('ainfo', JSON.stringify(data.ainfo));
                 $(location).attr('href', '/?app=codelist');
             } else
                 alert(data.msg);
