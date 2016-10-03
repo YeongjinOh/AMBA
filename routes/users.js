@@ -27,7 +27,7 @@ router.post('/login', function (req, res, next) {
                     resultCode: 0,
                     aauth: aauth,
                     ainfo: {
-                        aname: data.username
+                        username: data.username
                     }
                 });
             }

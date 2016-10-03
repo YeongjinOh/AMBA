@@ -11,7 +11,7 @@ var mainCurrent = div().displayBlock().size('100%', '70%').color('#F5FFFA').appe
                     .textAlignRight().fontSize('8vw').textOverflowEllipsis().text(0);
 
 var input = div().size('70%', '60%').marginLeft('5%').color('#D3D3D3').appendTo(root)
-                 .cursorDefault().textAlignCenter().textDragNone();
+                 .cursorDefault().textAlignCenter().disableSelection();
 var control = div().size('75%', '80%').color('#D3D3D3').appendTo(input);
 var operator = div().size('25%', '80%').color('#D3D3D3').appendTo(input);
 var etc = div().size('100%', '20%').color('#D3D3D3').appendTo(input);

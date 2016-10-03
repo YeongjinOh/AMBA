@@ -46,11 +46,8 @@ Div.prototype.aceEditor = function () {
 
 
 Div.prototype.attr = function (key, value) {
-    if (value === undefined) {
-        alert(key);
-        alert(value);
+    if (value === undefined)
         return this.$.attr(key);
-    }
 
     this.$.attr(key, value);
     return this;
@@ -112,7 +109,7 @@ Div.prototype.detach = function () {
 
 Div.prototype.css = function (key, value) {
     if (value === undefined)
-        return this.param[key];
+        return this.$.css(key);
     this.param[key] = value;
     this.$.css(key, value);
     return this;
@@ -120,10 +117,16 @@ Div.prototype.css = function (key, value) {
 
 Div.prototype.cssText = function (key, value) {
     if (value === undefined)
-        return this.param[key];
+        return this.$text.css(key);
     this.param[key] = value;
     this.$text.css(key, value);
     return this;
+};
+
+Div.prototype.params = function (key) {
+    if (arguments.length === 0)
+        return this.param;
+    return this.param[key];
 };
 
 /**
@@ -500,7 +503,7 @@ Div.prototype.widthPixel = function () {
  * @since    2016-09-21
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textDragNone = function () {
+Div.prototype.disableSelection = function () {
     this.css('user-drag', 'none');
     this.css('user-select', 'none');
     this.css('-moz-user-select', 'none');
@@ -511,6 +514,24 @@ Div.prototype.textDragNone = function () {
     return this;
 };
 
+Div.prototype.selectable = function (value) {
+    if (value === 'disable' || value === false) {
+        this.css('user-drag', 'none');
+        this.css('user-select', 'none');
+        this.css('-moz-user-select', 'none');
+        this.css('-webkit-user-drag', 'none');
+        this.css('-webkit-user-select', 'none');
+        this.css('-ms-user-select', 'none');
+    } else {
+        this.css('user-drag', '');
+        this.css('user-select', '');
+        this.css('-moz-user-select', '');
+        this.css('-webkit-user-drag', '');
+        this.css('-webkit-user-select', '');
+        this.css('-ms-user-select', '');
+    }
+    return this;
+};
 
 /**
  * @desc     Content가 넘치면 scroll을 생성한다.
