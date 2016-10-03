@@ -1,5 +1,14 @@
 $(document).ready(function(){
 
+
+	div().text('open Chat').append().height(100).color('red').click(function(){
+		AB.loadScript('/app/kakao.js', function(){
+			var kmodule = module.kakao;
+			var chat = div().append().position('absolute').top(0).right(0).size(700, 'auto');
+			kmodule.appendTo(chat);
+		});
+	});
+
 	// initialize
 	var defaultMessage = 'To do';
 	Div.prototype.setParentWidth = function () {

@@ -109,7 +109,6 @@ Div.prototype.detach = function () {
     return this;
 };
 
-
 Div.prototype.css = function (key, value) {
     if (value === undefined)
         return this.param[key];

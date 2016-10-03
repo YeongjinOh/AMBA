@@ -1,9 +1,24 @@
 var AB = {};
+var module = {};
 
 AB.random = function(max) {
 	return parseInt(Math.random(max)*max);
 };
 
+AB.loadModule = function(url, callback) {
+    var name;
+    if(url == '/app/kakao.js')
+        name = 'kakao';
+
+    if(module[name]) {
+        callback(module[name]);
+    }
+    else {
+        AB.loadScript(url, function(){
+            callback(module[name]);
+        });
+    }
+}
 
 AB.loadScript = function(url, callback, charset) {
     var head= document.getElementsByTagName('head')[0];
@@ -30,6 +45,7 @@ AB.loadScript = function(url, callback, charset) {
     }
     script.src = url;
     head.appendChild(script);
+
 };
 
 AB.getParameter = function( name ) {
