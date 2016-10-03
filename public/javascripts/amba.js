@@ -303,7 +303,7 @@ var addAllCssMethods = function () {
         "outline-offset": [],
         "outline-style": [],
         "outline-width": [],
-        "overflow": [],
+        "overflow": ['hidden'],
         "overflow-x": [],
         "overflow-y": [],
         "padding": [],
@@ -363,7 +363,7 @@ var addAllCssMethods = function () {
         "text-decoration-style": [],
         "text-indent": [],
         "text-justify": [],
-        "text-overflow": [],
+        "text-overflow": ['clip', 'ellipsis'],
         "text-shadow": [],
         "text-transform": [],
         "white-space": ['inherit', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap']
@@ -421,37 +421,6 @@ Div.prototype.fontBold = function () {
 
 Div.prototype.fontNormal = function () {
     return this.cssText('font-weight','normal');
-};
-
-/**
- * @desc    범위를 넘어가면 text를 자른다.
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textOverflowClip = function() {
-    return this.cssText('text-overflow', 'clip');
-};
-
-/**
- * @desc    범위를 넘어가는 text를 ...으로 표현한다.
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textOverflowEllipsis = function() {
-    this.cssText('text-overflow', 'ellipsis');
-    this.css('white-space', 'nowrap');
-    this.css('overflow', 'hidden');
-
-    return this;
-};
-
-/**
- * @desc    text가 길어도 줄바꿈이 되지 않는다.
- * @since   2016-09-25
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.whiteSpaceNowrap = function () {
-    return this.css('white-space', 'nowrap');
 };
 
 // css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
