@@ -75,6 +75,9 @@ Div.prototype.appendTo = function (parent) {
 };
 
 Div.prototype.parent = function () {
+    // console.log('parent');
+    // console.log(this);
+    // console.log(this.$.parent().data('div'));
     return this.$.parent().data('div');
 };
 
@@ -91,7 +94,8 @@ Div.prototype.children = function () {
  * @author Yeongjin OH
  */
 Div.prototype.deco = function (fn) {
-    fn(this);
+    if (typeof fn === "function")
+        fn(this);
     return this;
 };
 
@@ -299,7 +303,7 @@ var addAllCssMethods = function () {
         "outline-offset": [],
         "outline-style": [],
         "outline-width": [],
-        "overflow": [],
+        "overflow": ['hidden'],
         "overflow-x": [],
         "overflow-y": [],
         "padding": [],
@@ -359,7 +363,7 @@ var addAllCssMethods = function () {
         "text-decoration-style": [],
         "text-indent": [],
         "text-justify": [],
-        "text-overflow": [],
+        "text-overflow": ['clip', 'ellipsis'],
         "text-shadow": [],
         "text-transform": [],
         "white-space": ['inherit', 'normal', 'nowrap', 'pre', 'pre-line', 'per-wrap']
@@ -419,37 +423,6 @@ Div.prototype.fontNormal = function () {
     return this.cssText('font-weight','normal');
 };
 
-/**
- * @desc    범위를 넘어가면 text를 자른다.
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textOverflowClip = function() {
-    return this.cssText('text-overflow', 'clip');
-};
-
-/**
- * @desc    범위를 넘어가는 text를 ...으로 표현한다.
- * @since   2016-09-22
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.textOverflowEllipsis = function() {
-    this.cssText('text-overflow', 'ellipsis');
-    this.css('white-space', 'nowrap');
-    this.css('overflow', 'hidden');
-
-    return this;
-};
-
-/**
- * @desc    text가 길어도 줄바꿈이 되지 않는다.
- * @since   2016-09-25
- * @author  Yoon JiSoo yjsgoon@naver.com
- */
-Div.prototype.whiteSpaceNowrap = function () {
-    return this.css('white-space', 'nowrap');
-};
-
 // css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
 // 'border-bottom', 'border-top'  등등 각각에 입력을 해야 할까요? (Yeongjin 09/23)
 Div.prototype.border = function (value) {
@@ -488,12 +461,28 @@ Div.prototype.color = function (c) {
 };
 
 Div.prototype.parentWidth = function () {
-    return this.parent().width();
+    return this.parent().widthPixel();
 };
 
 Div.prototype.parentHeight = function () {
-    return this.parent().height();
+    return this.parent().heightPixel();
 };
+
+/**
+ * @desc jquery position을 이용해서, left의 좌표를 받아옵니다.
+ * @author Yoengjin Oh
+ */
+Div.prototype.positionLeft = function () {
+    return this.$.position().left;
+};
+
+/**
+ * @desc jquery position을 이용해서, top의 좌표를 받아옵니다.
+ * @author Yoengjin Oh
+ */
+Div.prototype.positionTop = function () {
+    return this.$.position().top;
+}
 
 /**
  * height 값을 pixel로 받아옵니다.
@@ -580,6 +569,19 @@ Div.prototype.moveDown = function (y, delay) {
     this.$.animate({
         top: value
     }, delay);
+    return this;
+};
+
+/**
+ * @desc jquery animate 메서드를 이용하여 애니메이션 효과를 적용합니다.
+ * @param properties animation을 적용할 property와 value들을 가진 object입니다.
+ *        예를 들어, { width: "70%", opacity: 0.4, marginLeft: "0.6in", fontSize: "3em", borderWidth: "10px" }
+ *        와 같은 object가 될 수 있습니다.
+ * @param duration animation이 수행되는 시간
+ * @author Yeongjin Oh
+ */
+Div.prototype.animate = function (properties, duration) {
+    this.$.animate(properties, duration);
     return this;
 };
 
