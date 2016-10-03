@@ -20,10 +20,30 @@ var getCurrentDate = function () {
     + "-" + curr_year + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
 }
 
+var getTime = function () {
+    var date = new Date();
 
+    var hour = date.getHours();
+    var min = addZeroIfNeeded(date.getMinutes());
+    if(hour < 13){
+        return "오전 " + hour +":" + min;
+    }else{
+        hour-=12;
+        return "오후 " + hour +":"+ min;
+    }
+
+}
+
+function inputChange(){
+    var temp = editDiv.text();
+    if(temp !==''){
+        inputDiv.color('blue');
+    }else{
+        inputDiv.color('black');
+    }
+};
 
 var primus = Primus.connect();
-
 
 //처음 접속시 채널에 가입한다
 primus.write({
@@ -48,12 +68,12 @@ var topDiv = div().append().size('700','70').color('#EEEEEE').displayBlock(); //
 //밑에 전송 화면도 그런식으로...
 var userImgDiv = div().size('70','70').appendTo(topDiv).position('relative');
 div().appendTo(userImgDiv).size(60,60).color('red').borderRadius('50%').margin('auto').position('absolute').top(0).bottom(0).left(0).right(0);
-var userNameDiv = div().appendTo(topDiv).size('auto','auto').minHeight(15).marginLeft(5).marginTop(5).color('blue').fontSize(18);
+var userNameDiv = div().appendTo(topDiv).size('auto','auto').minHeight(15).marginLeft(5).marginTop(5).fontSize(18);
 
 var currentData = getCurrentDate();
 var chatListView = div().append().size('700','600').overflow('scroll').color('#90CAF9').displayBlock().text(currentData).textAlign('center');
 
-var bottomFunc = div().append().size('700', '30').color('gray').displayBlock();
+var bottomFunc = div().append().size('700', '30').color('#cccccc').displayBlock();
 //var func1 = div().appendTo(bottomFunc).size('40','100%').border(1).color('blue');
 //var func2 = div().appendTo(bottomFunc).size('40','100%').border(1).color('red');
 //var func3 = div().appendTo(bottomFunc).size('40','100%').border(1).color('blue');
@@ -61,26 +81,43 @@ var bottomFunc = div().append().size('700', '30').color('gray').displayBlock();
 
 
 var bottomDiv = div().append().size('700', '100');
-var bottomDiv1 = div().appendTo(bottomDiv).size('80%', '100%').editable(true).color('white').text('');
-//var inputDiv = div().appendTo(bottomDiv1).size('100%', '100%').color('red').padding(10);
+var bottomDiv1 = div().appendTo(bottomDiv).size('80%', '100%').position('relative');
+var editDiv = div().appendTo(bottomDiv1).size('90%','80%').editable(true).color('white').text('').position('absolute').top(0).bottom(0).left(0).right(0)
+    //.trigger('contentChanged');
 
-var bottomDiv2 = div().appendTo(bottomDiv).size('20%','100%').color('green').text('전송버튼').fontSize(25)
+var bottomDiv2 = div().appendTo(bottomDiv).size('20%', '100%').color('white').position('relative');
+var inputDiv = div().appendTo(bottomDiv2).size('75%','75%').color('#e6e6e6').text('전송').fontSize(15).margin('auto')
+    .position('absolute').top(0).bottom(0).left(0).right(0)
+    .borderOption(3).borderOption('#d9d9d9', 'color').borderRadius(20).textAlign('center').verticalAlign('middle').lineHeight('475%')
     .click(function () {
-        var msg = bottomDiv1.text();
-        bottomDiv1.text('');
-        primus.write({
-            action : 'send_msg',
-            message : {
-                //username : username,
-                username: userNameDiv.text(),
-                msg : msg
-            }
-        });
-        var myMsg = div().size('100%', 'auto');
-        var txt = div().appendTo(myMsg).text(msg).floatRight().marginRight(10).size('auto','auto').color('#ffff4d').fontSize(25).borderOption(4).borderOption('#ffff4d','color').borderRadius('16%');
-        myMsg.appendTo(chatListView);
-
+        var msg = editDiv.text();
+        if(msg !== ''){
+            editDiv.text('');
+            primus.write({
+                action : 'send_msg',
+                message : {
+                    //username : username,
+                    username: userNameDiv.text(),
+                    msg : msg
+                }
+            });
+            //size의 width를 100%줘서 displayBlock()이 필요없다.
+            var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
+            var txt = div().appendTo(myMsg).size('auto','auto').text(msg).floatRight().marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
+                .borderOption(4).borderOption('#ffff4d','color').borderRadius('10%').whiteSpace('pre-line').textAlign('left');
+            var myTime = div().appendTo(myMsg).size('auto','15').floatRight().text(getTime()).marginRight(5);
+            myMsg.appendTo(chatListView);
+        }
     });
+
+    //.on("click", function () {
+    //        if(editDiv.text() !== ''){
+    //            inputDiv.color('blue');
+    //        }else{
+    //            inputDiv.color('black');
+    //        }
+    //    });
+
 
 primus.on('data', function (data){
     var action = data.action;
@@ -97,24 +134,20 @@ primus.on('data', function (data){
     if('broadcast_msg' == action) {
         var msg = data.message.msg;
         var username = data.message.username;
-
-        var receivedMsg = div().size('100%', 'auto').minHeight(70);
+        //size의 width를 100%줘서 displayBlock()이 필요없다.
+        var receivedMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
         //parent의 height를 'auto'로 설정했을때 min값을 설정해서 profile이 출력되게 하였다
         var profile = div().appendTo(receivedMsg).size('60','60').color('blue').borderRadius('50%').floatLeft();
-        var txtArea = div().appendTo(receivedMsg).size('500','auto').color('gray').marginLeft(2).floatLeft();
+        var txtArea = div().appendTo(receivedMsg).size('auto','auto').marginLeft(4).floatLeft();
 
-        var name = div().appendTo(txtArea).size('100','100%').color('red').text(username).displayBlock().fontSize(20);
-        var msg = div().appendTo(txtArea).size('100%','auto').color('purple').text(msg).whiteSpace('per-wrap').fontSize(25).textAlign('left');
+        //tesxtAlign을 통해서 문자 왼쪽 정렬
+        var name = div().appendTo(txtArea).size('auto','auto').text(username).displayBlock()
+            .fontSize(20).textAlign('left');
+        var txt = div().appendTo(txtArea).size('auto','auto').color('white').text(msg).maxWidth(300)
+            .borderOption(4).borderOption('white','color').borderRadius('10%')
+            .whiteSpace('pre-line').fontSize(25).textAlign('left').floatLeft();
+
+        var recievdTime = div().appendTo(receivedMsg).size('auto','15').floatLeft().text(getTime()).marginLeft(5);
         receivedMsg.appendTo(chatListView);
-
-        //var recievedMsg = div().size('100%', '60').text(msg).border(1).borderColor('black');
-        //recievedMsg.appendTo(chatList);
-
     }
 });
-/**
- * redis의 h-set, 레디스 개념 ZADD를 사용한 랭킹구현,
- * 처음생성할때는 display를 none으로 하고 span사이즈르 auto;
- */
-
-//var submitDiv = div().appendTo(bottomDiv2).size('100%', '100%').color('red').padding(10);
