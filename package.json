@@ -14,6 +14,7 @@
     "ejs": "~2.4.1",
     "engine.io": "^1.6.11",
     "express": "~4.13.4",
+    "fs-promise": "^0.5.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-jsdoc3": "^1.0.0",
