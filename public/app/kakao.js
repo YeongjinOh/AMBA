@@ -104,7 +104,7 @@ var inputDiv = div().appendTo(bottomDiv2).size('75%','75%').color('#e6e6e6').tex
             //size의 width를 100%줘서 displayBlock()이 필요없다.
             var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
             var txt = div().appendTo(myMsg).size('auto','auto').text(msg).floatRight().marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
-                .borderOption(4).borderOption('#ffff4d','color').borderRadius('10%').whiteSpace('pre-line').textAlign('left');
+                .borderOption(4).borderOption('#ffff4d','color').borderRadius('10%').whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
             var myTime = div().appendTo(myMsg).size('auto','15').floatRight().text(getTime()).marginRight(5);
             myMsg.appendTo(chatListView);
         }
@@ -145,7 +145,7 @@ primus.on('data', function (data){
             .fontSize(20).textAlign('left');
         var txt = div().appendTo(txtArea).size('auto','auto').color('white').text(msg).maxWidth(300)
             .borderOption(4).borderOption('white','color').borderRadius('10%')
-            .whiteSpace('pre-line').fontSize(25).textAlign('left').floatLeft();
+            .whiteSpace('pre-line').fontSize(25).textAlign('left').floatLeft().wordBreak('break-all');
 
         var recievdTime = div().appendTo(receivedMsg).size('auto','15').floatLeft().text(getTime()).marginLeft(5);
         receivedMsg.appendTo(chatListView);
