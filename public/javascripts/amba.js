@@ -688,3 +688,13 @@ Div.prototype.textPassword = function(value) {
         return this.css('-webkit-text-security', 'none');
     return this.css('-webkit-text-security', 'disc');
 };
+
+
+/**
+ * @desc jquery empty를 이용해서 children을 지웁니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.empty = function () {
+    this.$.empty();
+    return this;
+}
