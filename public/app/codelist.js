@@ -5,14 +5,15 @@ $(document).ready(function () {
     var basicColor = '#11bb55';
     // var username = prompt("Enter your username").toLowerCase();
     var username = 'yeongjinoh';
+    var uid = 2;
     var currentBlock, currentCode, saveButton, currentCodeManager;
 
     var parent = div().append().size(outerWidth, outerHeight);
     var sidebar = div().appendTo(parent).size('5%', outerHeight).color('white');
-    var content = div().appendTo(parent).size('95%',outerHeight);
-    var projectList = div().appendTo(content).zIndex(2).size('30%',outerHeight).border(1).borderOption('#aaaaaa','color');
+    var content = div().appendTo(parent).size('95%', outerHeight);
+    var projectList = div().appendTo(content).zIndex(2).size('30%', outerHeight).border(1).borderOption('#aaaaaa', 'color');
     projectList.color('#eaeaea').position('absolute').left(content.positionLeft()).top(content.positionTop());
-    var codelist = div().appendTo(content).zIndex(1).size('25%', outerHeight).border(1).borderOption('#aaaaaa','color');
+    var codelist = div().appendTo(content).zIndex(1).size('25%', outerHeight).border(1).borderOption('#aaaaaa', 'color');
     var codeWrapper = div().appendTo(content).zIndex(1).size('65%', outerHeight).padding(20).color('white');
     var blank = div();
 
@@ -23,27 +24,26 @@ $(document).ready(function () {
     };
     var getCurrentDate = function () {
         var date = new Date();
-        var m_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         var curr_date = addZeroIfNeeded(date.getDate());
-        var curr_month = date.getMonth();
+        var curr_month = addZeroIfNeeded(date.getMonth() + 1);
         var curr_year = date.getFullYear();
-        var curr_hour = date.getHours();
-        var curr_min = addZeroIfNeeded(date.getMinutes());
-        var curr_sec = addZeroIfNeeded(date.getSeconds());
-        return (curr_date + "-" + m_names[curr_month]
-        + "-" + curr_year + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
-    }
-
+        return curr_year + "-" + curr_month + "-" + curr_date;
+    };
 
     /** define Project, Code classes **/
 
-    var Project = function (pid) {
-        this.username = username;
-        this.pid = pid;
-        this.title = "Project " + pid;
-        this.iptDate = getCurrentDate();
-        this.codeManager;
-    };
+        // Q. insert, update date는 db에 들어간 시간을 기준? 클라이언트 리퀘스트 기준?
+    var Project = function (project) {
+            this.pid = project.pid;
+            this.uid = project.uid;
+            this.title = project.title;
+            this.main_cid = project.main_cid;
+            this.description = project.description;
+            this.ipt_date = project.ipt_date.slice(0, 10);
+            this.upt_date = project.upt_date.slice(0, 10);
+            this.codeManager;
+        };
+
     // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
     var resetCodes = function (project) {
         if (project.codeManager) {
@@ -59,12 +59,12 @@ $(document).ready(function () {
 
     // uid, pid, title, ctext, description, ipt_date, upt_date
     var Code = function (pid, cid) {
-        this.username = username;
-        this.pid = pid;
         this.cid = cid;
+        this.uid = uid;
+        this.pid = pid;
         this.title = "Title " + cid;
         this.ctext = "Code";
-        this.desc = "description";
+        this.description = "description";
         this.iptDate = getCurrentDate();
         this.uptDate = this.iptDate;
     };
@@ -78,53 +78,65 @@ $(document).ready(function () {
 
         this.init = function () {
             that.getProjects()
-            // create default project
                 .done(function () {
-                    if (projects.length === 0)
-                        that.createProject();
-                })
-                .done(function () {
-                    for (var i=0; i<projects.length; i++) {
+                    for (var i = 0; i < projects.length; i++) {
                         newProjectBlock(projects[i]);
-                    };
+                    }
+                    ;
                 });
         };
 
         this.getProjects = function () {
-            return $.get("/projects", {username: username})
+            return $.get("/projects", {uid: uid})
                 .done(function (data) {
-                    projects = data;
-                    if (projects === undefined)
-                        projects = [];
-                    else if (typeof projects == "string")
-                        projects = [projects];
+                    if (data.resultCode === 0) {
+                        projects = data.projects.map(buildProject);
+                    } else {
+                        alert(data.msg);
+                    }
                     return projects;
                 });
         };
 
-
-        // this.getProject = function (pid) {
-        //     $.get("/projects/" + pid, {username:username})
-        //         .done()
-        // }
-
         this.createProject = function () {
-            var project = new Project(that.getNextIndex());
-            projects.push(project);
-            $.post("/projects", project);
-            return project;
+            var currentDate = getCurrentDate();
+            var defaultProject = {
+                uid: uid,
+                title: "new project " + projects.length,
+                description: "description",
+                ipt_date: currentDate,
+                upt_date: currentDate
+            };
+            var project = buildProject(defaultProject);
+            return $.post("/projects", project)
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        project.pid = data.pid;
+                        projects.push(project);
+                    } else {
+                        alert(data.msg);
+                    }
+                    data.project = project;
+                    return data;
+                });
         };
 
         this.deleteProject = function (pid) {
 
-            // remove from array;
-            for(var i=0 ; i<projects.length; i++) {
-                if(projects[i].pid == pid) {
-                    projects.splice(i,1);
-                    break;
-                }
-            }
-            $.post("/projects/"+pid+"/delete", {username:username});
+            $.post("/projects/delete", {uid:uid, pid:pid})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        // remove from array;
+                        for (var i = 0; i < projects.length; i++) {
+                            if (projects[i].pid == pid) {
+                                projects.splice(i, 1);
+                                break;
+                            }
+                        }
+                    } else {
+                        alert(data.msg);
+                    }
+                });
         };
 
         this.getNextIndex = function () {
@@ -150,14 +162,15 @@ $(document).ready(function () {
 
         this.resetCodelist = function () {
             listWrapper.empty()
-            for (var i=0; i<codes.length; i++) {
+            for (var i = 0; i < codes.length; i++) {
                 newCodeBlock(codes[i]);
-            };
+            }
+            ;
             // currentCodeManager = that;
         };
 
         this.getCodes = function () {
-            return $.get(basicURL, {username: username})
+            return $.get(basicURL, {uid: uid})
                 .done(function (data) {
                     codes = data;
                     if (codes === undefined || codes === "[]")
@@ -170,7 +183,7 @@ $(document).ready(function () {
         };
 
         this.getCode = function (cid) {
-            return $.get(basicURL + '/' + cid, {username: username})
+            return $.get(basicURL + '/' + cid, {uid: uid})
                 .done(that.updateCode);
         };
 
@@ -182,8 +195,8 @@ $(document).ready(function () {
         };
 
         this.updateCode = function (newCode) {
-            for(var i=0 ; i<codes.length; i++) {
-                if(codes[i].cid == newCode.cid) {
+            for (var i = 0; i < codes.length; i++) {
+                if (codes[i].cid == newCode.cid) {
                     codes[i] = newCode;
                     break;
                 }
@@ -195,13 +208,13 @@ $(document).ready(function () {
         this.deleteCode = function (cid) {
 
             // remove from array;
-            for(var i=0 ; i<codes.length; i++) {
-                if(codes[i].cid == cid) {
-                    codes.splice(i,1);
+            for (var i = 0; i < codes.length; i++) {
+                if (codes[i].cid == cid) {
+                    codes.splice(i, 1);
                     break;
                 }
             }
-            $.post(basicURL + "/" + cid + "/delete", {username:username});
+            $.post(basicURL + "/" + cid + "/delete", {uid: uid});
         };
 
         this.getNextIndex = function () {
@@ -210,6 +223,11 @@ $(document).ready(function () {
             var lastCode = codes[codes.length - 1];
             return parseInt(lastCode.cid) + 1;
         };
+    };
+
+    /** project buider**/
+    var buildProject = function (obj) {
+        return new Project(obj);
     };
 
     /** define newProjectBlock, newCodeBlock functions **/
@@ -229,8 +247,7 @@ $(document).ready(function () {
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
-                iptDate: div().appendTo(blockWrapper).size('100%', '15px').text(project.iptDate).fontSize(12).fontColor('gray'),
-                numOfCodes: project.numOfCodes
+                iptDate: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
             };
 
             var onHover = function () {
@@ -248,7 +265,7 @@ $(document).ready(function () {
                 listHeaderTitle.text(block.title.text());
                 projectList.animate({opacity: 0, 'z-index': -1}, 300);
                 projectAddButton.animate({display: 'none', opacity: 0}, 300);
-                projectHide=true;
+                projectHide = true;
                 resetCodes(project);
             };
             blockWrapper.hover(onHover, offHover);
@@ -279,11 +296,11 @@ $(document).ready(function () {
         var block = {
             title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold(),
             date: div().appendTo(blockWrapper).size('100%', '15px').text(code.uptDate).fontSize(12).fontColor('gray'),
-            desc: div().appendTo(blockWrapper).size('100%', '35px').text(code.desc).fontSize(16).fontColor('gray'),
+            description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray'),
             refresh: function () {
                 this.title.text(code.title);
                 this.date.text(code.uptDate);
-                this.desc.text(code.desc);
+                this.description.text(code.description);
             }
         };
 
@@ -291,18 +308,18 @@ $(document).ready(function () {
             blockWrapper.color(basicColor);
             block.title.fontColor('white');
             block.date.fontColor('white');
-            block.desc.fontColor('white');
+            block.description.fontColor('white');
         };
         var offHover = function () {
             blockWrapper.color('#fafafa');
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
-            block.desc.fontColor('gray');
+            block.description.fontColor('gray');
             removeButton.color('inherit');
         };
         var onClickCode = function () {
             titleEditor.editable(true).text(code.title);
-            descEditor.editable(true).css('outline', 'none').text(code.desc);
+            descEditor.editable(true).css('outline', 'none').text(code.description);
             dateEditor.text(code.uptDate);
             if (code.ctext == undefined) {
                 currentCodeManager.getCode(code.cid)
@@ -329,7 +346,6 @@ $(document).ready(function () {
     };
 
 
-
     /** on click events **/
 
     var onAddCode = function () {
@@ -338,19 +354,22 @@ $(document).ready(function () {
     };
 
     var onAddProject = function () {
-        var project = projectManager.createProject();
-        newProjectBlock(project);
+        projectManager.createProject()
+            .done(function (data) {
+                if (data.resultCode === 0)
+                    newProjectBlock(data.project);
+            });
+
     }
 
     var onSave = function () {
         currentCode.title = titleEditor.text();
         currentCode.uptDate = getCurrentDate();
-        currentCode.desc = descEditor.text();
+        currentCode.description = descEditor.text();
         currentCode.ctext = codeEditor.text();
         currentBlock.refresh();
         currentCodeManager.updateCode(currentCode);
     };
-
 
 
     /** initialization **/
@@ -361,16 +380,16 @@ $(document).ready(function () {
 
 
     // create project list
-    var projectHide=false;
+    var projectHide = false;
     var onProject = function () {
         projectHide = !projectHide;
-        if(projectHide) {
+        if (projectHide) {
             projectList.animate({opacity: 0, 'z-index': -1}, 300);
             projectAddButton.animate({display: 'none', opacity: 0}, 300);
         }
         else {
             projectList.zIndex(2);
-            projectList.animate({opacity:1},300);
+            projectList.animate({opacity: 1}, 300);
             projectAddButton.display('inline-block')
             projectAddButton.animate({opacity: 1}, 300);
         }
@@ -385,8 +404,8 @@ $(document).ready(function () {
                 .fontBold().fontSize(28).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
         };
     var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(40).text('+').click(onAddCode);
-    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P').fontSize(20).size(20,20).padding(5).click(onProject);
-    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('new').fontSize(12).size(20,20)
+    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P').fontSize(20).size(20, 20).padding(5).click(onProject);
+    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('new').fontSize(12).size(20, 20)
         .padding(5).click(onAddProject);
 
     // design projectlist

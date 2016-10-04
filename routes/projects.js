@@ -6,7 +6,7 @@ var jsonfile = require('jsonfile');
 var path = './datas/{username}/';
 var projectDir = path + 'project{pid}/';
 var fs = require('fs-promise');
-
+var db = require('../db');
 
 /*
 
@@ -93,64 +93,54 @@ var deleteFolderRecursive = function (path) {
 
 /**
  * GET /projects
- * @param username
- * @desc project의 pid, 이름, 코드 수를 project.json로 부터 읽어 온다.
- * @return [ {pid:1, title:"amba", numOfCodes:3}, {pid:2, title:"project2", numOfCodes:1}, ... ]
+ * @param uid
+ * @return resultCode, projects
  */
 
 router.route('').get(function (req, res) {
     var params = getParams(req.url);
-    // create directory of username if doesn't exist
-    var userDir = strformat(path, params);
-    var file = strformat(path + 'projects.json', params);
-    if (!fs.existsSync(userDir)) {
-        fs.mkdirSync(userDir);
-        jsonfile.writeFile(file, []);
-    }
-    jsonfile.readFile(file, function (err, obj) {
-        if (err) {
-            console.error(err);
-        } else {
-            // console.dir(obj);
-            res.send(obj);
-        }
-    });
+
+    db.any("select * from project where uid=${uid}", params)
+        .then(function (data) {
+            res.json({
+                resultCode:0,
+                projects:data
+            })
+        })
+        // TODO error handling
+        .catch(function (error) {
+            console.log("ERROR:", error.message || error);
+            res.json({
+                resultCode: -1,
+                msg: '일시적인 오류입니다.'
+            });
+        });
 
 });
 
 /**
- * GET /projects/:pid
- * @param username
- * @desc 해당 pid의 project의 제목과 코드 수를 읽어 온다.
- * @return {pid:1, title:"amba", numOfCodes:3}
- */
-// router.route('/:pid').get(function(req, res) {
-//
-// });
-
-/**
  * POST /projects
- * @param username, project
- * @desc 새로운 project 생성
- * @return statusCode
+ * @param project {pid, uid, title, main_cid, description, ipt_date, upt_date}
+ * @return resultCode
  */
 router.route('').post(function (req, res) {
     var params = req.body;
-    var file = strformat(path + 'projects.json', params);
-    fs.readJson(file)
-        .then(function (obj) {
-            obj.push(params)
-            fs.writeJson(file, obj);
+    var query = "insert into project(uid, title, description, ipt_date, upt_date) " +
+        "values (${uid}, ${title}, ${description}, now(), now()) returning pid";
+    db.one(query, params)
+        .then(function (data) {
+            console.log(data.pid);
+            res.json({
+                resultCode:0,
+                pid:data.pid
+            })
         })
-        .then(function () {
-            var dir = strformat(projectDir, params);
-            fs.mkdirSync(dir);
-            return dir;
-        })
-        .then(function (dir) {
-            var file = dir + 'project.json';
-            fs.writeJson(file, []);
-            res.sendStatus(0);
+        .catch(function (error) {
+            console.log("ERROR:", error.message || error);
+            res.json({
+                resultCode: -1,
+                msg: '일시적인 오류입니다.'
+            });
         });
 });
 
@@ -165,33 +155,27 @@ router.route('').post(function (req, res) {
 // });
 
 /**
- * DELETE /projects/:pid
- * @param username
- * @desc 해당 id의 프로젝트 삭제
- * @return statusCode
+ * POST /projects/delete
+ * @param pid
+ * @return resultCode
  */
-router.route('/:pid/delete').post(function (req, res) {
+router.route('/delete').post(function (req, res) {
 
-    var pid = req.params.pid;
-    var params = req.body
-
-    var file = strformat(path + 'projects.json', params);
-    fs.readJson(file)
-        .then(function (projects) {
-            // modify projects.json
-            for (var i = 0; i < projects.length; i++) {
-                if (projects[i].pid == pid) {
-                    projects.splice(i, 1);
-                    break;
-                }
-            }
-            fs.writeJson(file, projects);
-        })
+    var params = req.body;
+    db.none("delete from project where pid = ${pid}", params)
         .then(function () {
-            var dir = strformat(path + 'project' + pid, params);
-            deleteFolderRecursive(dir);
-            res.sendStatus(0);
+            res.json({
+                resultCode:0
+            })
+        })
+        .catch(function (error) {
+            console.log("ERROR:", error.message || error);
+            res.json({
+                resultCode: -1,
+                msg: '프로젝트를 찾을 수 없습니다.'
+            });
         });
+
 });
 
 
