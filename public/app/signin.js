@@ -25,7 +25,7 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
 },  function (dv) {
     dv.fontColor('white');
 }).click( function () {
-    $.post("http://soma-amba.herokuapp.com/users/login", { email: email.text(), password: password.text() })
+    $.post("/users/login", { email: email.text(), password: password.text() })
         .done(function (data) {
             if( data.resultCode === 0) {
                 alert('signin success');

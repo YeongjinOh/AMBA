@@ -8,22 +8,69 @@ var db = require('../db');
 
 router.get('/put', function(req, res, next) {
     // cid, key, value
-    res.send('put');
+    db.none("insert into data_store (cid, key, value) values ($1, $2, $3) on duplicate key update value = $4;",
+            [req.query.cid, req.query.key, req.query.value, req.query.value])
+        .then(function () {
+            res.json({
+                resultCode: 0
+            });
+        })
+        .catch(function (err) {
+            res.json({
+                resultCode: -1,
+                msg: err
+            });
+        });
 });
 
 router.get('/get', function(req, res, next) {
-    // cid, key
-    res.send('get');
+    //cid, key
+    db.many("select value from data_store where cid = $1 and key = $2;", [req.query.cid, req.query.key])
+        .then(function (data) {
+            res.json({
+                resultCode: 0,
+                info: data
+            })
+        })
+        .catch(function (err) {
+            res.json({
+                resultCode: -1,
+                msg: err
+            })
+        });
 });
 
 router.get('/delete', function(req, res, next) {
     // cid, key
-    res.send('delete');
+    db.none("delete from data_store where cid = $1 and key = $2;", [req.query.cid, req.query.key])
+        .then(function (data) {
+            res.json({
+                resultCode: 0
+            })
+        })
+        .catch(function (err) {
+            res.json({
+                resultCode: -1,
+                msg: err
+            })
+        });
 });
 
 router.get('/keys', function(req, res, next) {
     // cid
-    res.send('keys');
+    db.many("select key, value from data_store where cid = $1;", [req.query.cid])
+        .then(function (data) {
+            res.json({
+                resultCode: 0,
+                info: data
+            })
+        })
+        .catch(function (err) {
+            res.json({
+                resultCode: -1,
+                msg: err
+            })
+        });
 });
 
 module.exports = router;
