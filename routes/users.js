@@ -5,13 +5,11 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('./amba_crypto');
 var db = require('../db');
-var config = require('../config');
 
 /* 사용자의 새로운 토큰을 생성한다. */
 router.post('/login', function (req, res, next) {
     db.one("select * from users where email = $1;", [req.body.email])
         .then(function (data) {
-            // var password = crypto.createHmac('sha256', config.secret.password).update(req.body.password).digest('base64');
             var password = crypto.encrypt(req.body.password);
 
             if (data.password === password) {
@@ -19,10 +17,8 @@ router.post('/login', function (req, res, next) {
                     uid: data.uid,
                     status: data.status
                 };
-                aauth = JSON.stringify(aauth);
-                // aauth = crypto.createHmac('sha256', config.secret.aauth).update(aauth).digest('base64');
-                aauth = crypto.encrypt(aauth);
-                // var aauth = crypto.createHmac('sha256', config.secret.aauth).update(data.uid + '.' + data.status).digest('base64');
+
+                aauth = crypto.encrypt(JSON.stringify(aauth));
                 res.json({
                     resultCode: 0,
                     aauth: aauth,
@@ -46,7 +42,6 @@ router.post('/login', function (req, res, next) {
 
 /* 새로운 사용자를 생성한다. */
 router.post('/regist', function(req, res, next) {
-    // var password = crypto.createHmac('sha256', config.secret.password).update(req.body.password).digest('base64');
     var password = crypto.encrypt(req.body.password);
 
     db.none("insert into users(email, password, username, ipt_date, upt_date) values($1, $2, $3, now(), now());", [req.body.email, password, req.body.username])
