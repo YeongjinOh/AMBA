@@ -8,8 +8,7 @@ var db = require('../db');
 
 
 /*
-    JSON Array Parsing하기.
-    duplicate on 문제 해결하기
+    JSON Array Parsing하기
  */
 
 router.get('/put', function(req, res, next) {
