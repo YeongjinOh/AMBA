@@ -49,7 +49,6 @@ $(document).ready(function () {
         if (project.codeManager) {
             project.codeManager.resetCodelist();
         } else {
-            console.log(project.pid);
             project.codeManager = new CodeManager(project.pid);
             project.codeManager.init();
         }
@@ -58,15 +57,15 @@ $(document).ready(function () {
     };
 
     // uid, pid, title, ctext, description, ipt_date, upt_date
-    var Code = function (pid, cid) {
-        this.cid = cid;
-        this.uid = uid;
-        this.pid = pid;
-        this.title = "Title " + cid;
-        this.ctext = "Code";
-        this.description = "description";
-        this.iptDate = getCurrentDate();
-        this.uptDate = this.iptDate;
+    var Code = function (code) {
+        this.cid = code.cid;
+        this.uid = code.uid;
+        this.pid = code.pid;
+        this.title = code.title;
+        this.ctext = code.ctext;
+        this.description = code.description;
+        this.ipt_date = code.ipt_date.slice(0, 10);
+        this.upt_date = code.upt_date.slice(0, 10);
     };
 
     /** define ProjectManager, CodeManager classes **/
@@ -82,7 +81,6 @@ $(document).ready(function () {
                     for (var i = 0; i < projects.length; i++) {
                         newProjectBlock(projects[i]);
                     }
-                    ;
                 });
         };
 
@@ -94,7 +92,6 @@ $(document).ready(function () {
                     } else {
                         alert(data.msg);
                     }
-                    return projects;
                 });
         };
 
@@ -103,7 +100,7 @@ $(document).ready(function () {
             var defaultProject = {
                 uid: uid,
                 title: "new project " + projects.length,
-                description: "description",
+                description: "project description",
                 ipt_date: currentDate,
                 upt_date: currentDate
             };
@@ -123,7 +120,7 @@ $(document).ready(function () {
 
         this.deleteProject = function (pid) {
 
-            $.post("/projects/delete", {uid:uid, pid:pid})
+            $.post("/projects/delete", {uid: uid, pid: pid})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         // remove from array;
@@ -138,14 +135,6 @@ $(document).ready(function () {
                     }
                 });
         };
-
-        this.getNextIndex = function () {
-            if (projects.length === 0)
-                return 1;
-            var lastProject = projects[projects.length - 1];
-            return parseInt(lastProject.pid) + 1;
-        };
-
     };
 
 
@@ -153,7 +142,6 @@ $(document).ready(function () {
 
         var codes = [];
         var that = this;
-        var basicURL = "/projects/" + pid + "/codes";
 
         this.init = function () {
             that.getCodes()
@@ -170,39 +158,58 @@ $(document).ready(function () {
         };
 
         this.getCodes = function () {
-            return $.get(basicURL, {uid: uid})
+            return $.get("/projects/codes", {pid: pid})
                 .done(function (data) {
-                    codes = data;
-                    if (codes === undefined || codes === "[]")
-                        codes = [];
-                    // TODO : correct type checking
-                    // else if (codes === "[]")
-                    //     codes = [codes];
-                    return codes;
+                    if (data.resultCode === 0) {
+                        codes = data.codes.map(buildCode);
+                    } else {
+                        alert(data.msg);
+                    }
                 });
         };
 
-        this.getCode = function (cid) {
-            return $.get(basicURL + '/' + cid, {uid: uid})
-                .done(that.updateCode);
-        };
-
         this.createCode = function () {
-            var code = new Code(pid, that.getNextIndex());
-            codes.push(code);
-            $.post(basicURL, code);
-            return code;
+
+            var currentDate = getCurrentDate();
+            var defaultCode = {
+                uid: uid,
+                pid: pid,
+                title: "new code " + codes.length,
+                ctext: "",
+                description: "code description",
+                ipt_date: currentDate,
+                upt_date: currentDate
+            };
+            var code = buildCode(defaultCode);
+            return $.post("/projects/codes", code)
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        code.cid = data.cid;
+                        codes.push(code);
+                    } else {
+                        alert(data.msg);
+                    }
+                    data.code = code;
+                    return data;
+                });
         };
 
         this.updateCode = function (newCode) {
-            for (var i = 0; i < codes.length; i++) {
-                if (codes[i].cid == newCode.cid) {
-                    codes[i] = newCode;
-                    break;
-                }
-            }
-            $.post(basicURL + '/' + newCode.cid + "/update", newCode);
-            return newCode;
+
+            $.post("/projects/codes/update", newCode)
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        // update
+                        for (var i = 0; i < codes.length; i++) {
+                            if (codes[i].cid == newCode.cid) {
+                                codes[i] = newCode;
+                                break;
+                            }
+                        }
+                    } else {
+                        alert(data.msg);
+                    }
+                });
         };
 
         this.deleteCode = function (cid) {
@@ -214,20 +221,16 @@ $(document).ready(function () {
                     break;
                 }
             }
-            $.post(basicURL + "/" + cid + "/delete", {uid: uid});
-        };
-
-        this.getNextIndex = function () {
-            if (codes.length === 0)
-                return 1;
-            var lastCode = codes[codes.length - 1];
-            return parseInt(lastCode.cid) + 1;
+            $.post("/projects/codes/delete", {cid: cid});
         };
     };
 
-    /** project buider**/
+    /** project and code builders **/
     var buildProject = function (obj) {
         return new Project(obj);
+    };
+    var buildCode = function (obj) {
+        return new Code(obj);
     };
 
     /** define newProjectBlock, newCodeBlock functions **/
@@ -247,18 +250,18 @@ $(document).ready(function () {
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
-                iptDate: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
+                ipt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
             };
 
             var onHover = function () {
                 blockWrapper.color(basicColor);
                 block.title.fontColor('white');
-                block.iptDate.fontColor('white');
+                block.ipt_date.fontColor('white');
             };
             var offHover = function () {
                 blockWrapper.color('inherit');
                 block.title.fontColor('#333333');
-                block.iptDate.fontColor('gray');
+                block.ipt_date.fontColor('gray');
                 removeButton.color('inherit');
             };
             var onClickProject = function () {
@@ -295,11 +298,11 @@ $(document).ready(function () {
 
         var block = {
             title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold(),
-            date: div().appendTo(blockWrapper).size('100%', '15px').text(code.uptDate).fontSize(12).fontColor('gray'),
+            date: div().appendTo(blockWrapper).size('100%', '15px').text(code.upt_date).fontSize(12).fontColor('gray'),
             description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray'),
             refresh: function () {
                 this.title.text(code.title);
-                this.date.text(code.uptDate);
+                this.date.text(code.upt_date);
                 this.description.text(code.description);
             }
         };
@@ -318,26 +321,15 @@ $(document).ready(function () {
             removeButton.color('inherit');
         };
         var onClickCode = function () {
+            console.log(code.cid);
             titleEditor.editable(true).text(code.title);
             descEditor.editable(true).css('outline', 'none').text(code.description);
-            dateEditor.text(code.uptDate);
-            if (code.ctext == undefined) {
-                currentCodeManager.getCode(code.cid)
-                    .done(function (code) {
-                        codeEditor.editable(true).text('');
-                        codeEditor.text(code.ctext);
-                        saveButton.visibility('visible');
-                        currentCode = code;
-                        currentBlock = block;
-                    })
-            } else {
-                codeEditor.editable(true).text('');
-                codeEditor.text(code.ctext);
-                saveButton.visibility('visible');
-                currentCode = code;
-                currentBlock = block;
-            }
-
+            dateEditor.text(code.upt_date);
+            codeEditor.editable(true).text('');
+            codeEditor.text(code.ctext);
+            saveButton.visibility('visible');
+            currentCode = code;
+            currentBlock = block;
         };
 
         blockWrapper.hover(onHover, offHover).click(onClickCode);
@@ -349,8 +341,11 @@ $(document).ready(function () {
     /** on click events **/
 
     var onAddCode = function () {
-        var code = currentCodeManager.createCode();
-        newCodeBlock(code);
+        currentCodeManager.createCode()
+            .done(function (data) {
+                if (data.resultCode === 0)
+                    newCodeBlock(data.code);
+            });
     };
 
     var onAddProject = function () {
@@ -359,12 +354,11 @@ $(document).ready(function () {
                 if (data.resultCode === 0)
                     newProjectBlock(data.project);
             });
-
     }
 
     var onSave = function () {
         currentCode.title = titleEditor.text();
-        currentCode.uptDate = getCurrentDate();
+        currentCode.upt_date = getCurrentDate();
         currentCode.description = descEditor.text();
         currentCode.ctext = codeEditor.text();
         currentBlock.refresh();
