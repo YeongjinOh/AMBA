@@ -8,7 +8,7 @@ var db = require('../db');
 
 router.get('/put', function(req, res, next) {
     // cid, key, value
-    db.none("insert into data_store (cid, key, value) values ($1, $2, $3) on duplicate key update value = $4;",
+    db.none("insert into data_store(cid, key, value) values($1, $2, $3) on duplicate key update value = $4;",
             [req.query.cid, req.query.key, req.query.value, req.query.value])
         .then(function () {
             res.json({

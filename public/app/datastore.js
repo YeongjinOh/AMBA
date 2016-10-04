@@ -19,7 +19,7 @@ div().appendTo(topDiv).size('170px', '40px').marginLeft('100px').marginTop('30px
             if (data.resultCode === 0)
                 memo.text('Put Success');
             else
-                alert(data.msg);
+                alert(JSON.stringify(data.msg));
         });
     // cid, key, value
 });
@@ -32,9 +32,9 @@ div().appendTo(topDiv).size('170px', '40px').marginLeft('10px').marginTop('30px'
     $.get("/datastore/get", { cid: 'test1', key: 'key1' })
         .done(function (data) {
             if (data.resultCode === 0)
-                memo.text(data.info);
+                memo.text(JSON.stringify(data.info));
             else
-                alert(data.msg);
+                alert(JSON.stringify(data.msg));
         });
     //cid, key
 });
@@ -49,7 +49,7 @@ div().appendTo(topDiv).size('170px', '40px').marginLeft('10px').marginTop('30px'
             if (data.resultCode === 0)
                 memo.text('Delete Success');
             else
-                alert(data.msg);
+                alert(JSON.stringify(data.msg));
         });
     //cid, key
 });
@@ -62,9 +62,9 @@ div().appendTo(topDiv).size('170px', '40px').marginLeft('10px').marginTop('30px'
     $.get("/datastore/keys", { cid: 'test1' })
         .done(function (data) {
             if (data.resultCode === 0)
-                memo.text(data.info);
+                memo.text(JSON.stringify(data.info));
             else
-                alert(data.msg);
+                alert(JSON.stringify(data.msg));
         });
     // cid
 });
