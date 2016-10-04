@@ -3,21 +3,32 @@ $(document).ready(function () {
     /* initialize variables */
 
     var basicColor = '#11bb55';
-    // var username = prompt("Enter your username").toLowerCase();
-    var username = 'yeongjinoh';
-    var uid = 2;
-    var currentBlock, currentCode, saveButton, currentCodeManager;
+    var currentBlock, currentCode, currentCodeManager;
 
     var parent = div().append().size(outerWidth, outerHeight);
     var sidebar = div().appendTo(parent).size('5%', outerHeight).color('white');
     var content = div().appendTo(parent).size('95%', outerHeight);
-    var projectList = div().appendTo(content).zIndex(2).size('30%', outerHeight).border(1).borderOption('#aaaaaa', 'color');
-    projectList.color('#eaeaea').position('absolute').left(content.positionLeft()).top(content.positionTop());
+    var projectList = div().appendTo(content).zIndex(2).size('30%', outerHeight).border(1).borderOption('#aaaaaa', 'color')
+        .color('#eaeaea').position('absolute').left(content.positionLeft()).top(content.positionTop());
     var codelist = div().appendTo(content).zIndex(1).size('25%', outerHeight).border(1).borderOption('#aaaaaa', 'color');
     var codeWrapper = div().appendTo(content).zIndex(1).size('65%', outerHeight).padding(20).color('white');
     var blank = div();
 
+    /** set user authentication **/
+    var authFactory = function () {
+        var ainfo = JSON.parse(localStorage.getItem('ainfo'));
+        return {
+            getUsername : function () {
+                return ainfo.username || "";
+            }
+        };
+    }();
+    var username = authFactory.getUsername();
 
+    // TODO how to get uid??
+    var uid = 2;
+
+    /** basic functions **/
     var addZeroIfNeeded = function (num) {
         num = parseInt(num);
         return num < 10 ? '0' + num : num;
@@ -405,7 +416,7 @@ $(document).ready(function () {
     // design projectlist
     var projectHeader = div().appendTo(projectList).size('100%', '150px').color('#bbbbbb');
     var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(40).text('Project List').fontSize(28).textAlignCenter();
-    var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text('project').fontSize(22).fontColor('gray').textAlignCenter();
+    var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
     var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll');
 
 
@@ -418,7 +429,7 @@ $(document).ready(function () {
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '60px').padding(20).borderOption('1px solid gray', 'bottom');
     var descEditor = div().size('600px', '60px').appendTo(wrapperHeader).fontSize(20).fontBold().fontColor('gray').overflow('scroll');
-    saveButton = div().appendTo(wrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
+    var saveButton = div().appendTo(wrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
         .borderOption(5, 'radius').float('right').visibility('hidden').click(onSave).cursorPointer();
     var dateEditor = div().appendTo(wrapperHeader).fontSize(18).fontColor('gray').clear('right').float('right');
 
