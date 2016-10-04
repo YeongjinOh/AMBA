@@ -2,8 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 var strformat = require('strformat');
-// var jsonfile = require('jsonfile');
-// var fs = require('fs-promise');
 var db = require('../db');
 var generalErrMsg = "일시적인 오류입니다."
 
@@ -177,7 +175,6 @@ router.post('/codes', function (req, res) {
  */
 router.post('/codes/update', function (req, res) {
     var params = req.body;
-    console.log(params);
     var query = "update code_store set (title, ctext, description, upt_date) " +
         "= (${title}, ${ctext}, ${description}, now()) where cid=${cid}";
     db.none(query, params)
