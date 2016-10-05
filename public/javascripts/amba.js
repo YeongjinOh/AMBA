@@ -39,6 +39,7 @@ Div.prototype.aceEditor = function () {
         //자동 저장 가능
     });
     editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
+    console.log(editor);
     this.aceValue = editor;
     return this;
 };
@@ -72,9 +73,6 @@ Div.prototype.appendTo = function (parent) {
 };
 
 Div.prototype.parent = function () {
-    // console.log('parent');
-    // console.log(this);
-    // console.log(this.$.parent().data('div'));
     return this.$.parent().data('div');
 };
 
@@ -305,7 +303,7 @@ var addAllCssMethods = function () {
         "outline-offset": [],
         "outline-style": [],
         "outline-width": [],
-        "overflow": ['hidden'],
+        "overflow": ['hidden', 'scroll', 'auto'],
         "overflow-x": [],
         "overflow-y": [],
         "padding": [],
@@ -394,6 +392,15 @@ addAllCssMethods();
 
 // TODO : editable 속성의 div에서 text 받아오기.
 Div.prototype.text = function (txt) {
+    // if this div is ace editor, use text in div
+    if (this.aceValue) {
+        if (txt === undefined)
+            return this.aceValue.getValue();
+        this.aceValue.setValue(txt);
+        return this;
+    }
+
+    // otherwise, use span tag for text
     if (txt === undefined)
         return this.$text.text();
     this.$text.text(txt);

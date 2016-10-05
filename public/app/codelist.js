@@ -186,7 +186,7 @@ $(document).ready(function () {
                 uid: uid,
                 pid: pid,
                 title: "new code " + codes.length,
-                ctext: "",
+                ctext: "// write code here\nnew line text",
                 description: "code description",
                 ipt_date: currentDate,
                 upt_date: currentDate
@@ -332,12 +332,11 @@ $(document).ready(function () {
             removeButton.color('inherit');
         };
         var onClickCode = function () {
-            console.log(code.cid);
             titleEditor.editable(true).text(code.title);
             descEditor.editable(true).css('outline', 'none').text(code.description);
             dateEditor.text(code.upt_date);
-            codeEditor.editable(true).text('');
-            codeEditor.text(code.ctext);
+            // codeEditor.editable(true).text('');
+            codeEditor.displayInlineBlock().editable(true).text(code.ctext);
             saveButton.visibility('visible');
             currentCode = code;
             currentBlock = block;
@@ -417,23 +416,23 @@ $(document).ready(function () {
     var projectHeader = div().appendTo(projectList).size('100%', '150px').color('#bbbbbb');
     var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(40).text('Project List').fontSize(28).textAlignCenter();
     var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
-    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll');
+    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto();
 
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '120px').color('#dddddd');
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(20).text('Project name').fontSize(28).textAlignCenter();
     var listName = div().appendTo(listHeader).size('100%', '50px').marginTop(20).text(username).fontSize(20).fontColor('darkgray').textAlignCenter();
-    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflow('scroll').color('white');
+    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '60px').padding(20).borderOption('1px solid gray', 'bottom');
-    var descEditor = div().size('600px', '60px').appendTo(wrapperHeader).fontSize(20).fontBold().fontColor('gray').overflow('scroll');
+    var descEditor = div().size('600px', '60px').appendTo(wrapperHeader).fontSize(20).fontBold().fontColor('gray').overflowAuto();
     var saveButton = div().appendTo(wrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
         .borderOption(5, 'radius').float('right').visibility('hidden').click(onSave).cursorPointer();
     var dateEditor = div().appendTo(wrapperHeader).fontSize(18).fontColor('gray').clear('right').float('right');
 
-    var titleEditor = div().size('600px', '40px').appendTo(codeWrapper).fontSize(30).fontBold().margin(20).fontColor('#05aa33').overflow('scroll');
-    var codeEditor = div().appendTo(codeWrapper).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflow('scroll');
+    var titleEditor = div().appendTo(codeWrapper).size('600px', '40px').fontSize(30).fontBold().margin(20).fontColor('#05aa33').overflowAuto();
+    var codeEditor = div().appendTo(codeWrapper).aceEditor().displayNone().zIndex(1).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflowAuto();
 
 });
