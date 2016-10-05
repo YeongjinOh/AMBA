@@ -720,9 +720,10 @@ Div.prototype.empty = function () {
 };
 
 Div.prototype.markdown = function() {
-    $.get('/converter/md', { text: this.$text.text() })
+    $.get('/datastore/md', { text: this.$.text() })
         .done(function (data) {
-            return this.$text.text(data.markdown);
+            console.log(JSON.stringify(data));
+            return this.$.text(data.markdown);
         });
 
     // var converter = new showdown.Converter();

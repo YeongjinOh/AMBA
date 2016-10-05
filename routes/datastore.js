@@ -76,4 +76,13 @@ router.get('/keys', function(req, res, next) {
         });
 });
 
+router.get('/md', function (req, res, next) {
+    var showdown = require('showdown');
+
+    var converter = new showdown.Converter();
+    res.json({
+        md: converter.makeHtml(req.query.text)
+    });
+});
+
 module.exports = router;
