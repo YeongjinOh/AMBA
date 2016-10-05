@@ -2,16 +2,16 @@ $(document).ready(function () {
 
     /* initialize variables */
 
-    var basicColor = '#11bb55';
+    var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)';
     var currentBlock, currentCode, currentCodeManager;
 
     var parent = div().append().size(outerWidth, outerHeight);
-    var sidebar = div().appendTo(parent).size('5%', outerHeight).color('white');
-    var content = div().appendTo(parent).size('95%', outerHeight);
-    var projectList = div().appendTo(content).zIndex(2).size('30%', outerHeight).border(1).borderOption('#aaaaaa', 'color')
-        .color('#eaeaea').position('absolute').left(content.positionLeft()).top(content.positionTop());
-    var codelist = div().appendTo(content).zIndex(1).size('25%', outerHeight).border(1).borderOption('#aaaaaa', 'color');
-    var codeWrapper = div().appendTo(content).zIndex(1).size('65%', outerHeight).padding(20).color('white');
+    var sidebar = div().appendTo(parent).size(outerWidth/20, outerHeight).color('white');
+    var content = div().appendTo(parent).size(outerWidth*19/20, outerHeight);
+    var projectList = div().appendTo(content).zIndex(2).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color')
+        .color('#C8E6C9').position('absolute').left(content.positionLeft()).top(content.positionTop());
+    var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color');
+    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, outerHeight).padding(15).color('white').displayNone();
     var blank = div();
 
     /** set user authentication **/
@@ -277,10 +277,13 @@ $(document).ready(function () {
             };
             var onClickProject = function () {
                 listHeaderTitle.text(block.title.text());
+                listName.text(project.description);
                 projectList.animate({opacity: 0, 'z-index': -1}, 300);
                 projectAddButton.animate({display: 'none', opacity: 0}, 300);
                 projectHide = true;
                 resetCodes(project);
+                codeWrapper.displayNone();
+                screenWrapper.detach();
             };
             blockWrapper.hover(onHover, offHover);
             block.title.click(onClickProject).cursorPointer();
@@ -300,6 +303,7 @@ $(document).ready(function () {
             descEditor.text('').editable(false);
             dateEditor.text('');
             codeEditor.text('').editable(false);
+            runButton.visibility('hidden');
             saveButton.visibility('hidden');
             currentCodeManager.deleteCode(code.cid);
             blank.appendTo(parent);
@@ -319,7 +323,7 @@ $(document).ready(function () {
         };
 
         var onHover = function () {
-            blockWrapper.color(basicColor);
+            blockWrapper.color(basicColorWeak);
             block.title.fontColor('white');
             block.date.fontColor('white');
             block.description.fontColor('white');
@@ -332,14 +336,18 @@ $(document).ready(function () {
             removeButton.color('inherit');
         };
         var onClickCode = function () {
-            titleEditor.editable(true).text(code.title);
-            descEditor.editable(true).css('outline', 'none').text(code.description);
-            dateEditor.text(code.upt_date);
-            // codeEditor.editable(true).text('');
-            codeEditor.displayInlineBlock().editable(true).text(code.ctext);
-            saveButton.visibility('visible');
-            currentCode = code;
-            currentBlock = block;
+            if (currentBlock != block) {
+                codeWrapper.displayInlineBlock();
+                screenWrapper.detach();
+                titleEditor.editable(true).text(code.title);
+                descEditor.editable(true).css('outline', 'none').text(code.description);
+                dateEditor.text(code.upt_date);
+                codeEditor.displayInlineBlock().editable(true).text(code.ctext);
+                runButton.visibility('visible');
+                saveButton.visibility('visible');
+                currentCode = code;
+                currentBlock = block;
+            }
         };
 
         blockWrapper.hover(onHover, offHover).click(onClickCode);
@@ -364,7 +372,12 @@ $(document).ready(function () {
                 if (data.resultCode === 0)
                     newProjectBlock(data.project);
             });
-    }
+    };
+
+    var onRun = function () {
+        screen.text(codeEditor.text());
+        screenWrapper.after(listHeader);
+    };
 
     var onSave = function () {
         currentCode.title = titleEditor.text();
@@ -413,26 +426,37 @@ $(document).ready(function () {
         .padding(5).click(onAddProject);
 
     // design projectlist
-    var projectHeader = div().appendTo(projectList).size('100%', '150px').color('#bbbbbb');
-    var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(40).text('Project List').fontSize(28).textAlignCenter();
+    var projectHeader = div().appendTo(projectList).size('100%', '170px').color('#white').borderBottom('3px solid green');
+    var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(50).text('Project List').fontSize(28).textAlignCenter();
     var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
     var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto();
 
 
     // design codelist
-    var listHeader = div().appendTo(codelist).size('100%', '120px').color('#dddddd');
-    var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(20).text('Project name').fontSize(28).textAlignCenter();
-    var listName = div().appendTo(listHeader).size('100%', '50px').marginTop(20).text(username).fontSize(20).fontColor('darkgray').textAlignCenter();
+    var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
+    var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
+    var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
+    var screenWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc');
+    var screen = div().appendTo(screenWrapper).size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
+    var screenWrapper = div().size(listWrapper.widthPixel()-20,listWrapper.widthPixel()*1.5).padding(10).backgroundColor('#cccccc');
+    var screen = div().appendTo(screenWrapper).size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
 
     // design codeWrapper
-    var wrapperHeader = div().appendTo(codeWrapper).size('95%', '60px').padding(20).borderOption('1px solid gray', 'bottom');
-    var descEditor = div().size('600px', '60px').appendTo(wrapperHeader).fontSize(20).fontBold().fontColor('gray').overflowAuto();
-    var saveButton = div().appendTo(wrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
+    var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');
+    var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
+    var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
+    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').fontSize(30).fontBold()
+        .fontColor(basicColor)
+        // .fontColor('#05aa33')
+        .overflowAuto();
+    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').marginTop(10).marginLeft(10).fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
         .borderOption(5, 'radius').float('right').visibility('hidden').click(onSave).cursorPointer();
-    var dateEditor = div().appendTo(wrapperHeader).fontSize(18).fontColor('gray').clear('right').float('right');
+    var runButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Run').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
+        .borderOption(5, 'radius').float('right').visibility('hidden').click(onRun).cursorPointer().marginRight(20);
+    var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
 
-    var titleEditor = div().appendTo(codeWrapper).size('600px', '40px').fontSize(30).fontBold().margin(20).fontColor('#05aa33').overflowAuto();
     var codeEditor = div().appendTo(codeWrapper).aceEditor().displayNone().zIndex(1).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflowAuto();
 
 });
