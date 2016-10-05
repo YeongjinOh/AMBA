@@ -12,7 +12,7 @@ var formDiv = div().appendTo(topDiv).size('760px', '200px').color('white');
 var memo = div().appendTo(bottomDiv).displayBlock().size('80%', '100%').margin('auto').color('white').borderRadius(5).borderOption('5px solid');
 
 div().appendTo(inputDiv).displayBlock().size('180px', '15px').margin('auto').marginTop('15px').color('white')
-    .text('cid').fontSize('15px').fontColor('black').disableSelection().cursorDefault();
+    .text('# cid').fontSize('15px').fontColor('black').disableSelection().cursorDefault().markdown();
 var cid = div().appendTo(inputDiv).displayBlock().size('180px', '20px').margin('auto').marginTop('5px').color('white')
     .borderRadius(5).boxShadow('5px 5px 5px black').text('').editable().fontSize('15px').cursorText();
 

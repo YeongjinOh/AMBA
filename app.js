@@ -10,6 +10,7 @@ var users = require('./routes/users');
 var projects = require('./routes/projects');
 var datastore = require('./routes/datastore');
 var cachestore = require('./routes/cachestore');
+var converter = require('./routes/converter');
 
 var app = express();
 var redis = require('redis');
@@ -40,7 +41,7 @@ app.use('/users', users);
 app.use('/projects', projects);
 app.use('/datastore', datastore);
 app.use('/cachestore',cachestore);
-
+app.use('/converter', converter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -717,4 +717,15 @@ Div.prototype.textPassword = function(value) {
 Div.prototype.empty = function () {
     this.$.empty();
     return this;
-}
+};
+
+Div.prototype.markdown = function() {
+    $.get('/converter/md', { text: this.$text.text() })
+        .done(function (data) {
+            return this.$text.text(data.markdown);
+        });
+
+    // var converter = new showdown.Converter();
+    //
+    // return this.$text.text(converter.makeHtml(this.$text.text()));
+};
