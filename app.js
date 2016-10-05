@@ -9,8 +9,11 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var projects = require('./routes/projects');
 var datastore = require('./routes/datastore');
+var cachestore = require('./routes/cachestore');
 
 var app = express();
+var redis = require('redis');
+var cache = redis.createClient();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -25,10 +28,19 @@ app.use(cookieParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+//라우터보다 먼저 미들웨어 등록!!
+app.use(function (req, res, next) {
+  req.cache = cache;
+  next();
+});
+
 app.use('/', routes);
 app.use('/users', users);
 app.use('/projects', projects);
 app.use('/datastore', datastore);
+app.use('/cachestore',cachestore);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
