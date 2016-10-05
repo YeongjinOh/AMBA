@@ -727,13 +727,12 @@ Div.prototype.empty = function () {
 };
 
 Div.prototype.markdown = function() {
-    $.get('/datastore/md', { text: this.$.text() })
+    var that = this;
+    $.get('/converter/markdown', { text: that.$text.text() })
         .done(function (data) {
-            console.log(JSON.stringify(data));
-            return this.$.text(data.markdown);
+            // innerHTML이랑 차이를 정확하게 알고싶다....
+            that.$text.remove();
+            var temp = $.parseHTML(data.markdown);
+            return that.$.append(temp);
         });
-
-    // var converter = new showdown.Converter();
-    //
-    // return this.$text.text(converter.makeHtml(this.$text.text()));
 };
