@@ -13,7 +13,7 @@ var cachestore = require('./routes/cachestore');
 
 var app = express();
 var redis = require('redis');
-var cache = redis.createClient();
+//var cache = redis.createClient();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -30,10 +30,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 //라우터보다 먼저 미들웨어 등록!!
-app.use(function (req, res, next) {
-  req.cache = cache;
-  next();
-});
+//app.use(function (req, res, next) {
+//  req.cache = cache;
+//  next();
+//});
 
 app.use('/', routes);
 app.use('/users', users);
