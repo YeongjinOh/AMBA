@@ -77,6 +77,15 @@ Div.prototype.prependTo = function (parent) {
     return this;
 };
 
+/**
+ * prev 다음에 위치하도록 append 합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.after = function (prev) {
+    prev.$.after(this.$);
+    return this;
+}
+
 Div.prototype.parent = function () {
     return this.$.parent().data('div');
 };
