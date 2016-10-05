@@ -30,7 +30,7 @@ function Div() {
 Div.prototype.aceEditor = function () {
     var editor = ace.edit(this.$.get(0));
 
-    editor.setTheme("ace/theme/monokai");
+    editor.setTheme("ace/theme/tomorrow_night_eighties");
 
     //js문법에 따라 하이라이팅을 준다
     editor.getSession().setMode("ace/mode/javascript");
@@ -69,6 +69,11 @@ Div.prototype.append = function () {
 
 Div.prototype.appendTo = function (parent) {
     this.$.appendTo(parent.$);
+    return this;
+};
+
+Div.prototype.prependTo = function (parent) {
+    this.$.prependTo(parent.$);
     return this;
 };
 
