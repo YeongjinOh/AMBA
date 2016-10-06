@@ -742,11 +742,21 @@ Div.prototype.empty = function () {
 
 Div.prototype.markdown = function() {
     var that = this;
-    $.get('/converter/markdown', { text: that.$text.text() })
-        .done(function (data) {
-            // innerHTML이랑 차이를 정확하게 알고싶다....
-            that.$text.remove();
-            var temp = $.parseHTML(data.markdown);
-            return that.$.append(temp);
-        });
+
+    AB.loadScript('/javascripts/showdown.js', function(){
+        var sdModule = module.markdown.showdown();
+
+        that.$text.remove();
+        var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
+        return that.$.append(temp);
+    });
+
+    // var that = this;
+    // $.get('/converter/markdown', { text: that.$text.text() })
+    //     .done(function (data) {
+    //         // innerHTML이랑 차이를 정확하게 알고싶다....
+    //         that.$text.remove();
+    //         var temp = $.parseHTML(data.markdown);
+    //         return that.$.append(temp);
+    //     });
 };
