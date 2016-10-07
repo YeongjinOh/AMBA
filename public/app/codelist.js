@@ -283,7 +283,7 @@ $(document).ready(function () {
                 projectHide = true;
                 resetCodes(project);
                 codeWrapper.displayNone();
-                screenWrapper.detach();
+                viewerWrapper.detach();
             };
             blockWrapper.hover(onHover, offHover);
             block.title.click(onClickProject).cursorPointer();
@@ -338,7 +338,7 @@ $(document).ready(function () {
         var onClickCode = function () {
             if (currentBlock != block) {
                 codeWrapper.displayInlineBlock();
-                screenWrapper.detach();
+                viewerWrapper.detach();
                 titleEditor.editable(true).text(code.title);
                 descEditor.editable(true).css('outline', 'none').text(code.description);
                 dateEditor.text(code.upt_date);
@@ -374,9 +374,25 @@ $(document).ready(function () {
             });
     };
 
+    var body = document.body;
+    var viewerScriptWrapper = document.createElement('viewerScripts');
+    viewerScriptWrapper.id = 'viewerScriptWrapper';
+    body.appendChild(viewerScriptWrapper);
+    var dummyScript = document.createElement('script');
+    viewerScriptWrapper.appendChild(dummyScript);
+
+    var resetViewerScript = function (newScript) {
+        viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
+    };
+
     var onRun = function () {
-        screen.text(codeEditor.text());
-        screenWrapper.after(listHeader);
+        viewer.empty();
+        viewerWrapper.after(listHeader);
+
+        var txt = codeEditor.text();
+        var newScript = document.createElement('script');
+        newScript.textContent = txt.replace(/append\(\)/g,"appendTo($('#viewer').data('div'))")
+        resetViewerScript(newScript);
     };
 
     var onSave = function () {
@@ -436,20 +452,15 @@ $(document).ready(function () {
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
     var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
-    var screenWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc');
-    var screen = div().appendTo(screenWrapper).size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
+    var viewerWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc');
+    var viewer = div().appendTo(viewerWrapper).id('viewer').size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
-    var screenWrapper = div().size(listWrapper.widthPixel()-20,listWrapper.widthPixel()*1.5).padding(10).backgroundColor('#cccccc');
-    var screen = div().appendTo(screenWrapper).size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').fontSize(30).fontBold()
-        .fontColor(basicColor)
-        // .fontColor('#05aa33')
-        .overflowAuto();
+    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').fontSize(30).fontBold().fontColor(basicColor).overflowAuto();
     var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').marginTop(10).marginLeft(10).fontSize(20).fontBold().fontColor('gray').overflowAuto();
     var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
         .borderOption(5, 'radius').float('right').visibility('hidden').click(onSave).cursorPointer();
