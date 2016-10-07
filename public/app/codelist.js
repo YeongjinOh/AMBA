@@ -374,24 +374,27 @@ $(document).ready(function () {
             });
     };
 
+    // initialize viewer script and function for onRun event
     var body = document.body;
     var viewerScriptWrapper = document.createElement('viewerScripts');
     viewerScriptWrapper.id = 'viewerScriptWrapper';
     body.appendChild(viewerScriptWrapper);
-    var dummyScript = document.createElement('script');
-    viewerScriptWrapper.appendChild(dummyScript);
+    viewerScriptWrapper.appendChild(document.createElement('script')); // append dummy script node
 
     var resetViewerScript = function (newScript) {
         viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
     };
 
     var onRun = function () {
+        // set viewer
         viewer.empty();
         viewerWrapper.after(listHeader);
 
-        var txt = codeEditor.text();
+        // set script
         var newScript = document.createElement('script');
-        newScript.textContent = txt.replace(/append\(\)/g,"appendTo($('#viewer').data('div'))")
+        var txt = codeEditor.text(); // get text from code editor
+        var innerCode =  txt.replace(/append\(\)/g,"appendTo($('#viewer').data('div'))");
+        newScript.textContent = '(function(){' + innerCode + '})();'; // modularize inner code
         resetViewerScript(newScript);
     };
 
