@@ -741,6 +741,11 @@ Div.prototype.empty = function () {
     return this;
 };
 
+Div.prototype.remove = function () {
+    this.$.remove();
+    return this;
+};
+
 Div.prototype.markdown = function() {
     var that = this;
 
