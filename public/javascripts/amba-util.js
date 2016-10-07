@@ -5,16 +5,15 @@ AB.random = function(max) {
 	return parseInt(Math.random(max)*max);
 };
 
-AB.loadModule = function(url, callback) {
-    var name;
-    if(url == '/app/kakao.js')
-        name = 'kakao';
-
+/**
+ * module명과 module이 정의된 javascript 파일 명이 같다고 가정합니다.
+ * @author Yeongjin Oh
+ */
+AB.loadModule = function(name, callback) {
     if(module[name]) {
         callback(module[name]);
-    }
-    else {
-        AB.loadScript(url, function(){
+    } else {
+        AB.loadScript('/module/'+name+'.js', function(){
             callback(module[name]);
         });
     }

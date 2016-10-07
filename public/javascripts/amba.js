@@ -40,7 +40,7 @@ Div.prototype.aceEditor = function () {
         //자동 저장 가능
     });
     editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
-    console.log(editor);
+    editor.$blockScrolling = Infinity;
     this.aceValue = editor;
     return this;
 };
@@ -741,11 +741,16 @@ Div.prototype.empty = function () {
     return this;
 };
 
+Div.prototype.remove = function () {
+    this.$.remove();
+    return this;
+};
+
 Div.prototype.markdown = function() {
     var that = this;
 
-    AB.loadScript('/javascripts/showdown.js', function(){
-        var sdModule = module.markdown.showdown();
+    AB.loadModule('showdown.js', function(){
+        var sdModule = module.showdown.converter();
 
         that.$text.remove();
         var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
