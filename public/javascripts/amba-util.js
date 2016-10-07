@@ -38,6 +38,10 @@ AB.loadScript = function(url, callback, charset) {
                 callback();
         }
     }
+
+    /**
+     * Ajax로 소스를 불러와서 eval함수로 실행. 그 return값을 변수로 넣어 콜백으로 보냄.
+     */
     script.onload = function () {
         if(callback)
             callback();
@@ -54,4 +58,16 @@ AB.getParameter = function( name ) {
 	var results = regex.exec( window.location.href ); 
 	if( results == null )    return undefined;
 	else    return results[1];
-}
+};
+
+/**
+ * find amba object by Id
+ */
+AB.find = function (id) {
+    if(!id)
+        return undefined;
+
+    if(!id.startsWith('#') && !id.startsWith('.'))
+        id = '#' + id;
+    return $(id).data('div');
+};
