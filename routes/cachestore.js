@@ -31,7 +31,7 @@ router.post('/put', function (req, res,next) {
     var value = body.value;
     console.log('body : ', body);
 
-    req.cache.hset(cid,key,value, function (err, result) {
+    req.cache.hset(cid, key, value, function (err, result) {
         console.log('result : ', result);
        if(err){
            console.log(err);
