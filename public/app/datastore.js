@@ -101,5 +101,3 @@ div().appendTo(formDiv).size('150px', '40px').marginLeft('10px').marginTop('7px'
             });
     }
 });
-
-formDiv.verticalAlignCenter();
