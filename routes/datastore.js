@@ -13,7 +13,7 @@ var db = require('../db');
 
 router.get('/put', function(req, res, next) {
     // cid, key, value
-    db.none("insert into data_store values($1, $2, $3) on conflict (cid, key) do update set value = $4;",
+    db.none("INSERT INTO data_store VALUES($1, $2, $3) ON CONFLICT (cid, key) DO UPDATE SET VALUE = $4;",
             [req.query.cid, req.query.key, req.query.value, req.query.value])
         .then(function () {
             res.json({
@@ -29,7 +29,7 @@ router.get('/put', function(req, res, next) {
 });
 
 router.get('/get', function(req, res, next) {
-    db.many("select value from data_store where cid = $1 and key = $2;", [req.query.cid, req.query.key])
+    db.many("SELECT value FROM data_store WHERE cid = $1 AND key = $2;", [req.query.cid, req.query.key])
         .then(function (data) {
             res.json({
                 resultCode: 0,
@@ -45,7 +45,7 @@ router.get('/get', function(req, res, next) {
 });
 
 router.get('/delete', function(req, res, next) {
-    db.none("delete from data_store where cid = $1 and key = $2;", [req.query.cid, req.query.key])
+    db.none("DELETE FROM data_store WHERE cid = $1 AND key = $2;", [req.query.cid, req.query.key])
         .then(function (data) {
             res.json({
                 resultCode: 0
@@ -61,7 +61,7 @@ router.get('/delete', function(req, res, next) {
 
 router.get('/keys', function(req, res, next) {
     // [{"value":"value1"}]
-    db.many("select key, value from data_store where cid = $1;", [req.query.cid])
+    db.many("SELECT key, value FROM data_store WHERE cid = $1;", [req.query.cid])
         .then(function (data) {
             res.json({
                 resultCode: 0,

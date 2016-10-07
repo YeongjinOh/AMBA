@@ -42,6 +42,16 @@ Div.prototype.aceEditor = function () {
     editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
     editor.$blockScrolling = Infinity;
     this.aceValue = editor;
+
+    var that = this;
+    this.textInterceptor(function(txt){
+        if(txt === undefined)
+            return editor.getValue();
+        else
+            editor.setValue(txt);
+        return that;
+    })
+
     return this;
 };
 
@@ -92,11 +102,11 @@ Div.prototype.parent = function () {
 
 Div.prototype.children = function () {
     var arr = this.$.children();
-    return _.map(arr, function(o){
-        // console.log(o);
-        return o;
-        // return o.data('div');
-    });
+    var result = [];
+    for(var i=0; i<arr.length; i++) {
+        result.push(arr.eq(i).data('div'));
+    }
+    return result;
 };
 
 /**
@@ -405,15 +415,25 @@ var addAllCssMethods = function () {
 
 addAllCssMethods();
 
+Div.prototype.textInterceptor = function (fn) {
+    this.fnText = fn;
+}
+
 // TODO : editable 속성의 div에서 text 받아오기.
 Div.prototype.text = function (txt) {
-    // if this div is ace editor, use text in div
-    if (this.aceValue) {
-        if (txt === undefined)
-            return this.aceValue.getValue();
-        this.aceValue.setValue(txt);
-        return this;
+    if(this.fnText) {
+        return this.fnText(txt);
     }
+
+    // if this div is ace editor, use text in div
+    // if (this.aceValue) {
+    //     if (txt === undefined)
+    //         return this.aceValue.getValue();
+    //     this.aceValue.setValue(txt);
+    //     return this;
+    // }
+
+
 
     // otherwise, use span tag for text
     if (txt === undefined)
@@ -606,6 +626,11 @@ Div.prototype.draggable = function (opt) {
     return this;
 };
 
+Div.prototype.resizable = function (opt) {
+    this.$.resizable(opt);
+    return this;
+};
+
 Div.prototype.moveDown = function (y, delay) {
     var value = y >= 0 ? '+' + y : '-' + y;
     this.$.animate({
@@ -626,6 +651,29 @@ Div.prototype.animate = function (properties, duration) {
     this.$.animate(properties, duration);
     return this;
 };
+
+
+Div.prototype.slideDown = function (duration, easing, complete) {
+    this.$.slideDown(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.slideUp = function (duration, easing, complete) {
+    this.$.slideUp(duration, easing, complete);
+    return this;
+};
+
+
+Div.prototype.hide = function (duration, easing, complete) {
+    this.$.hide(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.show = function (duration, easing, complete) {
+    this.$.show(duration, easing, complete);
+    return this;
+};
+
 
 /**
  * @desc    hover event
@@ -746,50 +794,42 @@ Div.prototype.remove = function () {
     return this;
 };
 
+Div.prototype.html = function (tag) {
+    if (tag === undefined)
+        return this.$text.html();
+    this.$text.html(tag);
+    return this;
+};
+
 Div.prototype.markdown = function() {
     var that = this;
 
-    AB.loadModule('showdown.js', function(){
-        var sdModule = module.showdown.converter();
-
-        that.$text.remove();
-        var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
-        return that.$.append(temp);
+    AB.loadScript('/javascripts/showdown.js', function(){
+        var sdModule = module.markdown.showdown();
+        var htmlText = sdModule.makeHtml(that.$text.text());
+        that.html(htmlText);
+        // that.$text.remove();
+        // var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
+        // return that.$.append(temp);
     });
-
-    // var that = this;
-    // $.get('/converter/markdown', { text: that.$text.text() })
-    //     .done(function (data) {
-    //         // innerHTML이랑 차이를 정확하게 알고싶다....
-    //         that.$text.remove();
-    //         var temp = $.parseHTML(data.markdown);
-    //         return that.$.append(temp);
-    //     });
 };
 
 Div.prototype.verticalAlignCenter = function() {
     var i, ch = this.children();
-    var value = {
-        parentHeight: this.size().height,
-        childrenMinMarginTop: '0px',
-        childrenMaxHeight: '0px',
-        alignMarginTop: '0px'
-    };
+    this.paddingTop(0);
+    var minTop = 99999, maxBottom = 0;
+    for(i=0; i<ch.length; i++) {
+        console.log('%s, %s', ch[i].offset().top, ch[i].offset().top + ch[i].height());
+        if(minTop > ch[i].offset().top)
+            minTop = ch[i].offset().top;
 
-    for (i = 0; i < ch.length; i++) {
-        if (value.childrenMaxHeight < ch[i].style.height) {
-            value.childrenMaxHeight = ch[i].style.height;
-            value.childrenMinMarginTop = ch[i].style.marginTop;
-        }
+        if(maxBottom < ch[i].offset().top + parseInt(ch[i].height()))
+            maxBottom = ch[i].offset().top + parseInt(ch[i].height());
     }
-
-    for (i in value)
-        value[i] = parseInt(value[i]);
-
-    value.alignMarginTop = (value.parentHeight - value.childrenMaxHeight) / 2;
-
-    for (i = 0; i < ch.length; i++)
-        ch[i].style.marginTop = value.alignMarginTop + (parseInt(ch[i].style.marginTop) - value.childrenMinMarginTop) + 'px';
+    minTop-=this.offset().top;
+    maxBottom-=this.offset().top;
+    console.log(this.height());
+    this.paddingTop( (parseInt(this.height())-maxBottom)/2 );
 
     return this;
 };
