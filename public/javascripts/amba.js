@@ -104,7 +104,8 @@ Div.prototype.children = function () {
     var arr = this.$.children();
     var result = [];
     for(var i=0; i<arr.length; i++) {
-        result.push(arr.eq(i).data('div'));
+        if (arr.eq(i).data('div'))
+            result.push(arr.eq(i).data('div'));
     }
     return result;
 };
@@ -819,7 +820,6 @@ Div.prototype.verticalAlignCenter = function() {
     this.paddingTop(0);
     var minTop = 99999, maxBottom = 0;
     for(i=0; i<ch.length; i++) {
-        console.log('%s, %s', ch[i].offset().top, ch[i].offset().top + ch[i].height());
         if(minTop > ch[i].offset().top)
             minTop = ch[i].offset().top;
 
@@ -828,7 +828,6 @@ Div.prototype.verticalAlignCenter = function() {
     }
     minTop-=this.offset().top;
     maxBottom-=this.offset().top;
-    console.log(this.height());
     this.paddingTop( (parseInt(this.height())-maxBottom)/2 );
 
     return this;
