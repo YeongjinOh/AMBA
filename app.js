@@ -12,7 +12,7 @@ var datastore = require('./routes/datastore');
 var cachestore = require('./routes/cachestore');
 
 var app = express();
-var redis = require('redis');
+//var redis = require('redis');
 //var cache = redis.createClient();
 
 // view engine setup

@@ -28,6 +28,7 @@ function Div() {
  * @returns {Div}
  */
 Div.prototype.aceEditor = function () {
+    //var editor = oj.AceEditor.min.edit(this.$.get(0));
     var editor = ace.edit(this.$.get(0));
 
     editor.setTheme("ace/theme/monokai");
@@ -42,7 +43,6 @@ Div.prototype.aceEditor = function () {
     this.aceValue = editor;
     return this;
 };
-
 
 
 Div.prototype.attr = function (key, value) {
