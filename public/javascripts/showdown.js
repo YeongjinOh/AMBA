@@ -1,8 +1,8 @@
 ;/*! showdown 19-08-2016 */
 (function(){
 
-  module.markdown = {
-    showdown: function() {
+  module.showdown = {
+    converter: function() {
       return new showdown.Converter();
     }
   };

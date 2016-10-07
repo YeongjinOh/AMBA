@@ -749,8 +749,8 @@ Div.prototype.remove = function () {
 Div.prototype.markdown = function() {
     var that = this;
 
-    AB.loadScript('/javascripts/showdown.js', function(){
-        var sdModule = module.markdown.showdown();
+    AB.loadModule('showdown.js', function(){
+        var sdModule = module.showdown.converter();
 
         that.$text.remove();
         var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
