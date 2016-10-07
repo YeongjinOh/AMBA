@@ -31,7 +31,7 @@ Div.prototype.aceEditor = function () {
     //var editor = oj.AceEditor.min.edit(this.$.get(0));
     var editor = ace.edit(this.$.get(0));
 
-    editor.setTheme("ace/theme/monokai");
+    editor.setTheme("ace/theme/tomorrow_night_eighties");
 
     //js문법에 따라 하이라이팅을 준다
     editor.getSession().setMode("ace/mode/javascript");
@@ -40,6 +40,7 @@ Div.prototype.aceEditor = function () {
         //자동 저장 가능
     });
     editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
+    console.log(editor);
     this.aceValue = editor;
     return this;
 };
@@ -71,18 +72,30 @@ Div.prototype.appendTo = function (parent) {
     return this;
 };
 
+Div.prototype.prependTo = function (parent) {
+    this.$.prependTo(parent.$);
+    return this;
+};
+
+/**
+ * prev 다음에 위치하도록 append 합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.after = function (prev) {
+    prev.$.after(this.$);
+    return this;
+}
+
 Div.prototype.parent = function () {
-    // console.log('parent');
-    // console.log(this);
-    // console.log(this.$.parent().data('div'));
     return this.$.parent().data('div');
 };
 
 Div.prototype.children = function () {
     var arr = this.$.children();
     return _.map(arr, function(o){
-        console.log(o);
-        return o.data('div');
+        // console.log(o);
+        return o;
+        // return o.data('div');
     });
 };
 
@@ -305,7 +318,7 @@ var addAllCssMethods = function () {
         "outline-offset": [],
         "outline-style": [],
         "outline-width": [],
-        "overflow": ['hidden'],
+        "overflow": ['hidden', 'scroll', 'auto'],
         "overflow-x": [],
         "overflow-y": [],
         "padding": [],
@@ -394,6 +407,15 @@ addAllCssMethods();
 
 // TODO : editable 속성의 div에서 text 받아오기.
 Div.prototype.text = function (txt) {
+    // if this div is ace editor, use text in div
+    if (this.aceValue) {
+        if (txt === undefined)
+            return this.aceValue.getValue();
+        this.aceValue.setValue(txt);
+        return this;
+    }
+
+    // otherwise, use span tag for text
     if (txt === undefined)
         return this.$text.text();
     this.$text.text(txt);
@@ -717,4 +739,52 @@ Div.prototype.textPassword = function(value) {
 Div.prototype.empty = function () {
     this.$.empty();
     return this;
-}
+};
+
+Div.prototype.markdown = function() {
+    var that = this;
+
+    AB.loadScript('/javascripts/showdown.js', function(){
+        var sdModule = module.markdown.showdown();
+
+        that.$text.remove();
+        var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
+        return that.$.append(temp);
+    });
+
+    // var that = this;
+    // $.get('/converter/markdown', { text: that.$text.text() })
+    //     .done(function (data) {
+    //         // innerHTML이랑 차이를 정확하게 알고싶다....
+    //         that.$text.remove();
+    //         var temp = $.parseHTML(data.markdown);
+    //         return that.$.append(temp);
+    //     });
+};
+
+Div.prototype.verticalAlignCenter = function() {
+    var i, ch = this.children();
+    var value = {
+        parentHeight: this.size().height,
+        childrenMinMarginTop: '0px',
+        childrenMaxHeight: '0px',
+        alignMarginTop: '0px'
+    };
+
+    for (i = 0; i < ch.length; i++) {
+        if (value.childrenMaxHeight < ch[i].style.height) {
+            value.childrenMaxHeight = ch[i].style.height;
+            value.childrenMinMarginTop = ch[i].style.marginTop;
+        }
+    }
+
+    for (i in value)
+        value[i] = parseInt(value[i]);
+
+    value.alignMarginTop = (value.parentHeight - value.childrenMaxHeight) / 2;
+
+    for (i = 0; i < ch.length; i++)
+        ch[i].style.marginTop = value.alignMarginTop + (parseInt(ch[i].style.marginTop) - value.childrenMinMarginTop) + 'px';
+
+    return this;
+};

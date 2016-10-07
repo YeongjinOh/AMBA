@@ -143,4 +143,4 @@ var getTime = function () {
     }
 
 
-})()
+})();

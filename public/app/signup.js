@@ -30,14 +30,21 @@ div().appendTo(form).displayBlock().size('270px', '40px').margin('auto').marginT
 },  function (dv) {
     dv.fontColor('white');
 }).click( function () {
-    $.post('/users/regist', { username: username.text(), email: email.text(), password: password.text() })
-        .done(function (data) {
-            if (data.resultCode === 0) {
-                alert('success');
-                $(location).attr('href', '/?app=signin');
-            } else
-                alert(data.msg);
-        });
+    var regexS = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    var regex = new RegExp(regexS);
+
+    if (!regex.exec(email.text()))
+        alert('올바른 Email을 입력해주세요.');
+    else {
+        $.post('/users/regist', {username: username.text(), email: email.text(), password: password.text()})
+            .done(function (data) {
+                if (data.resultCode === 0) {
+                    alert('success');
+                    $(location).attr('href', '/?app=signin');
+                } else
+                    alert(data.msg);
+            });
+    }
 });
 
 div().appendTo(form).displayBlock().size('50px', '20px').float('right').marginRight('15px').marginTop('10px').textAlignRight()

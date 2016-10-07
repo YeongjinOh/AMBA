@@ -28,6 +28,7 @@
     "primus": "^6.0.3",
     "redis": "^2.6.2",
     "serve-favicon": "~2.3.0",
+    "showdown": "^1.4.3",
     "strformat": "0.0.7",
     "stylus": "0.54.5",
     "under_score": "^0.1.0"
