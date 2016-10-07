@@ -93,8 +93,9 @@ Div.prototype.parent = function () {
 Div.prototype.children = function () {
     var arr = this.$.children();
     return _.map(arr, function(o){
-        console.log(o);
-        return o.data('div');
+        // console.log(o);
+        return o;
+        // return o.data('div');
     });
 };
 
@@ -759,4 +760,31 @@ Div.prototype.markdown = function() {
     //         var temp = $.parseHTML(data.markdown);
     //         return that.$.append(temp);
     //     });
+};
+
+Div.prototype.verticalAlignCenter = function() {
+    var i, ch = this.children();
+    var value = {
+        parentHeight: this.size().height,
+        childrenMinMarginTop: '0px',
+        childrenMaxHeight: '0px',
+        alignMarginTop: '0px'
+    };
+
+    for (i = 0; i < ch.length; i++) {
+        if (value.childrenMaxHeight < ch[i].style.height) {
+            value.childrenMaxHeight = ch[i].style.height;
+            value.childrenMinMarginTop = ch[i].style.marginTop;
+        }
+    }
+
+    for (i in value)
+        value[i] = parseInt(value[i]);
+
+    value.alignMarginTop = (value.parentHeight - value.childrenMaxHeight) / 2;
+
+    for (i = 0; i < ch.length; i++)
+        ch[i].style.marginTop = value.alignMarginTop + (parseInt(ch[i].style.marginTop) - value.childrenMinMarginTop) + 'px';
+
+    return this;
 };
