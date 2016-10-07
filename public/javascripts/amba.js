@@ -28,6 +28,7 @@ function Div() {
  * @returns {Div}
  */
 Div.prototype.aceEditor = function () {
+    //var editor = oj.AceEditor.min.edit(this.$.get(0));
     var editor = ace.edit(this.$.get(0));
 
     editor.setTheme("ace/theme/tomorrow_night_eighties");
@@ -39,11 +40,10 @@ Div.prototype.aceEditor = function () {
         //자동 저장 가능
     });
     editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
-    console.log(editor);
+    editor.$blockScrolling = Infinity;
     this.aceValue = editor;
     return this;
 };
-
 
 
 Div.prototype.attr = function (key, value) {

@@ -26,18 +26,19 @@ var router = express.Router();
 router.post('/put', function (req, res,next) {
 
     var body = req.body;
-    var cid = 'test';
+    var cid = body.cid;
     var key = body.key;
     var value = body.value;
     console.log('body : ', body);
 
-    req.cache.set(key,value, function (err, result) {
+    req.cache.hset(cid,key,value, function (err, result) {
+        console.log('result : ', result);
        if(err){
            console.log(err);
            var data = {
                'resultCode' : -1,
                'msg' : '키 저장 실패'
-           }
+           };
            res.status(200).json(data);
            next(err);
            //return;
@@ -46,6 +47,7 @@ router.post('/put', function (req, res,next) {
             'resultCode' : 0,
             'msg' : '키 저장 성공'
         };
+
        res.status(200).json(data);
     });
 });
@@ -54,10 +56,61 @@ router.post('/put', function (req, res,next) {
  * url : /cachestore/get
  * query : cid, key
  */
-router.get('/get', function (req, res) {
-    //var page_number = req.query.page;
-    //var cid = req.param.cid;
-    res.json('test');
+router.get('/get', function (req, res,next) {
+    var cid = req.query.cid;
+    var key = req.query.key;
+    console.log('cid : ' + cid + ', key : ' + key);
+    req.cache.hget(cid, key, function (err, result) {
+        console.log('result : ', result);
+        if(err){
+            console.log(err);
+            var data = {
+                'resultCode' : -1,
+                'msg' : '키 저장 실패'
+            };
+            res.status(200).json(data);
+            next(err);
+        }
+        res.status(200).json(result);
+    });
+});
+
+
+//cid에 들어있는 key값들을 리턴
+router.get('/keys', function (req, res, next) {
+    var cid = req.query.cid;
+    console.log('cid : ' + cid);
+    req.cache.hkeys(cid, function (err, result) {
+        console.log('result : ', result);
+        if(err){
+            console.log(err);
+            var data = {
+                'resultCode' : -1,
+                'msg' : '키 저장 실패'
+            };
+            res.status(200).json(data);
+            next(err);
+        }
+        res.status(200).json(result);
+    });
+});
+
+router.get('/list', function (req, res, next) {
+    var cid = req.query.cid;
+    console.log('cid : ' + cid);
+    req.cache.hvals(cid, function (err, result) {
+        console.log('result : ', result);
+        if(err){
+            console.log(err);
+            var data = {
+                'resultCode' : -1,
+                'msg' : '키 저장 실패'
+            };
+            res.status(200).json(data);
+            next(err);
+        }
+        res.status(200).json(result);
+    });
 });
 
 module.exports = router;

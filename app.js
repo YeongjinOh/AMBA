@@ -13,7 +13,7 @@ var cachestore = require('./routes/cachestore');
 var converter = require('./routes/converter');
 
 var app = express();
-var redis = require('redis');
+//var redis = require('redis');
 //var cache = redis.createClient();
 
 // view engine setup
