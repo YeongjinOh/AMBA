@@ -6,7 +6,7 @@
         projectColor = '#C8E6C9', moduleColor = '#B2DFDB';
     var currentBlock, currentCode, currentCodeManager;
     var projectHide = false, moduleHide = true;
-
+    var fadeDuration = 300;
 
     /** set user authentication **/
 
@@ -45,6 +45,13 @@
         return curr_year + "-" + curr_month + "-" + curr_date;
     };
 
+    var fadeInAfterOut = function (inObj, outObj, duration) {
+        if (duration === undefined)
+            duration = fadeDuration/2;
+        outObj.fadeOut(duration, function () {
+            inObj.fadeIn(duration);
+        })
+    };
 
     /** define Project, Code classes **/
 
@@ -266,11 +273,11 @@
                 removeButton.color('inherit');
             };
             var onClickProject = function () {
-                listHeaderTitle.text(block.title.text());
-                listName.text(project.description);
-                closeProjectList();
-                resetCodes(project);
+
+                projectTitle.text(block.title.text());
+                projectDesc.text(project.description);
                 clearCurrentCode();
+                resetCodes(project).then(closeProjectList);
             };
             blockWrapper.hover(onHover, offHover).click(onClickProject).cursorPointer();
         };
@@ -300,7 +307,7 @@
         var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
             .marginRight(5).cursorPointer()
             .click(function () {
-            viewerWrapper.slideUp();
+            viewerWrapper.fadeOut();
         });
 
 
@@ -327,8 +334,7 @@
                 // set viewer
                 viewer.empty().viewer();
                 viewerHeader.text('  ' + titleEditor.text());
-                viewerWrapper.after(listHeader);
-                viewerWrapper.left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown();
+                viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
             }
         };
 
@@ -347,7 +353,7 @@
         };
         var onClickCode = function () {
             if (currentBlock === undefined)
-                moduleListButton.opacity(0).displayInlineBlock().animate({opacity: 1}, 300);
+                moduleListButton.fadeIn(fadeDuration);
             if (currentBlock != block) {
                 codeWrapper.displayInlineBlock();
                 titleEditor.text(code.title);
@@ -372,47 +378,41 @@
             project.codeManager.init();
         }
         currentCodeManager = project.codeManager;
+
+        return new Promise(function(resolve) {
+            resolve();
+        });
     };
 
     var clearCurrentCode = function () {
         currentCode = undefined;
         currentBlock = undefined;
-        moduleListButton.animate({opacity: 0}, 300, function () {
-            moduleListButton.displayNone();
-        });
+        moduleListButton.fadeOut(fadeDuration);
         codeWrapper.displayNone();
     };
 
 
     var openProjectList = function () {
-        projectList.zIndex(3).animate({opacity: 1}, 300);
+        projectList.fadeIn(fadeDuration);
         closeModuleList();
-        addCodeButton.animate({opacity: 0}, 150, function() {
-            addCodeButton.displayNone();
-            projectAddButton.displayInlineBlock().animate({opacity: 1}, 150);
-        });
+        fadeInAfterOut(projectAddButton, addCodeButton);
         projectHide = false;
     };
 
     var closeProjectList = function () {
-        projectList.animate({opacity: 0, 'z-index': -1}, 300);
-        projectAddButton.animate({opacity: 0}, 150, function() {
-            projectAddButton.displayNone();
-            addCodeButton.displayInlineBlock().animate({opacity: 1}, 150);
-        });
+        projectList.fadeOut(fadeDuration);
+        fadeInAfterOut(addCodeButton, projectAddButton);
         projectHide = true;
     };
 
     var openModuleList = function () {
-        moduleList.displayInlineBlock().zIndex(3).animate({opacity: 1}, 300);
+        moduleList.fadeIn(fadeDuration);
         closeProjectList();
         moduleHide = false;
     };
 
     var closeModuleList = function () {
-        moduleList.animate({opacity: 0, 'z-index': -1}, 300, function () {
-            moduleList.displayNone();
-        });
+        moduleList.fadeOut(fadeDuration);
         moduleHide = true;
     };
 
@@ -459,6 +459,24 @@
             closeProjectList();
     };
 
+    var onProjectEdit = function () {
+        projectTitle.editable(true);
+        projectDesc.editable(true);
+        fadeInAfterOut(projectSaveButton, projectEditButton, 200);
+    };
+
+    var onProjectSave = function () {
+        if (confirm("정말로 저장하시겠습니까?")) {
+
+        } else {
+
+        }
+        projectTitle.editable(false);
+        projectDesc.editable(false);
+        fadeInAfterOut(projectEditButton, projectSaveButton, 200);
+    };
+
+
     var onModuleList = function () {
         if (moduleHide)
             openModuleList();
@@ -476,14 +494,14 @@
     /** design **/
 
     // basic layout
-    var parent = div().append().size(outerWidth, outerHeight);
-    var sidebar = div().appendTo(parent).size(outerWidth/20, outerHeight).color('white');
-    var content = div().appendTo(parent).size(outerWidth*19/20, outerHeight);
-    var projectList = div().appendTo(content).zIndex(3).size(outerWidth/4, outerHeight).color(projectColor)
+    var parent = div().append().size(outerWidth, '100%');
+    var sidebar = div().appendTo(parent).size(outerWidth/20, '100%').color('white');
+    var content = div().appendTo(parent).size(outerWidth*19/20, '100%');
+    var projectList = div().appendTo(content).zIndex(3).size(outerWidth/4, '100%').color(projectColor)
         .border(1).borderColor('#aaaaaa').position('absolute').left(content.positionLeft()).top(content.positionTop());
     var moduleList = div().appendTo(content).cssSameWith(projectList).color(moduleColor).displayNone();
-    var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color');
-    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, outerHeight).padding(15).color('white').displayNone();
+    var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, '100%').border(1).borderOption('#aaaaaa', 'color').paddingBottom(1);
+    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, '100%').padding(15).color('white').displayNone();
     var blank = div();
 
     // design sidebar
@@ -504,21 +522,25 @@
     var projectHeader = div().appendTo(projectList).size('100%', '170px').color('#white').borderBottom('3px solid green');
     var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(50).text('Project List').fontSize(28).textAlignCenter();
     var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
-    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel())
-        .borderOption('1px solid gray', 'top').overflowAuto();
+    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).overflowAuto();
+
 
     // design modulelist
-    var moduleHeader = div().appendTo(moduleList).size('100%', '170px').color('#white').borderBottom('3px solid green');
+    var moduleHeader = div().appendTo(moduleList).size('100%', '170px').color('#white').borderBottom('3px solid #26A69A');
     var moduleHeaderTitle = div().appendTo(moduleHeader).size('100%', '40px').marginTop(50).text('Module List').fontSize(28).textAlignCenter();
-    var moduleName = div().appendTo(moduleHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
-    var moduleListWrapper = div().appendTo(moduleList).size('100%', moduleList.heightPixel() - moduleHeader.heightPixel())
-        .borderOption('1px solid gray', 'top').overflowAuto();
+    var moduleName = div().appendTo(moduleHeader).size('100%', '50px').marginTop(20).text('AMBA').fontSize(22).fontColor('gray').textAlignCenter();
+    var moduleListWrapper = div().appendTo(moduleList).size('100%', moduleList.heightPixel() - moduleHeader.heightPixel()).overflowAuto();
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
-    var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name')
+    var projectEditButton = div().appendTo(listHeader).size(10,10).margin(10).marginBottom(20).float('right').color('green')
+        .borderRadius(2).hoverColor(projectColor,'green').cursorPointer().click(onProjectEdit);
+    var projectSaveButton = div().appendTo(listHeader).cssSameWith(projectEditButton).size(40,20).margin(10)
+        .text('Save').fontSize(12).fontColor('white').textAlignCenter()
+        .hoverColor(projectColor,'green').hoverTextColor('green','white').displayNone().click(onProjectSave);
+    var projectTitle = div().appendTo(listHeader).size('100%', '40px').text('Project name')
         .fontSize(28).fontBold().fontColor('white').textAlignCenter();
-    var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)
+    var projectDesc = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)
         .fontColor('#1B5E20').textAlignCenter();
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
         .borderOption('1px solid gray', 'top').overflowAuto().color('white');

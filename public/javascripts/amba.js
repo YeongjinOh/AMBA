@@ -678,6 +678,16 @@ Div.prototype.show = function (duration, easing, complete) {
     return this;
 };
 
+Div.prototype.fadeIn = function (duration, easing, complete) {
+    this.$.fadeIn(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.fadeOut = function (duration, easing, complete) {
+    this.$.fadeOut(duration, easing, complete);
+    return this;
+};
+
 
 /**
  * @desc    hover event
