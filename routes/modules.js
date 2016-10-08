@@ -16,6 +16,16 @@ function getParams(url) {
     return params;
 }
 
+var Module = function (module) {
+    this.author = module.username;
+    this.title = module.title;
+    this.description = module.description;
+    this.upt_date = module.upt_date;
+};
+
+var buildModule = function (obj) {
+    return new Module(obj);
+};
 
 /**
  * GET /modules
@@ -25,11 +35,11 @@ function getParams(url) {
 router.get('', function (req, res) {
     // TODO authentication
     // var params = getParams(req.url);
-    db.any("SELECT * FROM code_store WHERE mstatus=1")
+    db.any("SELECT * FROM users JOIN code_store USING (uid) WHERE mstatus=1")
         .then(function (data) {
             res.json({
                 resultCode:0,
-                modules:data
+                modules:data.map(buildModule)
             })
         })
         // TODO error handling

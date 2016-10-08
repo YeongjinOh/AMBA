@@ -77,12 +77,23 @@
         this.upt_date = code.upt_date.slice(0, 10);
     };
 
+    var Module = function (module) {
+        this.author = module.author;
+        this.title = module.title;
+        this.description = module.description;
+        this.upt_date = module.upt_date.slice(0, 10);;
+    };
+
     var buildProject = function (obj) {
         return new Project(obj);
     };
 
     var buildCode = function (obj) {
         return new Code(obj);
+    };
+
+    var buildModule = function (obj) {
+        return new Module(obj);
     };
 
 
@@ -270,8 +281,7 @@
             that.getModules()
                 .done(function () {
                     for (var i = 0; i < modules.length; i++) {
-                        alert(JSON.stringify(modules[i]));
-                        // newProjectBlock(modules[i]);
+                        newModuleBlock(modules[i]);
                     }
                 });
         };
@@ -280,7 +290,7 @@
             return $.get("/modules", {token: token})
                 .done(function (data) {
                     if (data.resultCode === 0) {
-                        modules = data.modules.map(buildCode);
+                        modules = data.modules.map(buildModule);
                     } else {
                         alert(data.msg);
                     }
@@ -339,7 +349,7 @@
         };
 
 
-    // codelist에 새로운 block을 추가하고, 이를 리턴하는 함수
+    // codelist에 새로운 block을 추가하는 함수
     var newCodeBlock = function (code) {
         var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
@@ -422,6 +432,41 @@
             }
         };
         blockWrapper.hover(onHover, offHover).click(onClickCode);
+    };
+
+    // modulelist에 새로운 block을 추가하는 함수
+    var newModuleBlock = function (module) {
+        console.log(moduleList.widthPixel());
+        var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel()-20, '80px').borderOption('1px solid', 'bottom')
+            .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
+
+        var block = {
+            title: div().appendTo(blockWrapper).size('55%', '20px').text(module.title).fontSize(18).fontColor('#333333').fontBold().disableSelection(),
+            date: div().appendTo(blockWrapper).size('40%', '15px').text(module.upt_date).fontSize(12).fontColor('gray')
+                .textAlignRight().disableSelection(),
+            author: div().appendTo(blockWrapper).size('30%', '15px').text('by ' + module.author).fontSize(12).fontColor('gray')
+                .float('right').textAlignRight().disableSelection(),
+            description: div().appendTo(blockWrapper).marginTop(8).size('70%', '35px').text(module.description)
+                .fontSize(14).fontColor('gray').disableSelection(),
+        };
+
+        var onHover = function () {
+            blockWrapper.color(basicColorWeak);
+            block.title.fontColor('#004D40');
+            block.date.fontColor('white');
+            block.author.fontColor('white')
+                // .fontBold();
+            block.description.fontColor('white');
+        };
+        var offHover = function () {
+            blockWrapper.color('#fafafa');
+            block.title.fontColor('#333333');
+            block.date.fontColor('gray');
+            block.author.fontColor('gray')
+                // .fontNormal();
+            block.description.fontColor('gray');
+        };
+        blockWrapper.hover(onHover, offHover);
     };
 
     /** functions for code list and project list **/
