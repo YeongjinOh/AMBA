@@ -75,10 +75,23 @@ router.post('', function (req, res) {
         })
         .catch(function (error) {
             console.log("ERROR:", error.message || error);
-            res.json({
-                resultCode: -1,
-                msg: "프로젝트 생성에 실패하였습니다. 프로젝트 명이 중복됩니다."
-            });
+
+            if (error.code == 23505) {
+                res.json({
+                    resultCode: -2,
+                    msg: '프로젝트명이 중복됩니다.\n다른 이름으로 시도하여 주세요.'
+                });
+            } else if (error.code == 23502) {
+                res.json({
+                    resultCode: -3,
+                    msg: '올바른 프로젝트 명을 입력해주세요.'
+                });
+            } else {
+                res.json({
+                    resultCode: -1,
+                    msg: "프로젝트 생성에 실패하였습니다.\n다시 시도하여 주세요."
+                });
+            }
         });
 });
 
@@ -100,7 +113,6 @@ router.post('/update', function (req, res) {
         })
         .catch(function (error) {
             console.log("ERROR:", error.message || error);
-            console.log(error);
             if (error.code == 23505) {
                 res.json({
                     resultCode: -2,
