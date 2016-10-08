@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var crypto = require('./amba_crypto');
-var strformat = require('strformat');
 var db = require('../db');
 var generalErrMsg = "일시적인 오류입니다."
 
