@@ -43,6 +43,7 @@ $(document).ready(function () {
         return curr_year + "-" + curr_month + "-" + curr_date;
     };
 
+
     /** define Project, Code classes **/
 
         // Q. insert, update date는 db에 들어간 시간을 기준? 클라이언트 리퀘스트 기준?
@@ -56,19 +57,6 @@ $(document).ready(function () {
             this.codeManager;
         };
 
-    // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
-    var resetCodes = function (project) {
-        if (project.codeManager) {
-            project.codeManager.resetCodelist();
-        } else {
-            project.codeManager = new CodeManager(project.pid);
-            project.codeManager.init();
-        }
-        currentCodeManager = project.codeManager;
-        // console.log(currentCodeManager);
-    };
-
-    // uid, pid, title, ctext, description, ipt_date, upt_date
     var Code = function (code) {
         this.cid = code.cid;
         this.pid = code.pid;
@@ -78,6 +66,16 @@ $(document).ready(function () {
         this.ipt_date = code.ipt_date.slice(0, 10);
         this.upt_date = code.upt_date.slice(0, 10);
     };
+
+    /** project and code builders **/
+
+    var buildProject = function (obj) {
+        return new Project(obj);
+    };
+    var buildCode = function (obj) {
+        return new Code(obj);
+    };
+
 
     /** define ProjectManager, CodeManager classes **/
 
@@ -183,7 +181,7 @@ $(document).ready(function () {
             var defaultCode = {
                 pid: pid,
                 title: "new code " + codes.length,
-                ctext: "// write code here\nnew line text",
+                ctext: "// write code here",
                 description: "code description",
                 ipt_date: currentDate,
                 upt_date: currentDate
@@ -233,14 +231,6 @@ $(document).ready(function () {
         };
     };
 
-    /** project and code builders **/
-    var buildProject = function (obj) {
-        return new Project(obj);
-    };
-    var buildCode = function (obj) {
-        return new Code(obj);
-    };
-
     /** define newProjectBlock, newCodeBlock functions **/
 
         // 주어진 project object로 부터 project block을 생성 및 append
@@ -280,7 +270,6 @@ $(document).ready(function () {
                 projectHide = true;
                 resetCodes(project);
                 codeWrapper.displayNone();
-                viewerWrapper.detach();
             };
             blockWrapper.hover(onHover, offHover);
             block.title.click(onClickProject).cursorPointer();
@@ -290,32 +279,58 @@ $(document).ready(function () {
 
     // codelist에 새로운 block을 추가하고, 이를 리턴하는 함수
     var newCodeBlock = function (code) {
-        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color').color('#fafafa');
+        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom')
+            .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
         // remove functionality
         var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').marginRight(20).cursorPointer();
         var onRemove = function () {
             blockWrapper.remove();
-            titleEditor.text('').editable(false);
-            descEditor.text('').editable(false);
-            dateEditor.text('');
-            codeEditor.text('').editable(false);
-            runButton.visibility('hidden');
-            saveButton.visibility('hidden');
+            codeWrapper.displayNone();
             currentCodeManager.deleteCode(code.cid);
-            blank.appendTo(parent);
-            // deleteCodeBlock(id);
+            // blank.appendTo(parent);
         };
         removeButton.click(onRemove);
 
+        // set viewer
+        var viewerWrapper = div().padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
+        var viewerHeader = div().appendTo(viewerWrapper);
+        div().appendTo(viewerHeader).size(5,'100%'); // left space
+        viewerHeader.size('100%',27).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green').borderBottom('2px solid green').cursorDefault();
+        var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
+        var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right').marginRight(5).cursorPointer()
+            .click(function () {
+            viewerWrapper.slideUp();
+        });
+
+
+        // trick to adjust resizing control point
+        var virtualHeight = 35;
+        viewerWrapper.borderTop(virtualHeight + 'px solid green');
+        viewerHeader.marginTop(-virtualHeight);
+        viewer.marginTop(-virtualHeight+16);
+
+
+
         var block = {
-            title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold(),
-            date: div().appendTo(blockWrapper).size('100%', '15px').text(code.upt_date).fontSize(12).fontColor('gray'),
-            description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray'),
+            title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold().disableSelection(),
+            date: div().appendTo(blockWrapper).size('100%', '15px').text(code.upt_date).fontSize(12).fontColor('gray').disableSelection(),
+            description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray').disableSelection(),
             refresh: function () {
                 this.title.text(code.title);
                 this.date.text(code.upt_date);
                 this.description.text(code.description);
+            },
+            run: function () {
+                // save code
+                var txt = '(function(){' + codeEditor.text() + '})();'; // get text from code editor and modularize it
+                localStorage.setItem('acode', txt);
+
+                // set viewer
+                viewer.empty().viewer();
+                viewerHeader.text('  ' + titleEditor.text());
+                viewerWrapper.after(listHeader);
+                viewerWrapper.left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown();
             }
         };
 
@@ -335,13 +350,12 @@ $(document).ready(function () {
         var onClickCode = function () {
             if (currentBlock != block) {
                 codeWrapper.displayInlineBlock();
-                viewerWrapper.detach();
-                titleEditor.editable(true).text(code.title);
-                descEditor.editable(true).css('outline', 'none').text(code.description);
+                titleEditor.text(code.title);
+                descEditor.css('outline', 'none').text(code.description);
                 dateEditor.text(code.upt_date);
-                codeEditor.displayInlineBlock().editable(true).text(code.ctext);
-                runButton.visibility('visible');
-                saveButton.visibility('visible');
+                codeEditor
+                    // .displayInlineBlock()
+                    .text(code.ctext);
                 currentCode = code;
                 currentBlock = block;
             }
@@ -352,6 +366,16 @@ $(document).ready(function () {
         return block;
     };
 
+    // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
+    var resetCodes = function (project) {
+        if (project.codeManager) {
+            project.codeManager.resetCodelist();
+        } else {
+            project.codeManager = new CodeManager(project.pid);
+            project.codeManager.init();
+        }
+        currentCodeManager = project.codeManager;
+    };
 
     /** on click events **/
 
@@ -372,15 +396,7 @@ $(document).ready(function () {
     };
 
     var onRun = function () {
-        // save code
-        var txt = '(function(){' + codeEditor.text() + '})();'; // get text from code editor and modularize it
-        localStorage.setItem('acode', txt);
-
-        // set viewer
-        viewer.empty().viewer();
-        viewerHeader.show();
-        viewerWrapper.after(listHeader);
-        viewerWrapper.left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown();
+        currentBlock.run();
     };
 
     var onSave = function () {
@@ -442,28 +458,17 @@ $(document).ready(function () {
     var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
-    // design viewer
-    var viewerWrapper = div().padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
-    var viewerHeader = div().appendTo(viewerWrapper).size('100%',30).color(projectColor);
-    var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
-
-    // trick to adjust resizing control point
-    viewerWrapper.borderTop('30px solid green');
-    viewerHeader.marginTop(-30);
-    viewer.marginTop(-20);
-
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').fontSize(30).fontBold().fontColor(basicColor).overflowAuto();
-    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').marginTop(10).marginLeft(10).fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold().fontColor(basicColor).overflowAuto();
+    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').editable().marginTop(10).marginLeft(10).fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflowAuto();
     var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
-        .borderOption(5, 'radius').float('right').visibility('hidden').click(onSave).cursorPointer();
-    var runButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Run').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
-        .borderOption(5, 'radius').float('right').visibility('hidden').click(onRun).cursorPointer().marginRight(20);
+        .borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
+    var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
     var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
 
-    var codeEditor = div().appendTo(codeWrapper).aceEditor().displayNone().zIndex(1).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflowAuto();
 
 });
