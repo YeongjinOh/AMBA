@@ -742,6 +742,41 @@ Div.prototype.hoverTextColor = function(color1, color2) {
     return this;
 };
 
+Div.prototype.change = function (fn) {
+    if (fn === undefined) {
+        return this.$.change();
+    }
+
+    var that = this;
+    this.$.change(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
+Div.prototype.keyup = function (fn) {
+    if (fn === undefined) {
+        return this.$.keyup();
+    }
+
+    var that = this;
+    this.$.keyup(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
+Div.prototype.keydown = function (fn) {
+    if (fn === undefined) {
+        return this.$.keydown();
+    }
+
+    var that = this;
+    this.$.keydown(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
 
 /**
  * @desc    stop animation
@@ -822,7 +857,7 @@ Div.prototype.viewer = function () {
     this.$viewer = $('<iframe>').attr('src','/?app=viewer').width('100%').height('100%').css('border','none');
     this.$viewer.appendTo(this.$);
     return this;
-}
+};
 
 Div.prototype.verticalAlignMiddle = function() {
     var i, ch = this.children();
