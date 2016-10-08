@@ -210,15 +210,15 @@ router.post('/codes', function (req, res) {
 
 /**
  * POST projects/codes/update
- * @param code {cid, uid, pid, title, ctext, description, ipt_date, upt_date}
+ * @param code {cid, uid, pid, title, ctext, mstatus, description, ipt_date, upt_date}
  * @return resultCode
  */
 router.post('/codes/update', function (req, res) {
     var params = req.body;
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
-    var query = "UPDATE code_store SET (cid, title, ctext, description, upt_date) " +
-        "= (${newCid}, ${title}, ${ctext}, ${description}, now()) WHERE cid=${cid}";
+    var query = "UPDATE code_store SET (cid, title, ctext, mstatus, description, upt_date) " +
+        "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${description}, now()) WHERE cid=${cid}";
     db.none(query, params)
         .then(function () {
             res.json({

@@ -3,7 +3,7 @@
     /** initialize variables **/
 
     var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)',
-        projectColor = '#C8E6C9', moduleColor = '#B2DFDB';
+        projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33';
     var currentCodeBlock, currentCode, currentCodeManager, curProject, curProjectBlock;
     var projectHide = false, moduleHide = true;
     var fadeDuration = 300;
@@ -71,6 +71,7 @@
         this.pid = code.pid;
         this.title = code.title;
         this.ctext = code.ctext;
+        this.mstatus = code.mstatus;
         this.description = code.description;
         this.ipt_date = code.ipt_date.slice(0, 10);
         this.upt_date = code.upt_date.slice(0, 10);
@@ -390,6 +391,7 @@
                 codeEditor.text(code.ctext);
                 currentCode = code;
                 currentCodeBlock = block;
+                setModuleButtonColor();
             }
         };
         blockWrapper.hover(onHover, offHover).click(onClickCode);
@@ -469,8 +471,24 @@
     };
 
     var onModule = function () {
-        var res = confirm('모듈화를 하시겠습니까?');
-        console.log(res);
+        var msg;
+        console.log(currentCode.mstatus);
+        if (currentCode.mstatus == 0)
+            msg = '모듈화를 하시겠습니까?';
+        else
+            msg = '모듈화를 취소 하시겠습니까?';
+        if (confirm(msg)) {
+            if (currentCode.mstatus == 0) {
+                // 모듈화
+                currentCode.mstatus = 1;
+
+            } else {
+                // 모듈화 취소
+                currentCode.mstatus = 0;
+            }
+            currentCodeManager.updateCode(currentCode);
+            setModuleButtonColor();
+        }
     };
 
     var onSave = function () {
@@ -601,12 +619,19 @@
         .fontSize(20).fontBold().fontColor('gray').overflowAuto();
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
-    var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white')
-        .textAlignCenter().fontSize(18).verticalAlign('middle').borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
+    var saveButton = div().appendTo(rightWrapperHeader).size(48, 18).padding(5).color(buttonColor)
+        .text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
+        .border(2).borderColor(buttonColor).borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
     var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
     var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(15).click(onModule);
     var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
 
+    var setModuleButtonColor = function () {
+        if (currentCode.mstatus == 1)
+            moduleButton.color('white').fontColor('green');
+        else
+            moduleButton.color(buttonColor).fontColor('white');
+    };
 
     /** initialization **/
 
