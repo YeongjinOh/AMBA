@@ -7,13 +7,20 @@ var generalErrMsg = "일시적인 오류입니다."
 
 // get parameters from given url
 function getParams(url) {
+    var decUrl = decodeURIComponent(url);
     var regex = /[?&]([^=#]+)=([^&#]*)/g,
         params = {},
         match;
-    while (match = regex.exec(url)) {
+    while (match = regex.exec(decUrl)) {
         params[match[1]] = match[2];
     }
     return params;
+}
+
+// get uid from token
+function getUid (token) {
+    var aauth = JSON.parse(crypto.decrypt(token));
+    return aauth.uid;
 }
 
 /**
@@ -30,7 +37,8 @@ function getCid (pid, title) {
  */
 router.get('', function (req, res) {
     var params = getParams(req.url);
-    db.any("select * from project where uid=${uid}", params)
+    var uid = getUid(params.token);
+    db.any("SELECT * FROM project WHERE uid=$1", [uid])
         .then(function (data) {
             res.json({
                 resultCode:0,
@@ -54,9 +62,11 @@ router.get('', function (req, res) {
  */
 router.post('', function (req, res) {
     var params = req.body;
-    var query = "insert into project(uid, title, description, ipt_date, upt_date) " +
-        "values (${uid}, ${title}, ${description}, now(), now()) returning pid";
-    db.one(query, params)
+    var project = JSON.parse(params.project) || {};
+    project.uid = getUid(params.token);
+    var query = "INSERT INTO project(uid, title, description, ipt_date, upt_date) " +
+        "VALUES (${uid}, ${title}, ${description}, now(), now()) RETURNING pid";
+    db.one(query, project)
         .then(function (data) {
             res.json({
                 resultCode:0,
@@ -77,10 +87,11 @@ router.post('', function (req, res) {
  * @param project {pid, uid, title, main_cid, description, ipt_date, upt_date}
  * @return resultCode
  */
+// TODO use token
 router.post('/update', function (req, res) {
     var params = req.body;
-    var query = "update project set (title, main_cid, description, upt_date) " +
-        "= (${title}, ${main_cid}, ${description}, now()) where pid=${pid}";
+    var query = "UPDATE project SET (title, main_cid, description, upt_date) " +
+        "= (${title}, ${main_cid}, ${description}, now()) WHERE pid=${pid}";
     db.none(query, params)
         .then(function () {
             res.json({
@@ -102,9 +113,11 @@ router.post('/update', function (req, res) {
  * @param pid
  * @return resultCode
  */
+// TODO use uid
 router.post('/delete', function (req, res) {
     var params = req.body;
-    db.none("delete from project where pid = ${pid}", params)
+    params.uid = getUid(params.token);
+    db.none("DELETE FROM project WHERE pid = ${pid}", params)
         .then(function () {
             res.json({
                 resultCode:0
@@ -128,7 +141,7 @@ router.post('/delete', function (req, res) {
  */
 router.get('/codes', function (req, res) {
     var params = getParams(req.url);
-    db.any("select * from code_store where pid=${pid}", params)
+    db.any("SELECT * FROM code_store WHERE pid=${pid}", params)
         .then(function (data) {
             res.json({
                 resultCode:0,
@@ -147,17 +160,18 @@ router.get('/codes', function (req, res) {
 
 /**
  * POST projects/codes
- * @param code {uid, pid, title, ctext, description, ipt_date, upt_date}
+ * @param {token, code}
  * @return resultCode, cid
  */
 router.post('/codes', function (req, res) {
     var params = req.body;
-
-    var cid = getCid(params.pid, params.title);
-    params.cid = cid;
-    var query = "insert into code_store(cid, uid, pid, title, ctext, description, ipt_date, upt_date) " +
-        "values (${cid}, ${uid}, ${pid}, ${title}, ${ctext}, ${description}, now(), now())";
-    db.none(query, params)
+    var code = JSON.parse(params.code) || {};
+    var cid =  getCid(code.pid, code.title);
+    code.cid = cid;
+    code.uid =  getUid(params.token);
+    var query = "INSERT INTO code_store(cid, uid, pid, title, ctext, description, ipt_date, upt_date) " +
+        "VALUES (${cid}, ${uid}, ${pid}, ${title}, ${ctext}, ${description}, now(), now())";
+    db.none(query, code)
         .then(function () {
             res.json({
                 resultCode:0,
@@ -183,8 +197,8 @@ router.post('/codes/update', function (req, res) {
     var params = req.body;
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
-    var query = "update code_store set (cid, title, ctext, description, upt_date) " +
-        "= (${newCid}, ${title}, ${ctext}, ${description}, now()) where cid=${cid}";
+    var query = "UPDATE code_store SET (cid, title, ctext, description, upt_date) " +
+        "= (${newCid}, ${title}, ${ctext}, ${description}, now()) WHERE cid=${cid}";
     db.none(query, params)
         .then(function () {
             res.json({
@@ -208,7 +222,7 @@ router.post('/codes/update', function (req, res) {
  */
 router.post('/codes/delete', function (req, res) {
     var params = req.body;
-    db.none("delete from code_store where cid = ${cid}", params)
+    db.none("DELETE FROM code_store WHERE cid = ${cid}", params)
         .then(function () {
             res.json({
                 resultCode:0

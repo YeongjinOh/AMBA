@@ -17,16 +17,18 @@ $(document).ready(function () {
     /** set user authentication **/
     var authFactory = function () {
         var ainfo = JSON.parse(localStorage.getItem('ainfo'));
+        var aauth = localStorage.getItem('aauth');
         return {
             getUsername : function () {
                 return ainfo.username || "";
+            },
+            getToken : function () {
+                return aauth;
             }
         };
     }();
     var username = authFactory.getUsername();
-
-    // TODO how to get uid??
-    var uid = 2;
+    var token = authFactory.getToken();
 
     /** basic functions **/
     var addZeroIfNeeded = function (num) {
@@ -46,7 +48,6 @@ $(document).ready(function () {
         // Q. insert, update date는 db에 들어간 시간을 기준? 클라이언트 리퀘스트 기준?
     var Project = function (project) {
             this.pid = project.pid;
-            this.uid = project.uid;
             this.title = project.title;
             this.main_cid = project.main_cid;
             this.description = project.description;
@@ -70,7 +71,6 @@ $(document).ready(function () {
     // uid, pid, title, ctext, description, ipt_date, upt_date
     var Code = function (code) {
         this.cid = code.cid;
-        this.uid = code.uid;
         this.pid = code.pid;
         this.title = code.title;
         this.ctext = code.ctext;
@@ -96,7 +96,7 @@ $(document).ready(function () {
         };
 
         this.getProjects = function () {
-            return $.get("/projects", {uid: uid})
+            return $.get("/projects", {token: token})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         projects = data.projects.map(buildProject);
@@ -109,14 +109,13 @@ $(document).ready(function () {
         this.createProject = function () {
             var currentDate = getCurrentDate();
             var defaultProject = {
-                uid: uid,
                 title: "new project " + projects.length,
                 description: "project description",
                 ipt_date: currentDate,
                 upt_date: currentDate
             };
             var project = buildProject(defaultProject);
-            return $.post("/projects", project)
+            return $.post("/projects", {token:token, project:JSON.stringify(project)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         project.pid = data.pid;
@@ -131,7 +130,7 @@ $(document).ready(function () {
 
         this.deleteProject = function (pid) {
 
-            $.post("/projects/delete", {uid: uid, pid: pid})
+            $.post("/projects/delete", {token: token, pid:pid})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         // remove from array;
@@ -165,7 +164,6 @@ $(document).ready(function () {
                 newCodeBlock(codes[i]);
             }
             ;
-            // currentCodeManager = that;
         };
 
         this.getCodes = function () {
@@ -183,7 +181,6 @@ $(document).ready(function () {
 
             var currentDate = getCurrentDate();
             var defaultCode = {
-                uid: uid,
                 pid: pid,
                 title: "new code " + codes.length,
                 ctext: "// write code here\nnew line text",
@@ -192,7 +189,7 @@ $(document).ready(function () {
                 upt_date: currentDate
             };
             var code = buildCode(defaultCode);
-            return $.post("/projects/codes", code)
+            return $.post("/projects/codes", {token:token, code:JSON.stringify(code)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         code.cid = data.cid;
@@ -457,8 +454,8 @@ $(document).ready(function () {
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
     var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
-    var viewerWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc').draggable().zIndex(5);
-    var viewer = div().appendTo(viewerWrapper).id('viewer').size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
+    var viewerWrapper = div().size(codelist.widthPixel()-6,codelist.widthPixel()*1.4).padding(3).backgroundColor('green').draggable().zIndex(5);
+    var viewer = div().appendTo(viewerWrapper).id('viewer').size('100%','100%').overflowAuto().backgroundColor('white');
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
