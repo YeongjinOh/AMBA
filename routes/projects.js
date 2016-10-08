@@ -100,10 +100,18 @@ router.post('/update', function (req, res) {
         })
         .catch(function (error) {
             console.log("ERROR:", error.message || error);
-            res.json({
-                resultCode: -1,
-                msg: '프로젝트를 저장할 수 없습니다.\n다시 시도하여 주세요.'
-            });
+            console.log(error);
+            if (error.code == 23505) {
+                res.json({
+                    resultCode: -2,
+                    msg: '프로젝트명이 중복됩니다.\n다른 이름으로 시도하여 주세요.'
+                });
+            } else {
+                res.json({
+                    resultCode: -1,
+                    msg: '프로젝트를 저장할 수 없습니다.\n다시 시도하여 주세요.'
+                });
+            }
         });
 });
 

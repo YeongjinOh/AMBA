@@ -4,7 +4,7 @@
 
     var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)',
         projectColor = '#C8E6C9', moduleColor = '#B2DFDB';
-    var currentBlock, currentCode, currentCodeManager;
+    var currentCodeBlock, currentCode, currentCodeManager, curProject, curProjectBlock;
     var projectHide = false, moduleHide = true;
     var fadeDuration = 300;
 
@@ -135,8 +135,29 @@
                 });
         };
 
-        this.deleteProject = function (pid) {
 
+        this.updateProject = function (newProject, resolve, reject) {
+            $.post("/projects/update", newProject)
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        for (var i = 0; i < projects.length; i++) {
+                            if (projects[i].pid == newProject.pid) {
+                                projects[i] = newProject;
+                                curProject = newProject;
+                                break;
+                            }
+                        }
+                        if (typeof resolve === 'function')
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof reject === 'function')
+                            reject();
+                    }
+                });
+        };
+
+        this.deleteProject = function (pid, resolve) {
             $.post("/projects/delete", {token: token, pid:pid})
                 .done(function (data) {
                     if (data.resultCode === 0) {
@@ -147,6 +168,8 @@
                                 break;
                             }
                         }
+                        if (typeof resolve == 'function')
+                            resolve();
                     } else {
                         alert(data.msg);
                     }
@@ -185,7 +208,6 @@
         };
 
         this.createCode = function () {
-
             var currentDate = getCurrentDate();
             var defaultCode = {
                 pid: pid,
@@ -210,7 +232,6 @@
         };
 
         this.updateCode = function (newCode) {
-
             $.post("/projects/codes/update", newCode)
                 .done(function (data) {
                     if (data.resultCode === 0) {
@@ -228,7 +249,6 @@
         };
 
         this.deleteCode = function (cid) {
-
             // remove from array;
             for (var i = 0; i < codes.length; i++) {
                 if (codes[i].cid == cid) {
@@ -251,14 +271,21 @@
             var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
                 .marginRight(20).cursorPointer()
                 .click(function () {
-                blockWrapper.remove();
-                blank.appendTo(parent);
-                projectManager.deleteProject(project.pid);
+                projectManager.deleteProject(project.pid, function () {
+                    blockWrapper.remove();
+                    blank.appendTo(parent);
+                    curProjectBlock = undefined;
+                });
             });
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
                 ipt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
+                description:project.description,
+                refresh:function () {
+                    this.title.text(projectTitle.text());
+                    this.description = projectDesc.text();
+                }
             };
 
             var onHover = function () {
@@ -273,9 +300,10 @@
                 removeButton.color('inherit');
             };
             var onClickProject = function () {
-
+                curProject = project;
+                curProjectBlock = block;
                 projectTitle.text(block.title.text());
-                projectDesc.text(project.description);
+                projectDesc.text(block.description);
                 clearCurrentCode();
                 resetCodes(project).then(closeProjectList);
             };
@@ -352,16 +380,16 @@
             removeButton.color('inherit');
         };
         var onClickCode = function () {
-            if (currentBlock === undefined)
+            if (currentCodeBlock === undefined)
                 moduleListButton.fadeIn(fadeDuration);
-            if (currentBlock != block) {
+            if (currentCodeBlock != block) {
                 codeWrapper.displayInlineBlock();
                 titleEditor.text(code.title);
                 descEditor.text(code.description);
                 dateEditor.text(code.upt_date);
                 codeEditor.text(code.ctext);
                 currentCode = code;
-                currentBlock = block;
+                currentCodeBlock = block;
             }
         };
         blockWrapper.hover(onHover, offHover).click(onClickCode);
@@ -386,7 +414,7 @@
 
     var clearCurrentCode = function () {
         currentCode = undefined;
-        currentBlock = undefined;
+        currentCodeBlock = undefined;
         moduleListButton.fadeOut(fadeDuration);
         codeWrapper.displayNone();
     };
@@ -397,6 +425,7 @@
         closeModuleList();
         fadeInAfterOut(projectAddButton, addCodeButton);
         projectHide = false;
+        offProjectEdit();
     };
 
     var closeProjectList = function () {
@@ -409,6 +438,7 @@
         moduleList.fadeIn(fadeDuration);
         closeProjectList();
         moduleHide = false;
+        offProjectEdit();
     };
 
     var closeModuleList = function () {
@@ -435,7 +465,7 @@
     };
 
     var onRun = function () {
-        currentBlock.run();
+        currentCodeBlock.run();
     };
 
     var onModule = function () {
@@ -448,7 +478,7 @@
         currentCode.upt_date = getCurrentDate();
         currentCode.description = descEditor.text();
         currentCode.ctext = codeEditor.text();
-        currentBlock.refresh();
+        currentCodeBlock.refresh();
         currentCodeManager.updateCode(currentCode);
     };
 
@@ -465,15 +495,31 @@
         fadeInAfterOut(projectSaveButton, projectEditButton, 200);
     };
 
-    var onProjectSave = function () {
-        if (confirm("정말로 저장하시겠습니까?")) {
-
-        } else {
-
-        }
+    var offProjectEdit = function () {
         projectTitle.editable(false);
         projectDesc.editable(false);
         fadeInAfterOut(projectEditButton, projectSaveButton, 200);
+    };
+
+    var onProjectSave = function () {
+        if (confirm("정말로 저장하시겠습니까?")) {
+            var newProject = buildProject(curProject);
+            newProject.title = projectTitle.text();
+            newProject.description = projectDesc.text();
+            projectManager.updateProject(newProject,
+                function () {
+                    curProjectBlock.refresh();
+            },
+                function() {
+                    projectTitle.text(curProject.title);
+                    projectDesc.text(curProject.description);
+                }
+            );
+        } else {
+            projectTitle.text(curProject.title);
+            projectDesc.text(curProject.description);
+        }
+        offProjectEdit();
     };
 
 

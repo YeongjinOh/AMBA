@@ -832,6 +832,7 @@ Div.prototype.markdown = function() {
     //         return that.$.append(temp);
     //     });
 
+    return this;
 };
 
 /**
