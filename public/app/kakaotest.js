@@ -57,7 +57,7 @@ define(function () {
         //채팅방에 있는 사람이름과 몇명있는지
         //var userName = [];
         //var cntUser = 0;
-        var myName = ''
+        var myName = '';
         var target = div().append().size('auto','auto');
         //var parent = div().append().size('100%','100%');
         //width를 100%주면 display : block이 아니라 inline-block이라도 다음 박스가 밑으로 연결된다!

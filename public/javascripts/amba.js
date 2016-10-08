@@ -804,17 +804,14 @@ Div.prototype.html = function (tag) {
 Div.prototype.markdown = function() {
     var that = this;
 
-    AB.loadScript('/javascripts/showdown.js', function(){
-        var sdModule = module.markdown.showdown();
+    AB.loadModule('showdown', function(){
+        var sdModule = module.showdown.converter();
         var htmlText = sdModule.makeHtml(that.$text.text());
         that.html(htmlText);
-        // that.$text.remove();
-        // var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
-        // return that.$.append(temp);
     });
 };
 
-Div.prototype.verticalAlignCenter = function() {
+Div.prototype.verticalAlignMiddle = function() {
     var i, ch = this.children();
     this.paddingTop(0);
     var minTop = 99999, maxBottom = 0;
