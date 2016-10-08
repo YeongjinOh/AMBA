@@ -1,50 +1,52 @@
 /**
- * Created by Lightsoo on 2016. 9. 27..
+ * Created by Lightsoo on 2016. 10. 6..
  */
 
+/**
+ * kakao모듈을 정의한다
+ * 객체를 만들어서 스코프를 줬어
+ * 'kks'로 모듈의 이름을 명시했는데 같은 소스안에서만 require(['kks'], func(){})이 되네...?
+ * 파일명이랑 같게 해야되는건가...?
+ */
+define(function () {
+    var kakao = {};
 
-(function () {
-module.kakao = {
-    appendTo : appendTo
-};
+    var addZeroIfNeeded = function (num) {
+        num = parseInt(num);
+        return num < 10 ? '0' + num : num;
+    };
 
-var addZeroIfNeeded = function (num) {
-    num = parseInt(num);
-    return num < 10 ? '0' + num : num;
-};
-
-
-var getCurrentDate = function () {
-    var date = new Date();
-    var m_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    var curr_date = addZeroIfNeeded(date.getDate());
-    var curr_month = date.getMonth();
-    var curr_year = date.getFullYear();
-    var curr_hour = date.getHours();
-    var curr_min = addZeroIfNeeded(date.getMinutes());
-    var curr_sec = addZeroIfNeeded(date.getSeconds());
-    return (curr_date + "-" + m_names[curr_month]
-    + "-" + curr_year + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
-}
-
-var getTime = function () {
-    var date = new Date();
-
-    var hour = date.getHours();
-    var min = addZeroIfNeeded(date.getMinutes());
-    if(hour < 13){
-        return "오전 " + hour +":" + min;
-    }else{
-        hour-=12;
-        return "오후 " + hour +":"+ min;
+    var getCurrentDate = function () {
+        var date = new Date();
+        var m_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var curr_date = addZeroIfNeeded(date.getDate());
+        var curr_month = date.getMonth();
+        var curr_year = date.getFullYear();
+        var curr_hour = date.getHours();
+        var curr_min = addZeroIfNeeded(date.getMinutes());
+        var curr_sec = addZeroIfNeeded(date.getSeconds());
+        return (curr_date + "-" + m_names[curr_month]
+        + "-" + curr_year + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
     }
 
-}
+    var getTime = function () {
+        var date = new Date();
 
-    function appendTo(target) {
+        var hour = date.getHours();
+        var min = addZeroIfNeeded(date.getMinutes());
+        if(hour < 13){
+            return "오전 " + hour +":" + min;
+        }else{
+            hour-=12;
+            return "오후 " + hour +":"+ min;
+        }
+
+    }
+
+    kakaotest.appendTo = function(target){
         var primus = Primus.connect();
 
-//처음 접속시 채널에 가입한다
+        //처음 접속시 채널에 가입한다
         primus.write({
             action : 'join',
             message : {
@@ -52,19 +54,19 @@ var getTime = function () {
             }
         });
 
-//채팅방에 있는 사람이름과 몇명있는지
-//var userName = [];
-//var cntUser = 0;
+        //채팅방에 있는 사람이름과 몇명있는지
+        //var userName = [];
+        //var cntUser = 0;
         var myName = ''
-
-//var parent = div().append().size('100%','100%');
-//width를 100%주면 display : block이 아니라 inline-block이라도 다음 박스가 밑으로 연결된다!
+        var target = div().append().size('auto','auto');
+        //var parent = div().append().size('100%','100%');
+        //width를 100%주면 display : block이 아니라 inline-block이라도 다음 박스가 밑으로 연결된다!
         var topDiv = div().appendTo(target).size('700','70').color('#EEEEEE').displayBlock(); //.displayBlock();
 
 
-//userImgDiv안에 이미지 div를 넣어 상하좌우 가운데 정렬을 줬다
-//부모의 position을 relative를 주고, 자식의 position을 'absolute'를 주고 top,bottom,left,right의 위치를 준다. 각각 마진을 주는셈
-//밑에 전송 화면도 그런식으로...
+        //userImgDiv안에 이미지 div를 넣어 상하좌우 가운데 정렬을 줬다
+        //부모의 position을 relative를 주고, 자식의 position을 'absolute'를 주고 top,bottom,left,right의 위치를 준다. 각각 마진을 주는셈
+        //밑에 전송 화면도 그런식으로...
         var userImgDiv = div().size('70','70').appendTo(topDiv).position('relative');
         div().appendTo(userImgDiv).size(60,60).color('red').borderRadius('50%').margin('auto')
             .position('absolute').top(0).bottom(0).left(0).right(0);
@@ -140,7 +142,14 @@ var getTime = function () {
                 receivedMsg.appendTo(chatListView);
             }
         });
-    }
 
 
-})();
+    };
+    return kakao;
+});
+
+//require(['kakaotest'], function (kks) {
+//    var chat = div().size('auto','auto').append();
+//    //kakaotest모듈을 chat div에 붙인다
+//    kks.appendTo(chat);
+//});

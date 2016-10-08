@@ -10,11 +10,10 @@
  */
 //require()이것도 된다.
 //크롭에서는 렌더링이 잘 되는데, 사파리에서는 모듈이 늦게 불려진다..모듈 로딩 순서를 정의해줘야 되는듯 하다
-requirejs(['kakaotest'], function (kakaotest) {
+requirejs(['kakao'], function (kakaotest) {
     var chat = div().size('auto','auto').append();
     //kakaotest모듈을 chat div에 붙인다
     kakaotest.appendTo(chat);
-
 });
 
 //var kko = requirejs('kakaotest');

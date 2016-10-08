@@ -756,7 +756,7 @@ Div.prototype.markdown = function() {
         var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
         return that.$.append(temp);
     });
-
+ f
     // var that = this;
     // $.get('/converter/markdown', { text: that.$text.text() })
     //     .done(function (data) {
