@@ -27,7 +27,7 @@ define(function () {
         var curr_sec = addZeroIfNeeded(date.getSeconds());
         return (curr_date + "-" + m_names[curr_month]
         + "-" + curr_year + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
-    }
+    };
 
     var getTime = function () {
         var date = new Date();
@@ -41,7 +41,7 @@ define(function () {
             return "오후 " + hour +":"+ min;
         }
 
-    }
+    };
 
     kakaotest.appendTo = function(target){
         var primus = Primus.connect();

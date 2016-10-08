@@ -104,7 +104,8 @@ Div.prototype.children = function () {
     var arr = this.$.children();
     var result = [];
     for(var i=0; i<arr.length; i++) {
-        result.push(arr.eq(i).data('div'));
+        if (arr.eq(i).data('div'))
+            result.push(arr.eq(i).data('div'));
     }
     return result;
 };
@@ -809,6 +810,15 @@ Div.prototype.markdown = function() {
         var htmlText = sdModule.makeHtml(that.$text.text());
         that.html(htmlText);
     });
+    // var that = this;
+    // $.get('/converter/markdown', { text: that.$text.text() })
+    //     .done(function (data) {
+    //         // innerHTML이랑 차이를 정확하게 알고싶다....
+    //         that.$text.remove();
+    //         var temp = $.parseHTML(data.markdown);
+    //         return that.$.append(temp);
+    //     });
+
 };
 
 Div.prototype.verticalAlignMiddle = function() {
@@ -816,7 +826,6 @@ Div.prototype.verticalAlignMiddle = function() {
     this.paddingTop(0);
     var minTop = 99999, maxBottom = 0;
     for(i=0; i<ch.length; i++) {
-        console.log('%s, %s', ch[i].offset().top, ch[i].offset().top + ch[i].height());
         if(minTop > ch[i].offset().top)
             minTop = ch[i].offset().top;
 
@@ -825,7 +834,6 @@ Div.prototype.verticalAlignMiddle = function() {
     }
     minTop-=this.offset().top;
     maxBottom-=this.offset().top;
-    console.log(this.height());
     this.paddingTop( (parseInt(this.height())-maxBottom)/2 );
 
     return this;

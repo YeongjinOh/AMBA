@@ -6,13 +6,11 @@ var express = require('express');
 var router = express.Router();
 
 /**
- *
- cachestore
+ *cachestore
  -put(cid, key, value)
  -get(cid, key)
  -keys(cid) //keys() : 키 리턴
  -list(cid)
-
  */
 
 
@@ -66,7 +64,7 @@ router.get('/get', function (req, res,next) {
             console.log(err);
             var data = {
                 'resultCode' : -1,
-                'msg' : '키 저장 실패'
+                'msg' : '요청 실패'
             };
             res.status(200).json(data);
             next(err);
@@ -86,7 +84,7 @@ router.get('/keys', function (req, res, next) {
             console.log(err);
             var data = {
                 'resultCode' : -1,
-                'msg' : '키 저장 실패'
+                'msg' : '키 요청 실패'
             };
             res.status(200).json(data);
             next(err);
@@ -104,7 +102,7 @@ router.get('/list', function (req, res, next) {
             console.log(err);
             var data = {
                 'resultCode' : -1,
-                'msg' : '키 저장 실패'
+                'msg' : '요청 실패'
             };
             res.status(200).json(data);
             next(err);

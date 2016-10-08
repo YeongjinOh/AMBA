@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
+var crypto = require('./amba_crypto');
 var strformat = require('strformat');
 var db = require('../db');
 var generalErrMsg = "일시적인 오류입니다."
@@ -14,6 +14,13 @@ function getParams(url) {
         params[match[1]] = match[2];
     }
     return params;
+}
+
+/**
+ * pid와 title을 이용하여 cid를 encrypt 합니다.
+ */
+function getCid (pid, title) {
+    return crypto.encrypt(pid + '.' + title);
 }
 
 /**
@@ -146,8 +153,7 @@ router.get('/codes', function (req, res) {
 router.post('/codes', function (req, res) {
     var params = req.body;
 
-    // TODO : encrypt cid
-    var cid = params.pid + params.title;
+    var cid = getCid(params.pid, params.title);
     params.cid = cid;
     var query = "insert into code_store(cid, uid, pid, title, ctext, description, ipt_date, upt_date) " +
         "values (${cid}, ${uid}, ${pid}, ${title}, ${ctext}, ${description}, now(), now())";
@@ -175,8 +181,10 @@ router.post('/codes', function (req, res) {
  */
 router.post('/codes/update', function (req, res) {
     var params = req.body;
-    var query = "update code_store set (title, ctext, description, upt_date) " +
-        "= (${title}, ${ctext}, ${description}, now()) where cid=${cid}";
+    var newCid = getCid(params.pid, params.title);
+    params.newCid = newCid;
+    var query = "update code_store set (cid, title, ctext, description, upt_date) " +
+        "= (${newCid}, ${title}, ${ctext}, ${description}, now()) where cid=${cid}";
     db.none(query, params)
         .then(function () {
             res.json({

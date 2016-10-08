@@ -46,6 +46,7 @@ var btnPut = div().appendTo(btnView).size('148','100').text('PUT').verticalAlign
                     key: inputKey.text(),
                     value: inputValue.text()
                 }, function (result) {
+                    //outputView.empty();
                     outputView.text(JSON.stringify(result));
                 });
         }
@@ -62,7 +63,9 @@ var btnGet = div().appendTo(btnView).size('148','100').text('GET')
                     cid: inputCid.text(),
                     key: inputKey.text()
                 }, function (result) {
-                    outputView.text(JSON.stringify(result));
+                    outputView.empty();
+                    div().appendTo(outputView).text(JSON.stringify(result));
+                    //outputView.text(JSON.stringify(result));
                 });
         }
     });
@@ -73,15 +76,22 @@ var btnKeys = div().appendTo(btnView).size('148','100').text('KEYS')
         if (inputCid.text() === '' )
             alert('cid를 입력해주세요.');
         else {
-            $.get("/cachestore/list",
+            $.get("/cachestore/keys",
                 {
                     cid: inputCid.text()
                 }, function (result) {
                     outputView.empty();
-                    //outputView.text(JSON.stringify(result));
+                    adapter = adapter.concat(result);
+                    for(var i = 0; i< adapter.length;i++){
+                        div().appendTo(outputView).size('100%','40')
+                            .borderOption(1).borderOption('black','color')
+                            .text(adapter[i]);
+                    }
+                    adapter= [];
                 });
         }
     });
+
 var btnList = div().appendTo(btnView).size('148','100').text('LIST')
     .borderOption(1).borderOption('black', 'color')
     .hoverColor('blue','white')
@@ -93,6 +103,7 @@ var btnList = div().appendTo(btnView).size('148','100').text('LIST')
                 {
                     cid: inputCid.text()
                 }, function (result) {
+                    outputView.empty();
                     adapter = adapter.concat(result);
                     for(var i = 0; i< adapter.length;i++){
                         div().appendTo(outputView).size('100%','40')
