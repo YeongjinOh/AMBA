@@ -50,7 +50,7 @@ Div.prototype.aceEditor = function () {
         else
             editor.setValue(txt);
         return that;
-    })
+    });
 
     return this;
 };
@@ -143,6 +143,18 @@ Div.prototype.cssText = function (key, value) {
         return this.$text.css(key);
     this.param[key] = value;
     this.$text.css(key, value);
+    return this;
+};
+
+/**
+ * other에 입력한 css style을 그대로 복사하여 this에 적용합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.cssSameWith = function (other) {
+    var params = other.params();
+    for (var prop in params) {
+        this.css(prop,params[prop]);
+    }
     return this;
 };
 
@@ -425,16 +437,6 @@ Div.prototype.text = function (txt) {
     if(this.fnText) {
         return this.fnText(txt);
     }
-
-    // if this div is ace editor, use text in div
-    // if (this.aceValue) {
-    //     if (txt === undefined)
-    //         return this.aceValue.getValue();
-    //     this.aceValue.setValue(txt);
-    //     return this;
-    // }
-
-
 
     // otherwise, use span tag for text
     if (txt === undefined)
@@ -814,6 +816,7 @@ Div.prototype.markdown = function() {
 
 /**
  * 현재 Div를 localStorage에 저장된 code를 보여주는 viewer로 세팅합니다.
+ * @author Yeongjin Oh
  */
 Div.prototype.viewer = function () {
     this.$viewer = $('<iframe>').attr('src','/?app=viewer').width('100%').height('100%').css('border','none');
