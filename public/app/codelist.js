@@ -108,7 +108,7 @@ $(document).ready(function () {
         this.createProject = function () {
             var currentDate = getCurrentDate();
             var defaultProject = {
-                title: "new project " + projects.length,
+                title: prompt("프로젝트 명을 입력해주세요."),
                 description: "project description",
                 ipt_date: currentDate,
                 upt_date: currentDate
@@ -273,9 +273,7 @@ $(document).ready(function () {
                 resetCodes(project);
                 codeWrapper.displayNone();
             };
-            blockWrapper.hover(onHover, offHover);
-            block.title.click(onClickProject).cursorPointer();
-            // return block;
+            blockWrapper.hover(onHover, offHover).click(onClickProject).cursorPointer();
         };
 
 
@@ -364,10 +362,7 @@ $(document).ready(function () {
                 currentBlock = block;
             }
         };
-
         blockWrapper.hover(onHover, offHover).click(onClickCode);
-
-        return block;
     };
 
     // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.

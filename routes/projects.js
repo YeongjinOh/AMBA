@@ -77,7 +77,7 @@ router.post('', function (req, res) {
             console.log("ERROR:", error.message || error);
             res.json({
                 resultCode: -1,
-                msg: generalErrMsg
+                msg: "프로젝트 생성에 실패하였습니다. 프로젝트 명이 중복됩니다."
             });
         });
 });
