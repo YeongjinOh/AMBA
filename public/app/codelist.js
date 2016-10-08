@@ -4,12 +4,13 @@ $(document).ready(function () {
 
     var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)', projectColor = '#C8E6C9';
     var currentBlock, currentCode, currentCodeManager;
+    var projectHide = false;
 
     var parent = div().append().size(outerWidth, outerHeight);
     var sidebar = div().appendTo(parent).size(outerWidth/20, outerHeight).color('white');
     var content = div().appendTo(parent).size(outerWidth*19/20, outerHeight);
-    var projectList = div().appendTo(content).zIndex(2).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color')
-        .color(projectColor).position('absolute').left(content.positionLeft()).top(content.positionTop());
+    var projectList = div().appendTo(content).zIndex(2).size(outerWidth/4, outerHeight).color(projectColor)
+        .border(1).borderOption('#aaaaaa', 'color').position('absolute').left(content.positionLeft()).top(content.positionTop());
     var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color');
     var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, outerHeight).padding(15).color('white').displayNone();
     var blank = div();
@@ -235,16 +236,17 @@ $(document).ready(function () {
 
         // 주어진 project object로 부터 project block을 생성 및 append
     var newProjectBlock = function (project) {
-            var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', '70px').borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color');
+            var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', '70px')
+                .borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color');
 
             // remove functionality
-            var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').marginRight(20).cursorPointer();
-            var onRemove = function () {
+            var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
+                .marginRight(20).cursorPointer()
+                .click(function () {
                 blockWrapper.remove();
                 blank.appendTo(parent);
                 projectManager.deleteProject(project.pid);
-            };
-            removeButton.click(onRemove);
+            });
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
@@ -283,22 +285,24 @@ $(document).ready(function () {
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
         // remove functionality
-        var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').marginRight(20).cursorPointer();
-        var onRemove = function () {
+        var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
+            .marginRight(20).cursorPointer()
+            .click(function () {
             blockWrapper.remove();
             codeWrapper.displayNone();
             currentCodeManager.deleteCode(code.cid);
             // blank.appendTo(parent);
-        };
-        removeButton.click(onRemove);
+        });
 
         // set viewer
         var viewerWrapper = div().padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
         var viewerHeader = div().appendTo(viewerWrapper);
         div().appendTo(viewerHeader).size(5,'100%'); // left space
-        viewerHeader.size('100%',27).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green').borderBottom('2px solid green').cursorDefault();
+        viewerHeader.size('100%',27).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
+            .borderBottom('2px solid green').cursorDefault();
         var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
-        var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right').marginRight(5).cursorPointer()
+        var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
+            .marginRight(5).cursorPointer()
             .click(function () {
             viewerWrapper.slideUp();
         });
@@ -399,6 +403,11 @@ $(document).ready(function () {
         currentBlock.run();
     };
 
+    var onModule = function () {
+        var res = confirm('모듈화를 하시겠습니까?');
+        console.log(res);
+    };
+
     var onSave = function () {
         currentCode.title = titleEditor.text();
         currentCode.upt_date = getCurrentDate();
@@ -408,16 +417,6 @@ $(document).ready(function () {
         currentCodeManager.updateCode(currentCode);
     };
 
-
-    /** initialization **/
-
-    var projectManager = new ProjectManager();
-    // var codeManager = new CodeManager();
-    projectManager.init();
-
-
-    // create project list
-    var projectHide = false;
     var onProject = function () {
         projectHide = !projectHide;
         if (projectHide) {
@@ -433,6 +432,7 @@ $(document).ready(function () {
     };
 
 
+
     /** design **/
 
         // design sidebar
@@ -441,7 +441,8 @@ $(document).ready(function () {
                 .fontBold().fontSize(28).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
         };
     var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(40).text('+').click(onAddCode);
-    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P').fontSize(20).size(20, 20).padding(5).click(onProject);
+    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P')
+        .fontSize(20).size(20, 20).padding(5).click(onProject);
     var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('new').fontSize(12).size(20, 20)
         .padding(5).click(onAddProject);
 
@@ -449,26 +450,39 @@ $(document).ready(function () {
     var projectHeader = div().appendTo(projectList).size('100%', '170px').color('#white').borderBottom('3px solid green');
     var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(50).text('Project List').fontSize(28).textAlignCenter();
     var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
-    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto();
+    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel())
+        .borderOption('1px solid gray', 'top').overflowAuto();
 
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
-    var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
-    var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
-    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
+    var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name')
+        .fontSize(28).fontBold().fontColor('white').textAlignCenter();
+    var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)
+        .fontColor('#1B5E20').textAlignCenter();
+    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
+        .borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold().fontColor(basicColor).overflowAuto();
-    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').editable().marginTop(10).marginLeft(10).fontSize(20).fontBold().fontColor('gray').overflowAuto();
-    var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflowAuto();
-    var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
-        .borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
+    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold()
+        .fontColor(basicColor).overflowAuto();
+    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').editable().marginTop(10).marginLeft(10)
+        .fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
+        .fontSize(20).overflowAuto();
+    var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white')
+        .textAlignCenter().fontSize(18).verticalAlign('middle').borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
     var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
+    var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(15).click(onModule);
     var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
 
+    /** initialization **/
+
+    var projectManager = new ProjectManager();
+    // var codeManager = new CodeManager();
+    projectManager.init();
 
 });
