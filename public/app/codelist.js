@@ -2,14 +2,14 @@ $(document).ready(function () {
 
     /* initialize variables */
 
-    var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)';
+    var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)', projectColor = '#C8E6C9';
     var currentBlock, currentCode, currentCodeManager;
 
     var parent = div().append().size(outerWidth, outerHeight);
     var sidebar = div().appendTo(parent).size(outerWidth/20, outerHeight).color('white');
     var content = div().appendTo(parent).size(outerWidth*19/20, outerHeight);
     var projectList = div().appendTo(content).zIndex(2).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color')
-        .color('#C8E6C9').position('absolute').left(content.positionLeft()).top(content.positionTop());
+        .color(projectColor).position('absolute').left(content.positionLeft()).top(content.positionTop());
     var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color');
     var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, outerHeight).padding(15).color('white').displayNone();
     var blank = div();
@@ -371,30 +371,16 @@ $(document).ready(function () {
             });
     };
 
-    // initialize viewer script and function for onRun event
-    var body = document.body;
-    var viewerScriptWrapper = document.createElement('viewerScripts');
-    viewerScriptWrapper.id = 'viewerScriptWrapper';
-    body.appendChild(viewerScriptWrapper);
-    viewerScriptWrapper.appendChild(document.createElement('script')); // append dummy script node
-
-    var resetViewerScript = function (newScript) {
-        viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
-        viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
-    };
-
     var onRun = function () {
-        // set viewer
-        viewer.empty()
-        viewerWrapper.after(listHeader);
-        viewerWrapper.position('absolute').left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown().resizable();
+        // save code
+        var txt = '(function(){' + codeEditor.text() + '})();'; // get text from code editor and modularize it
+        localStorage.setItem('acode', txt);
 
-        // set script
-        var newScript = document.createElement('script');
-        var txt = codeEditor.text(); // get text from code editor
-        var innerCode =  txt.replace(/append\(\)/g,"appendTo($('#viewer').data('div'))");
-        newScript.textContent = '(function(){' + innerCode + '})();'; // modularize inner code
-        resetViewerScript(newScript);
+        // set viewer
+        viewer.empty().viewer();
+        viewerHeader.show();
+        viewerWrapper.after(listHeader);
+        viewerWrapper.left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown();
     };
 
     var onSave = function () {
@@ -454,9 +440,17 @@ $(document).ready(function () {
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
     var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
-    var viewerWrapper = div().size(codelist.widthPixel()-6,codelist.widthPixel()*1.4).padding(3).backgroundColor('green').draggable().zIndex(5);
-    var viewer = div().appendTo(viewerWrapper).id('viewer').size('100%','100%').overflowAuto().backgroundColor('white');
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
+
+    // design viewer
+    var viewerWrapper = div().padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
+    var viewerHeader = div().appendTo(viewerWrapper).size('100%',30).color(projectColor);
+    var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
+
+    // trick to adjust resizing control point
+    viewerWrapper.borderTop('30px solid green');
+    viewerHeader.marginTop(-30);
+    viewer.marginTop(-20);
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');

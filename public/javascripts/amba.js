@@ -821,6 +821,15 @@ Div.prototype.markdown = function() {
 
 };
 
+/**
+ * 현재 Div를 localStorage에 저장된 code를 보여주는 viewer로 세팅합니다.
+ */
+Div.prototype.viewer = function () {
+    this.$viewer = $('<iframe>').attr('src','/?app=viewer').width('100%').height('100%').css('border','none');
+    this.$viewer.appendTo(this.$);
+    return this;
+}
+
 Div.prototype.verticalAlignMiddle = function() {
     var i, ch = this.children();
     this.paddingTop(0);
