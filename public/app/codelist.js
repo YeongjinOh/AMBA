@@ -261,6 +261,33 @@
         };
     };
 
+    var ModuleManager = function () {
+
+        var modules = [];
+        var that = this;
+
+        this.init = function () {
+            that.getModules()
+                .done(function () {
+                    for (var i = 0; i < modules.length; i++) {
+                        alert(JSON.stringify(modules[i]));
+                        // newProjectBlock(modules[i]);
+                    }
+                });
+        };
+
+        this.getModules = function () {
+            return $.get("/modules", {token: token})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        modules = data.modules.map(buildCode);
+                    } else {
+                        alert(data.msg);
+                    }
+                });
+        };
+    };
+
     /** define newProjectBlock, newCodeBlock functions **/
 
         // 주어진 project object로 부터 project block을 생성 및 append
@@ -636,6 +663,8 @@
     /** initialization **/
 
     var projectManager = new ProjectManager();
+    var moduleManager = new ModuleManager();
     projectManager.init();
+    moduleManager.init();
 
 })();

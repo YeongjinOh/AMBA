@@ -1,0 +1,48 @@
+var express = require('express');
+var router = express.Router();
+var crypto = require('./amba_crypto');
+var db = require('../db');
+var generalErrMsg = "일시적인 오류입니다.";
+
+// get parameters from given url
+function getParams(url) {
+    var decUrl = decodeURIComponent(url);
+    var regex = /[?&]([^=#]+)=([^&#]*)/g,
+        params = {},
+        match;
+    while (match = regex.exec(decUrl)) {
+        params[match[1]] = match[2];
+    }
+    return params;
+}
+
+
+/**
+ * GET /modules
+ * @param uid
+ * @return resultCode, modules
+ */
+router.get('', function (req, res) {
+    // TODO authentication
+    // var params = getParams(req.url);
+    db.any("SELECT * FROM code_store WHERE mstatus=1")
+        .then(function (data) {
+            res.json({
+                resultCode:0,
+                modules:data
+            })
+        })
+        // TODO error handling
+        .catch(function (error) {
+            console.log("ERROR:", error.message || error);
+            res.json({
+                resultCode: -1,
+                msg: generalErrMsg
+            });
+        });
+});
+
+
+module.exports = router;
+
+
