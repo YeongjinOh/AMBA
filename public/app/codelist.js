@@ -267,9 +267,7 @@ $(document).ready(function () {
             var onClickProject = function () {
                 listHeaderTitle.text(block.title.text());
                 listName.text(project.description);
-                projectList.animate({opacity: 0, 'z-index': -1}, 300);
-                projectAddButton.animate({display: 'none', opacity: 0}, 300);
-                projectHide = true;
+                closeProjectList();
                 resetCodes(project);
                 codeWrapper.displayNone();
             };
@@ -412,18 +410,35 @@ $(document).ready(function () {
         currentCodeManager.updateCode(currentCode);
     };
 
+    var openProjectList = function () {
+        projectList.zIndex(2).animate({opacity: 1}, 300);
+        addCodeButton.animate({display: 'none', opacity: 0}, 150, function() {
+            addCodeButton.displayNone();
+            projectAddButton.displayInlineBlock().animate({opacity: 1}, 150);
+        });
+        projectHide = false;
+    };
+
+    var closeProjectList = function () {
+        projectList.animate({opacity: 0, 'z-index': -1}, 300);
+        projectAddButton.animate({display: 'none', opacity: 0}, 150, function() {
+            projectAddButton.displayNone();
+            addCodeButton.displayInlineBlock().animate({opacity: 1}, 150);
+        });
+        projectHide = true;
+    };
+
     var onProject = function () {
-        projectHide = !projectHide;
-        if (projectHide) {
-            projectList.animate({opacity: 0, 'z-index': -1}, 300);
-            projectAddButton.animate({display: 'none', opacity: 0}, 300);
-        }
-        else {
-            projectList.zIndex(2);
-            projectList.animate({opacity: 1}, 300);
-            projectAddButton.display('inline-block')
-            projectAddButton.animate({opacity: 1}, 300);
-        }
+        if (projectHide)
+            openProjectList();
+        else if (currentCodeManager)
+            closeProjectList();
+    };
+
+    var onLogout = function () {
+        localStorage.clear('aauth');
+        localStorage.clear('ainfo');
+        $(location).attr('href', '/?app=signin');
     };
 
 
@@ -432,14 +447,17 @@ $(document).ready(function () {
 
         // design sidebar
     var decoButton = function (div) {
-            div.size(30, 30).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius')
-                .fontBold().fontSize(28).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
+            div.size(20, 20).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
+                .fontBold().fontSize(20).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
         };
-    var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(40).text('+').click(onAddCode);
-    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P')
-        .fontSize(20).size(20, 20).padding(5).click(onProject);
-    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('new').fontSize(12).size(20, 20)
-        .padding(5).click(onAddProject);
+    var logoutButton = div().appendTo(sidebar).size(50,20).margin(5).marginTop(15).paddingTop(4).color('green')
+        .border(2).borderRadius(4).borderColor('green').textAlignCenter().text('logout').fontSize(14).fontColor('white')
+        .cursorPointer().hoverColor('white','green').hoverTextColor('green','white').click(onLogout);
+    var projectButton = div().appendTo(sidebar).deco(decoButton).text('P').marginTop(30).click(onProject);
+    var moduleButton = div().appendTo(sidebar).deco(decoButton).text('M').click(onAddCode);
+    var addCodeButton = div().appendTo(sidebar).deco(decoButton).paddingTop(0).height(25).text('+').fontSize(28)
+        .click(onAddCode).displayNone();
+    var projectAddButton = div().appendTo(sidebar).deco(decoButton).text('new').fontSize(12).click(onAddProject);
 
     // design projectlist
     var projectHeader = div().appendTo(projectList).size('100%', '170px').color('#white').borderBottom('3px solid green');
