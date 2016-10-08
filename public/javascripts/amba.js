@@ -810,15 +810,6 @@ Div.prototype.markdown = function() {
         var htmlText = sdModule.makeHtml(that.$text.text());
         that.html(htmlText);
     });
-    // var that = this;
-    // $.get('/converter/markdown', { text: that.$text.text() })
-    //     .done(function (data) {
-    //         // innerHTML이랑 차이를 정확하게 알고싶다....
-    //         that.$text.remove();
-    //         var temp = $.parseHTML(data.markdown);
-    //         return that.$.append(temp);
-    //     });
-
 };
 
 Div.prototype.verticalAlignMiddle = function() {
