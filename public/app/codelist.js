@@ -383,12 +383,14 @@ $(document).ready(function () {
 
     var resetViewerScript = function (newScript) {
         viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
+        viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
     };
 
     var onRun = function () {
         // set viewer
-        viewer.empty();
+        viewer.empty()
         viewerWrapper.after(listHeader);
+        viewerWrapper.position('absolute').left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown().resizable();
 
         // set script
         var newScript = document.createElement('script');
@@ -455,7 +457,7 @@ $(document).ready(function () {
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
     var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
     var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
-    var viewerWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc');
+    var viewerWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc').draggable().zIndex(5);
     var viewer = div().appendTo(viewerWrapper).id('viewer').size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
     var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
