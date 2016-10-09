@@ -50,7 +50,7 @@ Div.prototype.aceEditor = function () {
         else
             editor.setValue(txt);
         return that;
-    })
+    });
 
     return this;
 };
@@ -143,6 +143,18 @@ Div.prototype.cssText = function (key, value) {
         return this.$text.css(key);
     this.param[key] = value;
     this.$text.css(key, value);
+    return this;
+};
+
+/**
+ * other에 입력한 css style을 그대로 복사하여 this에 적용합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.cssSameWith = function (other) {
+    var params = other.params();
+    for (var prop in params) {
+        this.css(prop,params[prop]);
+    }
     return this;
 };
 
@@ -426,16 +438,6 @@ Div.prototype.text = function (txt) {
         return this.fnText(txt);
     }
 
-    // if this div is ace editor, use text in div
-    // if (this.aceValue) {
-    //     if (txt === undefined)
-    //         return this.aceValue.getValue();
-    //     this.aceValue.setValue(txt);
-    //     return this;
-    // }
-
-
-
     // otherwise, use span tag for text
     if (txt === undefined)
         return this.$text.text();
@@ -645,11 +647,12 @@ Div.prototype.moveDown = function (y, delay) {
  * @param properties animation을 적용할 property와 value들을 가진 object입니다.
  *        예를 들어, { width: "70%", opacity: 0.4, marginLeft: "0.6in", fontSize: "3em", borderWidth: "10px" }
  *        와 같은 object가 될 수 있습니다.
- * @param duration animation이 수행되는 시간
+ *        duration animation이 수행되는 시간
+ *        callback animation이 완료되고 수행될 함수
  * @author Yeongjin Oh
  */
-Div.prototype.animate = function (properties, duration) {
-    this.$.animate(properties, duration);
+Div.prototype.animate = function (properties, duration, callback) {
+    this.$.animate(properties, duration, callback);
     return this;
 };
 
@@ -672,6 +675,16 @@ Div.prototype.hide = function (duration, easing, complete) {
 
 Div.prototype.show = function (duration, easing, complete) {
     this.$.show(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.fadeIn = function (duration, easing, complete) {
+    this.$.fadeIn(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.fadeOut = function (duration, easing, complete) {
+    this.$.fadeOut(duration, easing, complete);
     return this;
 };
 
@@ -805,13 +818,10 @@ Div.prototype.html = function (tag) {
 Div.prototype.markdown = function() {
     var that = this;
 
-    AB.loadScript('/javascripts/showdown.js', function(){
-        var sdModule = module.markdown.showdown();
+    AB.loadModule('showdown', function(){
+        var sdModule = module.showdown.converter();
         var htmlText = sdModule.makeHtml(that.$text.text());
         that.html(htmlText);
-        // that.$text.remove();
-        // var temp = $.parseHTML(sdModule.makeHtml(that.$text.text()));
-        // return that.$.append(temp);
     });
     // var that = this;
     // $.get('/converter/markdown', { text: that.$text.text() })
@@ -822,9 +832,20 @@ Div.prototype.markdown = function() {
     //         return that.$.append(temp);
     //     });
 
+    return this;
 };
 
-Div.prototype.verticalAlignCenter = function() {
+/**
+ * 현재 Div를 localStorage에 저장된 code를 보여주는 viewer로 세팅합니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.viewer = function () {
+    this.$viewer = $('<iframe>').attr('src','/?app=viewer').width('100%').height('100%').css('border','none');
+    this.$viewer.appendTo(this.$);
+    return this;
+}
+
+Div.prototype.verticalAlignMiddle = function() {
     var i, ch = this.children();
     this.paddingTop(0);
     var minTop = 99999, maxBottom = 0;

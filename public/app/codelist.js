@@ -1,34 +1,38 @@
-$(document).ready(function () {
+(function () {
 
-    /* initialize variables */
+    /** initialize variables **/
 
-    var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)';
-    var currentBlock, currentCode, currentCodeManager;
-
-    var parent = div().append().size(outerWidth, outerHeight);
-    var sidebar = div().appendTo(parent).size(outerWidth/20, outerHeight).color('white');
-    var content = div().appendTo(parent).size(outerWidth*19/20, outerHeight);
-    var projectList = div().appendTo(content).zIndex(2).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color')
-        .color('#C8E6C9').position('absolute').left(content.positionLeft()).top(content.positionTop());
-    var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, outerHeight).border(1).borderOption('#aaaaaa', 'color');
-    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, outerHeight).padding(15).color('white').displayNone();
-    var blank = div();
+    var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)',
+        projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33';
+    var currentCodeBlock, currentCode, currentCodeManager, curProject, curProjectBlock;
+    var projectHide = false, moduleHide = true;
+    var fadeDuration = 300;
 
     /** set user authentication **/
+
     var authFactory = function () {
         var ainfo = JSON.parse(localStorage.getItem('ainfo'));
+        var aauth = localStorage.getItem('aauth');
         return {
             getUsername : function () {
-                return ainfo.username || "";
+                return (ainfo && ainfo.username);
+            },
+            getToken : function () {
+                return aauth;
             }
         };
     }();
     var username = authFactory.getUsername();
+    var token = authFactory.getToken();
+    if (!username || !token) {
+        $(location).attr('href', '/?app=signin');
+        alert('로그인 페이지로 이동합니다.')
+        return;
+    }
 
-    // TODO how to get uid??
-    var uid = 2;
 
     /** basic functions **/
+
     var addZeroIfNeeded = function (num) {
         num = parseInt(num);
         return num < 10 ? '0' + num : num;
@@ -41,12 +45,19 @@ $(document).ready(function () {
         return curr_year + "-" + curr_month + "-" + curr_date;
     };
 
+    var fadeInAfterOut = function (inObj, outObj, duration) {
+        if (duration === undefined)
+            duration = fadeDuration/2;
+        outObj.fadeOut(duration, function () {
+            inObj.fadeIn(duration);
+        })
+    };
+
     /** define Project, Code classes **/
 
         // Q. insert, update date는 db에 들어간 시간을 기준? 클라이언트 리퀘스트 기준?
     var Project = function (project) {
             this.pid = project.pid;
-            this.uid = project.uid;
             this.title = project.title;
             this.main_cid = project.main_cid;
             this.description = project.description;
@@ -55,32 +66,40 @@ $(document).ready(function () {
             this.codeManager;
         };
 
-    // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
-    var resetCodes = function (project) {
-        if (project.codeManager) {
-            project.codeManager.resetCodelist();
-        } else {
-            project.codeManager = new CodeManager(project.pid);
-            project.codeManager.init();
-        }
-        currentCodeManager = project.codeManager;
-        // console.log(currentCodeManager);
-    };
-
-    // uid, pid, title, ctext, description, ipt_date, upt_date
     var Code = function (code) {
         this.cid = code.cid;
-        this.uid = code.uid;
         this.pid = code.pid;
         this.title = code.title;
         this.ctext = code.ctext;
+        this.mstatus = code.mstatus;
         this.description = code.description;
         this.ipt_date = code.ipt_date.slice(0, 10);
         this.upt_date = code.upt_date.slice(0, 10);
     };
 
-    /** define ProjectManager, CodeManager classes **/
+    var Module = function (module) {
+        this.author = module.author;
+        this.title = module.title;
+        this.description = module.description;
+        this.upt_date = module.upt_date.slice(0, 10);;
+    };
 
+    var buildProject = function (obj) {
+        return new Project(obj);
+    };
+
+    var buildCode = function (obj) {
+        return new Code(obj);
+    };
+
+    var buildModule = function (obj) {
+        return new Module(obj);
+    };
+
+
+    /** define ProjectManager, CodeManager classes **/
+    // TODO define functions using prototype
+        // 모든 유저는 하나의 project manager를 가지고 project를 관리합니다.
     var ProjectManager = function () {
 
         var projects = [];
@@ -96,7 +115,7 @@ $(document).ready(function () {
         };
 
         this.getProjects = function () {
-            return $.get("/projects", {uid: uid})
+            return $.get("/projects", {token: token})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         projects = data.projects.map(buildProject);
@@ -109,14 +128,13 @@ $(document).ready(function () {
         this.createProject = function () {
             var currentDate = getCurrentDate();
             var defaultProject = {
-                uid: uid,
-                title: "new project " + projects.length,
+                title: prompt("프로젝트 명을 입력해주세요."),
                 description: "project description",
                 ipt_date: currentDate,
                 upt_date: currentDate
             };
             var project = buildProject(defaultProject);
-            return $.post("/projects", project)
+            return $.post("/projects", {token:token, project:JSON.stringify(project)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         project.pid = data.pid;
@@ -129,9 +147,30 @@ $(document).ready(function () {
                 });
         };
 
-        this.deleteProject = function (pid) {
 
-            $.post("/projects/delete", {uid: uid, pid: pid})
+        this.updateProject = function (newProject, resolve, reject) {
+            $.post("/projects/update", newProject)
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        for (var i = 0; i < projects.length; i++) {
+                            if (projects[i].pid == newProject.pid) {
+                                projects[i] = newProject;
+                                curProject = newProject;
+                                break;
+                            }
+                        }
+                        if (typeof resolve === 'function')
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof reject === 'function')
+                            reject();
+                    }
+                });
+        };
+
+        this.deleteProject = function (pid, resolve) {
+            $.post("/projects/delete", {token: token, pid:pid})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         // remove from array;
@@ -141,6 +180,8 @@ $(document).ready(function () {
                                 break;
                             }
                         }
+                        if (typeof resolve == 'function')
+                            resolve();
                     } else {
                         alert(data.msg);
                     }
@@ -148,7 +189,7 @@ $(document).ready(function () {
         };
     };
 
-
+    // 각각의 project는 하나의 code manager를 가지고 code들을 관리합니다.
     var CodeManager = function (pid) {
 
         var codes = [];
@@ -165,7 +206,6 @@ $(document).ready(function () {
                 newCodeBlock(codes[i]);
             }
             ;
-            // currentCodeManager = that;
         };
 
         this.getCodes = function () {
@@ -180,19 +220,17 @@ $(document).ready(function () {
         };
 
         this.createCode = function () {
-
             var currentDate = getCurrentDate();
             var defaultCode = {
-                uid: uid,
                 pid: pid,
                 title: "new code " + codes.length,
-                ctext: "// write code here\nnew line text",
+                ctext: "// write code here",
                 description: "code description",
                 ipt_date: currentDate,
                 upt_date: currentDate
             };
             var code = buildCode(defaultCode);
-            return $.post("/projects/codes", code)
+            return $.post("/projects/codes", {token:token, code:JSON.stringify(code)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         code.cid = data.cid;
@@ -206,7 +244,6 @@ $(document).ready(function () {
         };
 
         this.updateCode = function (newCode) {
-
             $.post("/projects/codes/update", newCode)
                 .done(function (data) {
                     if (data.resultCode === 0) {
@@ -224,7 +261,6 @@ $(document).ready(function () {
         };
 
         this.deleteCode = function (cid) {
-
             // remove from array;
             for (var i = 0; i < codes.length; i++) {
                 if (codes[i].cid == cid) {
@@ -236,32 +272,58 @@ $(document).ready(function () {
         };
     };
 
-    /** project and code builders **/
-    var buildProject = function (obj) {
-        return new Project(obj);
-    };
-    var buildCode = function (obj) {
-        return new Code(obj);
+    var ModuleManager = function () {
+
+        var modules = [];
+        var that = this;
+
+        this.init = function () {
+            that.getModules()
+                .done(function () {
+                    for (var i = 0; i < modules.length; i++) {
+                        newModuleBlock(modules[i]);
+                    }
+                });
+        };
+
+        this.getModules = function () {
+            return $.get("/modules", {token: token})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        modules = data.modules.map(buildModule);
+                    } else {
+                        alert(data.msg);
+                    }
+                });
+        };
     };
 
     /** define newProjectBlock, newCodeBlock functions **/
 
         // 주어진 project object로 부터 project block을 생성 및 append
     var newProjectBlock = function (project) {
-            var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', '70px').borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color');
+            var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', '70px')
+                .borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color');
 
             // remove functionality
-            var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').marginRight(20).cursorPointer();
-            var onRemove = function () {
-                blockWrapper.remove();
-                blank.appendTo(parent);
-                projectManager.deleteProject(project.pid);
-            };
-            removeButton.click(onRemove);
+            var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
+                .marginRight(20).cursorPointer()
+                .click(function () {
+                projectManager.deleteProject(project.pid, function () {
+                    blockWrapper.remove();
+                    blank.appendTo(parent);
+                    curProjectBlock = undefined;
+                });
+            });
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
                 ipt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
+                description:project.description,
+                refresh:function () {
+                    this.title.text(projectTitle.text());
+                    this.description = projectDesc.text();
+                }
             };
 
             var onHover = function () {
@@ -276,49 +338,69 @@ $(document).ready(function () {
                 removeButton.color('inherit');
             };
             var onClickProject = function () {
-                listHeaderTitle.text(block.title.text());
-                listName.text(project.description);
-                projectList.animate({opacity: 0, 'z-index': -1}, 300);
-                projectAddButton.animate({display: 'none', opacity: 0}, 300);
-                projectHide = true;
-                resetCodes(project);
-                codeWrapper.displayNone();
-                viewerWrapper.detach();
+                curProject = project;
+                curProjectBlock = block;
+                projectTitle.text(block.title.text());
+                projectDesc.text(block.description);
+                clearCurrentCode();
+                resetCodes(project).then(closeProjectList);
             };
-            blockWrapper.hover(onHover, offHover);
-            block.title.click(onClickProject).cursorPointer();
-            // return block;
+            blockWrapper.hover(onHover, offHover).click(onClickProject).cursorPointer();
         };
 
 
-    // codelist에 새로운 block을 추가하고, 이를 리턴하는 함수
+    // codelist에 새로운 block을 추가하는 함수
     var newCodeBlock = function (code) {
-        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color').color('#fafafa');
+        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom')
+            .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
         // remove functionality
-        var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').marginRight(20).cursorPointer();
-        var onRemove = function () {
-            blockWrapper.remove();
-            titleEditor.text('').editable(false);
-            descEditor.text('').editable(false);
-            dateEditor.text('');
-            codeEditor.text('').editable(false);
-            runButton.visibility('hidden');
-            saveButton.visibility('hidden');
-            currentCodeManager.deleteCode(code.cid);
-            blank.appendTo(parent);
-            // deleteCodeBlock(id);
-        };
-        removeButton.click(onRemove);
+        var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
+            .marginRight(20).cursorPointer()
+            .click(function () {
+                blockWrapper.remove();
+                currentCodeManager.deleteCode(code.cid);
+                clearCurrentCode();
+        });
+
+        // set viewer
+        var viewerWrapper = div().width(codelist.widthPixel()-6).padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
+        var viewerHeader = div().appendTo(viewerWrapper);
+        div().appendTo(viewerHeader).size(5,'100%'); // left space
+        viewerHeader.size('100%',27).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
+            .borderBottom('2px solid green').cursorDefault();
+        var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
+        var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
+            .marginRight(5).cursorPointer()
+            .click(function () {
+            viewerWrapper.fadeOut();
+        });
+
+
+        // trick to adjust resizing control point
+        var virtualHeight = 35;
+        viewerWrapper.borderTop(virtualHeight + 'px solid green');
+        viewerHeader.marginTop(-virtualHeight);
+        viewer.marginTop(-virtualHeight+16);
 
         var block = {
-            title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold(),
-            date: div().appendTo(blockWrapper).size('100%', '15px').text(code.upt_date).fontSize(12).fontColor('gray'),
-            description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray'),
+            title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold().disableSelection(),
+            date: div().appendTo(blockWrapper).size('100%', '15px').text(code.upt_date).fontSize(12).fontColor('gray').disableSelection(),
+            description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray').disableSelection(),
             refresh: function () {
                 this.title.text(code.title);
                 this.date.text(code.upt_date);
                 this.description.text(code.description);
+            },
+            run: function () {
+                // save code
+                var txt = '(function(){' + codeEditor.text() + '})();'; // get text from code editor and modularize it
+                localStorage.setItem('acode', txt);
+
+                // set viewer
+                viewer.empty().viewer();
+                viewerHeader.text('  ' + titleEditor.text());
+                viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
             }
         };
 
@@ -336,25 +418,107 @@ $(document).ready(function () {
             removeButton.color('inherit');
         };
         var onClickCode = function () {
-            if (currentBlock != block) {
+            if (currentCodeBlock === undefined)
+                moduleListButton.fadeIn(fadeDuration);
+            if (currentCodeBlock != block) {
                 codeWrapper.displayInlineBlock();
-                viewerWrapper.detach();
-                titleEditor.editable(true).text(code.title);
-                descEditor.editable(true).css('outline', 'none').text(code.description);
+                titleEditor.text(code.title);
+                descEditor.text(code.description);
                 dateEditor.text(code.upt_date);
-                codeEditor.displayInlineBlock().editable(true).text(code.ctext);
-                runButton.visibility('visible');
-                saveButton.visibility('visible');
+                codeEditor.text(code.ctext);
                 currentCode = code;
-                currentBlock = block;
+                currentCodeBlock = block;
+                setModuleButtonColor();
             }
         };
-
         blockWrapper.hover(onHover, offHover).click(onClickCode);
-
-        return block;
     };
 
+    // modulelist에 새로운 block을 추가하는 함수
+    var newModuleBlock = function (module) {
+        console.log(moduleList.widthPixel());
+        var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel()-20, '80px').borderOption('1px solid', 'bottom')
+            .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
+
+        var block = {
+            title: div().appendTo(blockWrapper).size('55%', '20px').text(module.title).fontSize(18).fontColor('#333333').fontBold().disableSelection(),
+            date: div().appendTo(blockWrapper).size('40%', '15px').text(module.upt_date).fontSize(12).fontColor('gray')
+                .textAlignRight().disableSelection(),
+            author: div().appendTo(blockWrapper).size('30%', '15px').text('by ' + module.author).fontSize(12).fontColor('gray')
+                .float('right').textAlignRight().disableSelection(),
+            description: div().appendTo(blockWrapper).marginTop(8).size('70%', '35px').text(module.description)
+                .fontSize(14).fontColor('gray').disableSelection(),
+        };
+
+        var onHover = function () {
+            blockWrapper.color(basicColorWeak);
+            block.title.fontColor('#004D40');
+            block.date.fontColor('white');
+            block.author.fontColor('white')
+                // .fontBold();
+            block.description.fontColor('white');
+        };
+        var offHover = function () {
+            blockWrapper.color('#fafafa');
+            block.title.fontColor('#333333');
+            block.date.fontColor('gray');
+            block.author.fontColor('gray')
+                // .fontNormal();
+            block.description.fontColor('gray');
+        };
+        blockWrapper.hover(onHover, offHover);
+    };
+
+    /** functions for code list and project list **/
+
+    // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
+    var resetCodes = function (project) {
+        if (project.codeManager) {
+            project.codeManager.resetCodelist();
+        } else {
+            project.codeManager = new CodeManager(project.pid);
+            project.codeManager.init();
+        }
+        currentCodeManager = project.codeManager;
+
+        return new Promise(function(resolve) {
+            resolve();
+        });
+    };
+
+    var clearCurrentCode = function () {
+        currentCode = undefined;
+        currentCodeBlock = undefined;
+        moduleListButton.fadeOut(fadeDuration);
+        codeWrapper.displayNone();
+    };
+
+
+    var openProjectList = function () {
+        projectList.fadeIn(fadeDuration);
+        closeModuleList();
+        fadeInAfterOut(projectAddButton, addCodeButton);
+        projectHide = false;
+        offProjectEdit();
+    };
+
+    var closeProjectList = function () {
+        projectList.fadeOut(fadeDuration);
+        fadeInAfterOut(addCodeButton, projectAddButton);
+        projectHide = true;
+    };
+
+    var openModuleList = function () {
+        moduleList.fadeIn(fadeDuration);
+        closeProjectList();
+        moduleHide = false;
+        offProjectEdit();
+    };
+
+    var closeModuleList = function () {
+        moduleList.fadeOut(fadeDuration);
+        moduleHide = true;
+    };
 
     /** on click events **/
 
@@ -374,30 +538,29 @@ $(document).ready(function () {
             });
     };
 
-    // initialize viewer script and function for onRun event
-    var body = document.body;
-    var viewerScriptWrapper = document.createElement('viewerScripts');
-    viewerScriptWrapper.id = 'viewerScriptWrapper';
-    body.appendChild(viewerScriptWrapper);
-    viewerScriptWrapper.appendChild(document.createElement('script')); // append dummy script node
-
-    var resetViewerScript = function (newScript) {
-        viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
-        viewerScriptWrapper.replaceChild(newScript, viewerScriptWrapper.firstChild);
+    var onRun = function () {
+        currentCodeBlock.run();
     };
 
-    var onRun = function () {
-        // set viewer
-        viewer.empty()
-        viewerWrapper.after(listHeader);
-        viewerWrapper.position('absolute').left(listWrapper.positionLeft()).top(listWrapper.positionTop()).append().hide().slideDown().resizable();
+    var onModule = function () {
+        var msg;
+        console.log(currentCode.mstatus);
+        if (currentCode.mstatus == 0)
+            msg = '모듈화를 하시겠습니까?';
+        else
+            msg = '모듈화를 취소 하시겠습니까?';
+        if (confirm(msg)) {
+            if (currentCode.mstatus == 0) {
+                // 모듈화
+                currentCode.mstatus = 1;
 
-        // set script
-        var newScript = document.createElement('script');
-        var txt = codeEditor.text(); // get text from code editor
-        var innerCode =  txt.replace(/append\(\)/g,"appendTo($('#viewer').data('div'))");
-        newScript.textContent = '(function(){' + innerCode + '})();'; // modularize inner code
-        resetViewerScript(newScript);
+            } else {
+                // 모듈화 취소
+                currentCode.mstatus = 0;
+            }
+            currentCodeManager.updateCode(currentCode);
+            setModuleButtonColor();
+        }
     };
 
     var onSave = function () {
@@ -405,74 +568,148 @@ $(document).ready(function () {
         currentCode.upt_date = getCurrentDate();
         currentCode.description = descEditor.text();
         currentCode.ctext = codeEditor.text();
-        currentBlock.refresh();
+        currentCodeBlock.refresh();
         currentCodeManager.updateCode(currentCode);
     };
 
+    var onProjectList = function () {
+        if (projectHide)
+            openProjectList();
+        else if (currentCodeManager)
+            closeProjectList();
+    };
 
-    /** initialization **/
+    var onProjectEdit = function () {
+        projectTitle.editable(true);
+        projectDesc.editable(true);
+        fadeInAfterOut(projectSaveButton, projectEditButton, 200);
+    };
 
-    var projectManager = new ProjectManager();
-    // var codeManager = new CodeManager();
-    projectManager.init();
+    var offProjectEdit = function () {
+        projectTitle.editable(false);
+        projectDesc.editable(false);
+        fadeInAfterOut(projectEditButton, projectSaveButton, 200);
+    };
 
-
-    // create project list
-    var projectHide = false;
-    var onProject = function () {
-        projectHide = !projectHide;
-        if (projectHide) {
-            projectList.animate({opacity: 0, 'z-index': -1}, 300);
-            projectAddButton.animate({display: 'none', opacity: 0}, 300);
+    var onProjectSave = function () {
+        if (confirm("정말로 저장하시겠습니까?")) {
+            var newProject = buildProject(curProject);
+            newProject.title = projectTitle.text();
+            newProject.description = projectDesc.text();
+            projectManager.updateProject(newProject,
+                function () {
+                    curProjectBlock.refresh();
+            },
+                function() {
+                    projectTitle.text(curProject.title);
+                    projectDesc.text(curProject.description);
+                }
+            );
+        } else {
+            projectTitle.text(curProject.title);
+            projectDesc.text(curProject.description);
         }
-        else {
-            projectList.zIndex(2);
-            projectList.animate({opacity: 1}, 300);
-            projectAddButton.display('inline-block')
-            projectAddButton.animate({opacity: 1}, 300);
-        }
+        offProjectEdit();
+    };
+
+
+    var onModuleList = function () {
+        if (moduleHide)
+            openModuleList();
+        else
+            closeModuleList();
+    };
+
+    var onLogout = function () {
+        localStorage.clear('aauth');
+        localStorage.clear('ainfo');
+        $(location).attr('href', '/?app=signin');
     };
 
 
     /** design **/
 
-        // design sidebar
+    // basic layout
+    var parent = div().append().size(outerWidth, '100%');
+    var sidebar = div().appendTo(parent).size(outerWidth/20, '100%').color('white');
+    var content = div().appendTo(parent).size(outerWidth*19/20, '100%');
+    var projectList = div().appendTo(content).zIndex(3).size(outerWidth/4, '100%').color(projectColor)
+        .border(1).borderColor('#aaaaaa').position('absolute').left(content.positionLeft()).top(content.positionTop());
+    var moduleList = div().appendTo(content).cssSameWith(projectList).color(moduleColor).displayNone();
+    var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, '100%').border(1).borderOption('#aaaaaa', 'color').paddingBottom(1);
+    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, '100%').padding(15).color('white').displayNone();
+    var blank = div();
+
+    // design sidebar
     var decoButton = function (div) {
-            div.size(30, 30).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius')
-                .fontBold().fontSize(28).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
+            div.size(20, 20).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
+                .fontBold().fontSize(20).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
         };
-    var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(40).text('+').click(onAddCode);
-    var projectButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('P').fontSize(20).size(20, 20).padding(5).click(onProject);
-    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(10).text('new').fontSize(12).size(20, 20)
-        .padding(5).click(onAddProject);
+    var logoutButton = div().appendTo(sidebar).size(50,20).margin(5).marginTop(15).paddingTop(4).color('green')
+        .border(2).borderRadius(4).borderColor('green').textAlignCenter().text('logout').fontSize(14).fontColor('white')
+        .cursorPointer().hoverColor('white','green').hoverTextColor('green','white').click(onLogout);
+    var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(30)
+        .paddingTop(0).height(25).text('+').fontSize(28).click(onAddCode).displayNone();
+    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(30).text('new').fontSize(12).click(onAddProject);
+    var projectListButton = div().appendTo(sidebar).deco(decoButton).text('P').click(onProjectList);
+    var moduleListButton = div().appendTo(sidebar).deco(decoButton).text('M').click(onModuleList).displayNone();
 
     // design projectlist
     var projectHeader = div().appendTo(projectList).size('100%', '170px').color('#white').borderBottom('3px solid green');
     var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(50).text('Project List').fontSize(28).textAlignCenter();
     var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
-    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto();
+    var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).overflowAuto();
 
+
+    // design modulelist
+    var moduleHeader = div().appendTo(moduleList).size('100%', '170px').color('#white').borderBottom('3px solid #26A69A');
+    var moduleHeaderTitle = div().appendTo(moduleHeader).size('100%', '40px').marginTop(50).text('Module List').fontSize(28).textAlignCenter();
+    var moduleName = div().appendTo(moduleHeader).size('100%', '50px').marginTop(20).text('AMBA').fontSize(22).fontColor('gray').textAlignCenter();
+    var moduleListWrapper = div().appendTo(moduleList).size('100%', moduleList.heightPixel() - moduleHeader.heightPixel()).overflowAuto();
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
-    var listHeaderTitle = div().appendTo(listHeader).size('100%', '40px').marginTop(40).text('Project name').fontSize(28).fontBold().fontColor('white').textAlignCenter();
-    var listName = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20).fontColor('#1B5E20').textAlignCenter();
-    var viewerWrapper = div().size(codelist.widthPixel()-20,codelist.widthPixel()*1.4).padding(10).backgroundColor('#cccccc').draggable().zIndex(5);
-    var viewer = div().appendTo(viewerWrapper).id('viewer').size('100%','100%').overflowAuto().backgroundColor('white').border(1).borderColor('gray');
-    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel()).borderOption('1px solid gray', 'top').overflowAuto().color('white');
+    var projectEditButton = div().appendTo(listHeader).size(10,10).margin(10).marginBottom(20).float('right').color('green')
+        .borderRadius(2).hoverColor(projectColor,'green').cursorPointer().click(onProjectEdit);
+    var projectSaveButton = div().appendTo(listHeader).cssSameWith(projectEditButton).size(40,20).margin(10)
+        .text('Save').fontSize(12).fontColor('white').textAlignCenter()
+        .hoverColor(projectColor,'green').hoverTextColor('green','white').displayNone().click(onProjectSave);
+    var projectTitle = div().appendTo(listHeader).size('100%', '40px').text('Project name')
+        .fontSize(28).fontBold().fontColor('white').textAlignCenter();
+    var projectDesc = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)
+        .fontColor('#1B5E20').textAlignCenter();
+    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
+        .borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').fontSize(30).fontBold().fontColor(basicColor).overflowAuto();
-    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').marginTop(10).marginLeft(10).fontSize(20).fontBold().fontColor('gray').overflowAuto();
-    var saveButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
-        .borderOption(5, 'radius').float('right').visibility('hidden').click(onSave).cursorPointer();
-    var runButton = div().appendTo(rightWrapperHeader).size(50, 20).padding(5).color('#05aa33').text('Run').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
-        .borderOption(5, 'radius').float('right').visibility('hidden').click(onRun).cursorPointer().marginRight(20);
+    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold()
+        .fontColor(basicColor).overflowAuto();
+    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').editable().marginTop(10).marginLeft(10)
+        .fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
+        .fontSize(20).overflowAuto();
+    var saveButton = div().appendTo(rightWrapperHeader).size(48, 18).padding(5).color(buttonColor)
+        .text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
+        .border(2).borderColor(buttonColor).borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
+    var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
+    var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(15).click(onModule);
     var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
 
-    var codeEditor = div().appendTo(codeWrapper).aceEditor().displayNone().zIndex(1).size('95%', '80%').marginTop(10).padding(20).fontSize(20).overflowAuto();
+    var setModuleButtonColor = function () {
+        if (currentCode.mstatus == 1)
+            moduleButton.color('white').fontColor('green');
+        else
+            moduleButton.color(buttonColor).fontColor('white');
+    };
 
-});
+    /** initialization **/
+
+    var projectManager = new ProjectManager();
+    var moduleManager = new ModuleManager();
+    projectManager.init();
+    moduleManager.init();
+
+})();

@@ -33,7 +33,7 @@ var outputView = div().appendTo(root).size('600','300').displayBlock()
     .borderOption(1).borderOption('black', 'color');
 
 
-var btnPut = div().appendTo(btnView).size('148','100').text('PUT').verticalAlignCenter()
+var btnPut = div().appendTo(btnView).size('148','100').text('PUT').verticalAlignMiddle()
     .borderOption(1).borderOption('black', 'color')
     .hoverColor('blue','white')
     .click(function () {
