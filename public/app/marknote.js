@@ -13,16 +13,17 @@ var editView = div().appendTo(leftBottom).size('85%', 700).margin(80).color('whi
 var resultView = div().appendTo(rightBottom).size('85%', 700).margin(80).color('white').borderRadius(20);
 
 var result = div().appendTo(resultView).size('90%', '100%').marginLeft(10).color('white').borderRadius(20).fontSize(30);
-var edit = div().appendTo(editView).size('90%', '90%').margin(10).color('white').borderRadius(20).text('').editable()
+
+div().appendTo(editView).aceEditor().size('100%', '100%').borderRadius(20).text('').editable().overflowAuto()
     .fontSize(30).cursorText().keyup(function (dv) {
     result.text(dv.text()).markdown();
 });
 
-var convert = div().appendTo(topDiv).displayBlock().size(200, 50).margin('auto').marginTop(50).color('#1a53ff').borderRadius(5).boxShadow('5px 5px 5px black')
-    .text('Markdown').textAlignCenter().fontSize('35px').fontColor('white').fontBold().disableSelection().cursorPointer().hover(function (dv) {
-        dv.fontColor('black');
-    },  function (dv) {
-        dv.fontColor('white');
-    }).click( function () {
-        result.text(edit.text()).markdown();
-    });
+div().appendTo(topDiv).displayBlock().size(200, 50).margin('auto').marginTop(50).color('#1a53ff').borderRadius(5).boxShadow('5px 5px 5px black')
+    .text('Markdown').textAlignCenter().fontSize('35px').fontColor('white').fontBold().disableSelection().cursorDefault();//.cursorPointer().hover(function (dv) {
+    //     dv.fontColor('black');
+    // },  function (dv) {
+    //     dv.fontColor('white');
+    // }).click( function () {
+    //     result.text(edit.text()).markdown();
+    // });
