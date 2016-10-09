@@ -1,2 +1,2 @@
 eval(localStorage.getItem('acode'));
-localStorage.setItem('acode','');
+localStorage.clear('acode');

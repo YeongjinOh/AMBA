@@ -647,11 +647,12 @@ Div.prototype.moveDown = function (y, delay) {
  * @param properties animation을 적용할 property와 value들을 가진 object입니다.
  *        예를 들어, { width: "70%", opacity: 0.4, marginLeft: "0.6in", fontSize: "3em", borderWidth: "10px" }
  *        와 같은 object가 될 수 있습니다.
- * @param duration animation이 수행되는 시간
+ *        duration animation이 수행되는 시간
+ *        callback animation이 완료되고 수행될 함수
  * @author Yeongjin Oh
  */
-Div.prototype.animate = function (properties, duration) {
-    this.$.animate(properties, duration);
+Div.prototype.animate = function (properties, duration, callback) {
+    this.$.animate(properties, duration, callback);
     return this;
 };
 
@@ -674,6 +675,16 @@ Div.prototype.hide = function (duration, easing, complete) {
 
 Div.prototype.show = function (duration, easing, complete) {
     this.$.show(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.fadeIn = function (duration, easing, complete) {
+    this.$.fadeIn(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.fadeOut = function (duration, easing, complete) {
+    this.$.fadeOut(duration, easing, complete);
     return this;
 };
 

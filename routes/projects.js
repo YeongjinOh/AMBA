@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var crypto = require('./amba_crypto');
-var strformat = require('strformat');
 var db = require('../db');
 var generalErrMsg = "일시적인 오류입니다."
 
@@ -75,10 +74,23 @@ router.post('', function (req, res) {
         })
         .catch(function (error) {
             console.log("ERROR:", error.message || error);
-            res.json({
-                resultCode: -1,
-                msg: generalErrMsg
-            });
+
+            if (error.code == 23505) {
+                res.json({
+                    resultCode: -2,
+                    msg: '프로젝트명이 중복됩니다.\n다른 이름으로 시도하여 주세요.'
+                });
+            } else if (error.code == 23502) {
+                res.json({
+                    resultCode: -3,
+                    msg: '올바른 프로젝트 명을 입력해주세요.'
+                });
+            } else {
+                res.json({
+                    resultCode: -1,
+                    msg: "프로젝트 생성에 실패하였습니다.\n다시 시도하여 주세요."
+                });
+            }
         });
 });
 
@@ -100,10 +112,17 @@ router.post('/update', function (req, res) {
         })
         .catch(function (error) {
             console.log("ERROR:", error.message || error);
-            res.json({
-                resultCode: -1,
-                msg: '프로젝트를 저장할 수 없습니다.\n다시 시도하여 주세요.'
-            });
+            if (error.code == 23505) {
+                res.json({
+                    resultCode: -2,
+                    msg: '프로젝트명이 중복됩니다.\n다른 이름으로 시도하여 주세요.'
+                });
+            } else {
+                res.json({
+                    resultCode: -1,
+                    msg: '프로젝트를 저장할 수 없습니다.\n다시 시도하여 주세요.'
+                });
+            }
         });
 });
 
@@ -190,15 +209,15 @@ router.post('/codes', function (req, res) {
 
 /**
  * POST projects/codes/update
- * @param code {cid, uid, pid, title, ctext, description, ipt_date, upt_date}
+ * @param code {cid, uid, pid, title, ctext, mstatus, description, ipt_date, upt_date}
  * @return resultCode
  */
 router.post('/codes/update', function (req, res) {
     var params = req.body;
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
-    var query = "UPDATE code_store SET (cid, title, ctext, description, upt_date) " +
-        "= (${newCid}, ${title}, ${ctext}, ${description}, now()) WHERE cid=${cid}";
+    var query = "UPDATE code_store SET (cid, title, ctext, mstatus, description, upt_date) " +
+        "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${description}, now()) WHERE cid=${cid}";
     db.none(query, params)
         .then(function () {
             res.json({
