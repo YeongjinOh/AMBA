@@ -71,7 +71,7 @@
         this.pid = code.pid;
         this.title = code.title;
         this.ctext = code.ctext;
-        this.mstatus = code.mstatus;
+        this.mstatus = code.mstatus || 0;
         this.description = code.description;
         this.ipt_date = code.ipt_date.slice(0, 10);
         this.upt_date = code.upt_date.slice(0, 10);
@@ -361,6 +361,7 @@
                 blockWrapper.remove();
                 currentCodeManager.deleteCode(code.cid);
                 clearCurrentCode();
+                blank.append();
         });
 
         // set viewer
@@ -373,7 +374,7 @@
         var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
             .marginRight(5).cursorPointer()
             .click(function () {
-            viewerWrapper.fadeOut();
+            viewerWrapper.fadeOut().detach();
         });
 
 
