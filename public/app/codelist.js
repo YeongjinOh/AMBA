@@ -139,7 +139,7 @@
                 upt_date: currentDate
             };
             var project = buildProject(defaultProject);
-            return $.post("/projects", {token:token, project:JSON.stringify(project)})
+            $.post("/projects", {token:token, project:JSON.stringify(project)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         project.pid = data.pid;
@@ -228,7 +228,7 @@
             var currentDate = getCurrentDate();
             var defaultCode = {
                 pid: pid,
-                title: "new code " + codes.length,
+                title: prompt("코드 명을 입력해주세요."),
                 ctext: "// write code here",
                 description: "code description",
                 ipt_date: currentDate,
@@ -248,7 +248,7 @@
                 });
         };
 
-        this.updateCode = function (newCode) {
+        this.updateCode = function (newCode, resolve, reject) {
             $.post("/projects/codes/update", newCode)
                 .done(function (data) {
                     if (data.resultCode === 0) {
@@ -259,8 +259,12 @@
                                 break;
                             }
                         }
+                        if (typeof resolve === 'function')
+                            resolve();
                     } else {
                         alert(data.msg);
+                        if (typeof reject === 'function')
+                            reject();
                     }
                 });
         };
@@ -348,7 +352,6 @@
             };
             var onClickProject = function () {
                 if (!deleted) {
-                    console.log(deleted);
                     curProject = project;
                     curProjectBlock = block;
                     projectTitle.text(block.title.text());
@@ -409,7 +412,7 @@
             },
             run: function () {
                 // save code
-                var txt = '(function(){' + codeEditor.text() + '})();'; // get text from code editor and modularize it
+                var txt = '(function(){' + codeEditor.text() + '\n})();'; // get text from code editor and modularize it
                 localStorage.setItem('acode', txt);
 
                 // set viewer
@@ -578,12 +581,17 @@
     };
 
     var onSave = function () {
-        currentCode.title = titleEditor.text();
-        currentCode.upt_date = getCurrentDate();
-        currentCode.description = descEditor.text();
-        currentCode.ctext = codeEditor.text();
-        currentCodeBlock.refresh();
-        currentCodeManager.updateCode(currentCode);
+
+        currentCodeManager.updateCode(currentCode, function () {
+            // update code
+            currentCode.title = titleEditor.text();
+            currentCode.upt_date = getCurrentDate();
+            currentCode.description = descEditor.text();
+            currentCode.ctext = codeEditor.text();
+
+            // update code block
+            currentCodeBlock.refresh();
+            });
     };
 
     var onProjectList = function () {
