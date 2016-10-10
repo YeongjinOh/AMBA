@@ -139,7 +139,7 @@
                 upt_date: currentDate
             };
             var project = buildProject(defaultProject);
-            $.post("/projects", {token:token, project:JSON.stringify(project)})
+            return $.post("/projects", {token:token, project:JSON.stringify(project)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         project.pid = data.pid;
