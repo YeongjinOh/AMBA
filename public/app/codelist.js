@@ -416,7 +416,7 @@
                 localStorage.setItem('acode', txt);
 
                 // set viewer
-                viewer.empty().viewer();
+                viewer.empty().iframe('/?app=ab_previewer');
                 viewerHeader.text('  ' + titleEditor.text());
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
             }

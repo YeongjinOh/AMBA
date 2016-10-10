@@ -18,6 +18,7 @@ function Div() {
     this.displayInlineBlock();
     this.isAddedText = false;
     this.verticalAlign('top');
+    this.boxSizingBorderBox();
 }
 
 
@@ -277,7 +278,7 @@ var addAllCssMethods = function () {
         "border-width": [],
         "bottom": [],
         "box-shadow": [],
-        "box-sizing": [],
+        "box-sizing": ['border-box', 'content-box', 'padding-box'],
         "caption-side": [],
         "clear": [],
         "clip": [],
@@ -432,7 +433,6 @@ Div.prototype.textInterceptor = function (fn) {
     this.fnText = fn;
 }
 
-// TODO : editable 속성의 div에서 text 받아오기.
 Div.prototype.text = function (txt) {
     if(this.fnText) {
         return this.fnText(txt);
@@ -470,21 +470,19 @@ Div.prototype.fontNormal = function () {
     return this.cssText('font-weight','normal');
 };
 
-// css('border', '1px 2px 3px 4px') 와 같은 입력이 적용되지 않는 것 같습니다.
-// 'border-bottom', 'border-top'  등등 각각에 입력을 해야 할까요? (Yeongjin 09/23)
 Div.prototype.border = function (value) {
-    if (typeof value === 'string') {
-        var parse = function (num) {
-            return parseInt(num);
-        }
-        value = _.chain(value.split(' ')).map(parse).value().join('px ') + 'px';
+    if (typeof value === 'number') {
+        var style = this.borderStyle();
+        if(style == 'none')
+            style = 'solid';
+        return this.css('border', value + 'px ' + style);
     }
-    else if (typeof value === 'number')
-        return this.css('border', value + 'px solid black');
     return this.css('border', value);
 };
 
 
+
+// TODO remove borderOption
 /**
  * border와 관련된 다양한 옵션들을 자유롭게 쓸 수 있도록 바꾸었습니다.
  * @param value border의 width가 될 숫자값 혹은 '2px solid'와 같은 value
@@ -831,10 +829,22 @@ Div.prototype.textPassword = function(value) {
 
 /**
  * @desc jquery empty를 이용해서 children을 지웁니다.
+ *      $text는 text가 있는 상황이면 항상 this.$에 append 되어 있습니다.
  * @author Yeongjin Oh
  */
 Div.prototype.empty = function () {
+    var $span = this.$text;
+    var needToAttach = false;
+
+    if ($span.parent() == this.$) {
+        $span.text('');
+        $span.detach();
+        needToAttach = true;
+    }
     this.$.empty();
+
+    if (needToAttach)
+        $span.appendTo(this.$);
     return this;
 };
 
@@ -850,23 +860,41 @@ Div.prototype.html = function (tag) {
     return this;
 };
 
-Div.prototype.markdown = function() {
+// TODO text, html intercepting (Jisoo)
+Div.prototype.markdown = function(string) {
     var that = this;
-
+    if (string === undefined)
+        string = this.text();
     AB.loadModule('showdown', function(){
         var sdModule = module.showdown.converter();
-        var htmlText = sdModule.makeHtml(that.$text.text());
+        var htmlText = sdModule.makeHtml(string);
         that.html(htmlText);
     });
+
+    return this;
 };
 
 /**
  * 현재 Div를 localStorage에 저장된 code를 보여주는 viewer로 세팅합니다.
  * @author Yeongjin Oh
  */
-Div.prototype.viewer = function () {
-    this.$viewer = $('<iframe>').attr('src','/?app=viewer').width('100%').height('100%').css('border','none');
-    this.$viewer.appendTo(this.$);
+Div.prototype.iframe = function (src) {
+
+    // remove iframe
+    if (src === '') {
+        if (this.$iframe)
+            this.$iframe.remove();
+        return this;
+    }
+    if (src === undefined) {
+        return this.$iframe;
+    }
+    if (this.$iframe)
+        this.$iframe.attr('src', src);
+    else {
+        this.$iframe = $('<iframe>').attr('src', src).width('100%').height('100%').css('border', 'none');
+        this.$iframe.appendTo(this.$);
+    }
     return this;
 };
 
@@ -883,7 +911,9 @@ Div.prototype.verticalAlignMiddle = function() {
     }
     minTop-=this.offset().top;
     maxBottom-=this.offset().top;
-    this.paddingTop( (parseInt(this.height())-maxBottom)/2 );
+    var paddingTop = (parseInt(this.height())-maxBottom)/2;
+    this.paddingTop(paddingTop);
+    this.height(this.heightPixel()-paddingTop);
 
     return this;
 };
