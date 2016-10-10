@@ -53,6 +53,11 @@
         })
     };
 
+     // list 내의 block을 지울 때, UI가 깨지는 것을 방지하기 위해 dummy div를 append 합니다.
+    var refreshList = function () {
+        blank.append();
+    };
+
     /** define Project, Code classes **/
 
         // Q. insert, update date는 db에 들어간 시간을 기준? 클라이언트 리퀘스트 기준?
@@ -304,16 +309,20 @@
     var newProjectBlock = function (project) {
             var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', '70px')
                 .borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color');
+            var deleted = false;
 
             // remove functionality
             var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
                 .marginRight(20).cursorPointer()
                 .click(function () {
-                projectManager.deleteProject(project.pid, function () {
-                    blockWrapper.remove();
-                    blank.appendTo(parent);
-                    curProjectBlock = undefined;
-                });
+                    if (confirm("프로젝트 [" + block.title.text() + "]를 정말로 삭제하시겠습니까?")) {
+                        deleted = true;
+                        projectManager.deleteProject(project.pid, function () {
+                            blockWrapper.remove();
+                            refreshList();
+                            curProjectBlock = undefined;
+                        });
+                    }
             });
 
             var block = {
@@ -338,12 +347,15 @@
                 removeButton.color('inherit');
             };
             var onClickProject = function () {
-                curProject = project;
-                curProjectBlock = block;
-                projectTitle.text(block.title.text());
-                projectDesc.text(block.description);
-                clearCurrentCode();
-                resetCodes(project).then(closeProjectList);
+                if (!deleted) {
+                    console.log(deleted);
+                    curProject = project;
+                    curProjectBlock = block;
+                    projectTitle.text(block.title.text());
+                    projectDesc.text(block.description);
+                    clearCurrentCode();
+                    resetCodes(project).then(closeProjectList);
+                }
             };
             blockWrapper.hover(onHover, offHover).click(onClickProject).cursorPointer();
         };
@@ -358,10 +370,12 @@
         var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
             .marginRight(20).cursorPointer()
             .click(function () {
-                blockWrapper.remove();
-                currentCodeManager.deleteCode(code.cid);
-                clearCurrentCode();
-                blank.append();
+                if (confirm("코드 [" + block.title.text() + "]를 정말로 삭제하시겠습니까?")) {
+                    blockWrapper.remove();
+                    currentCodeManager.deleteCode(code.cid);
+                    clearCurrentCode();
+                    refreshList();
+                }
         });
 
         // set viewer
@@ -437,7 +451,6 @@
 
     // modulelist에 새로운 block을 추가하는 함수
     var newModuleBlock = function (module) {
-        console.log(moduleList.widthPixel());
         var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel()-20, '80px').borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
