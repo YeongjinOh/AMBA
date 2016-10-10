@@ -20,10 +20,4 @@ div().appendTo(editView).aceEditor().size('100%', '100%').borderRadius(20).text(
 });
 
 div().appendTo(topDiv).displayBlock().size(200, 50).margin('auto').marginTop(50).color('#1a53ff').borderRadius(5).boxShadow('5px 5px 5px black')
-    .text('Markdown').textAlignCenter().fontSize('35px').fontColor('white').fontBold().disableSelection().cursorDefault();//.cursorPointer().hover(function (dv) {
-    //     dv.fontColor('black');
-    // },  function (dv) {
-    //     dv.fontColor('white');
-    // }).click( function () {
-    //     result.text(edit.text()).markdown();
-    // });
+    .text('Markdown').textAlignCenter().fontSize('35px').fontColor('white').fontBold().disableSelection().cursorDefault();
