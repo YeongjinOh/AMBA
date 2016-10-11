@@ -160,7 +160,7 @@ router.post('/delete', function (req, res) {
  */
 router.get('/codes', function (req, res) {
     var params = getParams(req.url);
-    db.any("SELECT cid, title, mstatus, description, upt_date FROM code_store WHERE pid=${pid}", params)
+    db.any("SELECT cid, pid, title, mstatus, description, upt_date FROM code_store WHERE pid=${pid}", params)
         .then(function (data) {
             res.json({
                 resultCode:0,

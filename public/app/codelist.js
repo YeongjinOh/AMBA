@@ -212,6 +212,8 @@
                               code[prop] = data.code[prop];
                           }
                       }
+                      if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
+                          code['upt_date'] = code['upt_date'].slice(0,10);
                       if (typeof resolve === "function")
                           resolve();
                   } else {
@@ -506,23 +508,21 @@
             author: div().appendTo(blockWrapper).size('30%', '15px').text('by ' + module.author).fontSize(12).fontColor('gray')
                 .float('right').textAlignRight().disableSelection(),
             description: div().appendTo(blockWrapper).marginTop(8).size('70%', '35px').text(module.description)
-                .fontSize(14).fontColor('gray').disableSelection(),
+                .fontSize(14).fontColor('gray').disableSelection()
         };
 
         var onHover = function () {
             blockWrapper.color(basicColorWeak);
             block.title.fontColor('#004D40');
             block.date.fontColor('white');
-            block.author.fontColor('white')
-            // .fontBold();
+            block.author.fontColor('white');
             block.description.fontColor('white');
         };
         var offHover = function () {
             blockWrapper.color('#fafafa');
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
-            block.author.fontColor('gray')
-            // .fontNormal();
+            block.author.fontColor('gray');
             block.description.fontColor('gray');
         };
         blockWrapper.hover(onHover, offHover);
