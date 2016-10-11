@@ -228,8 +228,7 @@
                         }
                         if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
                             code['upt_date'] = code['upt_date'].slice(0, 10);
-                        if (typeof code['deps'] === 'string' || code['deps'] === null)
-                            code['deps'] = [];
+                        code['deps'] = JSON.parse(code['deps']);
                         if (typeof resolve === "function")
                             resolve();
                     } else {
@@ -333,23 +332,21 @@
                 });
         };
 
-        this.resetDeps = function () {
+        // reset dependency of given code
+        this.reset = function (code) {
             for (var prop in modules) {
                 if (modules.hasOwnProperty(prop)) {
                     modules[prop].selected = false;
+                    modules[prop].setColor();
                 }
             }
-        };
-
-        // set dependency of given code
-        this.setDeps = function (code) {
             var deps = code.deps;
+            console.log(deps);
             for (var i = 0; i < deps.length; i++) {
                 modules[deps[i]].selected = true;
+                modules[deps[i]].setColor();
             }
-            ;
         };
-
 
         this.getModules = function () {
             return $.get("/modules", {token: token})
@@ -540,6 +537,13 @@
 
         // colors
         var selOnColor = '#03A9F4', selOffColor = '#B3E5FC', unselOnColor = basicColorWeak, unselOffColor = '#fafafa';
+        module.setColor = function () {
+            if(module.selected)
+                blockWrapper.color(selOffColor);
+            else
+                blockWrapper.color(unselOffColor);
+        };
+
         var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel(), 100).borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
@@ -564,10 +568,7 @@
             block.description.fontColor('white');
         };
         var offHover = function () {
-            if (module.selected)
-                blockWrapper.color(selOffColor);
-            else
-                blockWrapper.color(unselOffColor);
+            module.setColor()
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
             block.author.fontColor('gray');
@@ -575,10 +576,7 @@
         };
         var onClickModule = function () {
             module.selected = toggleModule(currentCode, module.title);
-            if (module.selected)
-                blockWrapper.color(selOffColor);
-            else
-                blockWrapper.color(unselOffColor);
+            module.setColor();
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
             block.author.fontColor('gray');
@@ -627,6 +625,7 @@
     };
 
     var openModuleList = function () {
+        moduleManager.reset(currentCode);
         moduleList.fadeIn(fadeDuration);
         closeProjectList();
         moduleHide = false;
