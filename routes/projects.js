@@ -174,7 +174,6 @@ router.get('/codes', function (req, res) {
                 msg: generalErrMsg
             });
         });
-
 });
 
 /**

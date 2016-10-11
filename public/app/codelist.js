@@ -66,7 +66,6 @@
             this.title = project.title;
             this.main_cid = project.main_cid;
             this.description = project.description;
-            this.ipt_date = project.ipt_date.slice(0, 10);
             this.upt_date = project.upt_date.slice(0, 10);
             this.codeManager;
         };
@@ -79,7 +78,6 @@
         this.mstatus = code.mstatus || 0;
         this.deps = code.deps || "";
         this.description = code.description;
-        this.ipt_date = code.ipt_date.slice(0, 10);
         this.upt_date = code.upt_date.slice(0, 10);
     };
 
@@ -137,7 +135,6 @@
                 var defaultProject = {
                     title: prompt("프로젝트 명을 입력해주세요."),
                     description: "project description",
-                    ipt_date: currentDate,
                     upt_date: currentDate
                 };
                 var project = buildProject(defaultProject);
@@ -226,7 +223,6 @@
                 title: prompt("코드 명을 입력해주세요."),
                 ctext: "// write code here",
                 description: "code description",
-                ipt_date: currentDate,
                 upt_date: currentDate
             };
             var code = buildCode(defaultCode);
@@ -334,10 +330,12 @@
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
-                ipt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
+                upt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.upt_date).fontSize(12).fontColor('gray'),
                 description: project.description,
                 refresh: function () {
                     this.title.text(projectTitle.text());
+                    project.upt_date = getCurrentDate();
+                    this.upt_date.text(project.upt_date);
                     this.description = projectDesc.text();
                 }
             };
@@ -345,12 +343,12 @@
             var onHover = function () {
                 blockWrapper.color(basicColor);
                 block.title.fontColor('white');
-                block.ipt_date.fontColor('white');
+                block.upt_date.fontColor('white');
             };
             var offHover = function () {
                 blockWrapper.color('inherit');
                 block.title.fontColor('#333333');
-                block.ipt_date.fontColor('gray');
+                block.upt_date.fontColor('gray');
                 removeButton.color('inherit');
             };
             var onClickProject = function () {
@@ -410,6 +408,7 @@
             description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray').disableSelection(),
             refresh: function () {
                 this.title.text(code.title);
+                code.upt_date = getCurrentDate();
                 this.date.text(code.upt_date);
                 this.description.text(code.description);
             },
@@ -581,6 +580,7 @@
             }
             currentCodeManager.updateMstatus(uptCode, function () {
                 currentCode.mstatus = uptCode.mstatus;
+                currentCodeBlock.refresh();
                 setModuleButtonColor();
             });
         }
@@ -595,7 +595,6 @@
         currentCodeManager.updateCode(uptCode, function () {
             // update code
             currentCode.title = titleEditor.text();
-            currentCode.upt_date = getCurrentDate();
             currentCode.description = descEditor.text();
             currentCode.ctext = codeEditor.text();
 
