@@ -311,13 +311,12 @@
 
         // 주어진 project object로 부터 project block을 생성 및 append
     var newProjectBlock = function (project) {
-            var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', '70px')
+            var blockWrapper = div().appendTo(projectListWrapper).padding(10).size('100%', 90)
                 .borderOption('1px solid', 'bottom').borderOption('rgb(200,200,200)', 'color');
             var deleted = false;
 
             // remove functionality
-            var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
-                .marginRight(20).cursorPointer()
+            var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right').cursorPointer()
                 .click(function () {
                     if (confirm("프로젝트 [" + block.title.text() + "]를 정말로 삭제하시겠습니까?")) {
                         deleted = true;
@@ -366,12 +365,12 @@
 
     // codelist에 새로운 block을 추가하는 함수
     var newCodeBlock = function (code) {
-        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', '100px').borderOption('1px solid', 'bottom')
+        var blockWrapper = div().appendTo(listWrapper).padding(10).size('100%', 120).borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
         // remove functionality
         var removeButton = div().appendTo(blockWrapper).size(10, 15).text('X').fontColor('gray').float('right')
-            .marginRight(20).cursorPointer()
+            .cursorPointer()
             .click(function () {
                 if (confirm("코드 [" + block.title.text() + "]를 정말로 삭제하시겠습니까?")) {
                     blockWrapper.remove();
@@ -382,10 +381,10 @@
         });
 
         // set viewer
-        var viewerWrapper = div().width(codelist.widthPixel()-6).padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
+        var viewerWrapper = div().width(codelist.widthPixel()).padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
         var viewerHeader = div().appendTo(viewerWrapper);
         div().appendTo(viewerHeader).size(5,'100%'); // left space
-        viewerHeader.size('100%',27).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
+        viewerHeader.size('100%',33).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
             .borderBottom('2px solid green').cursorDefault();
         var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
         var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
@@ -417,6 +416,7 @@
 
                 // set viewer
                 viewer.empty().iframe('/?app=ab_previewer');
+                viewer.$iframe.appendTo(viewer.$); // attach again
                 viewerHeader.text('  ' + titleEditor.text());
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
             }
@@ -454,7 +454,7 @@
 
     // modulelist에 새로운 block을 추가하는 함수
     var newModuleBlock = function (module) {
-        var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel()-20, '80px').borderOption('1px solid', 'bottom')
+        var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel(), 100).borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
         var block = {
@@ -659,27 +659,27 @@
         .border(1).borderColor('#aaaaaa').position('absolute').left(content.positionLeft()).top(content.positionTop());
     var moduleList = div().appendTo(content).cssSameWith(projectList).color(moduleColor).displayNone();
     var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, '100%').border(1).borderOption('#aaaaaa', 'color').paddingBottom(1);
-    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*13/20, '100%').padding(15).color('white').displayNone();
+    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*14/20, '100%').padding(15).color('white').displayNone();
     var blank = div();
 
     // design sidebar
     var decoButton = function (div) {
-            div.size(20, 20).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
+            div.size(30, 30).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
                 .fontBold().fontSize(20).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
         };
-    var logoutButton = div().appendTo(sidebar).size(50,20).margin(5).marginTop(15).paddingTop(4).color('green')
+    var logoutButton = div().appendTo(sidebar).size(50,24).margin(5).marginTop(15).paddingTop(4).color('green')
         .border(2).borderRadius(4).borderColor('green').textAlignCenter().text('logout').fontSize(14).fontColor('white')
         .cursorPointer().hoverColor('white','green').hoverTextColor('green','white').click(onLogout);
     var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(30)
-        .paddingTop(0).height(25).text('+').fontSize(28).click(onAddCode).displayNone();
+        .paddingTop(0).text('+').fontSize(28).click(onAddCode).displayNone();
     var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(30).text('new').fontSize(12).click(onAddProject);
     var projectListButton = div().appendTo(sidebar).deco(decoButton).text('P').click(onProjectList);
     var moduleListButton = div().appendTo(sidebar).deco(decoButton).text('M').click(onModuleList).displayNone();
 
     // design projectlist
-    var projectHeader = div().appendTo(projectList).size('100%', '170px').color('#white').borderBottom('3px solid green');
-    var projectHeaderTitle = div().appendTo(projectHeader).size('100%', '40px').marginTop(50).text('Project List').fontSize(28).textAlignCenter();
-    var projectName = div().appendTo(projectHeader).size('100%', '50px').marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
+    var projectHeader = div().appendTo(projectList).size('100%', 170).color('#white').borderBottom('3px solid green');
+    var projectHeaderTitle = div().appendTo(projectHeader).size('100%', 40).marginTop(50).text('Project List').fontSize(28).textAlignCenter();
+    var projectName = div().appendTo(projectHeader).size('100%', 50).marginTop(20).text(username).fontSize(22).fontColor('gray').textAlignCenter();
     var projectListWrapper = div().appendTo(projectList).size('100%', projectList.heightPixel() - projectHeader.heightPixel()).overflowAuto();
 
 
@@ -704,7 +704,7 @@
         .borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
-    var wrapperHeader = div().appendTo(codeWrapper).size('95%', '100px').padding(10).borderOption('1px solid gray', 'bottom');
+    var wrapperHeader = div().appendTo(codeWrapper).size('95%', 120).padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
     var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold()
@@ -713,7 +713,7 @@
         .fontSize(20).fontBold().fontColor('gray').overflowAuto();
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
-    var saveButton = div().appendTo(rightWrapperHeader).size(48, 18).padding(5).color(buttonColor)
+    var saveButton = div().appendTo(rightWrapperHeader).size(60, 30).padding(5).color(buttonColor)
         .text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
         .border(2).borderColor(buttonColor).borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
     var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
