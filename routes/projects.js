@@ -211,8 +211,9 @@ router.post('/codes', function (req, res) {
     var cid =  getCid(code.pid, code.title);
     code.cid = cid;
     code.uid =  getUid(params.token);
-    var query = "INSERT INTO code_store(cid, uid, pid, title, ctext, description, ipt_date, upt_date) " +
-        "VALUES (${cid}, ${uid}, ${pid}, ${title}, ${ctext}, ${description}, now(), now())";
+    code.deps = '[]';
+    var query = "INSERT INTO code_store(cid, uid, pid, title, ctext, deps, description, ipt_date, upt_date) " +
+        "VALUES (${cid}, ${uid}, ${pid}, ${title}, ${ctext}, ${deps}, ${description}, now(), now())";
     db.none(query, code)
         .then(function () {
             res.json({
@@ -246,6 +247,7 @@ router.post('/codes/update', function (req, res) {
     var params = req.body;
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
+
     var query = "UPDATE code_store SET (cid, title, ctext, mstatus, deps, description, upt_date) " +
         "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${deps}, ${description}, now()) WHERE cid=${cid}";
     db.none(query, params)

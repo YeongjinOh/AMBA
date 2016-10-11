@@ -58,16 +58,30 @@
         blank.append();
     };
 
+
+    // 주어진 모듈이 없으면 추가하고 true를, 이미 있으면 제거하고 false를 리턴합니다.
+    toggleModule = function (code, title) {
+        var deps = code.deps;
+        for (var i = 0; i < deps.length; i++) {
+            if (deps[i] === title) {
+                deps.splice(i, 1);
+                return false;
+            }
+        }
+        deps.push(title);
+        return true;
+    };
+
     /** define Project, Code classes **/
 
     var Project = function (project) {
-            this.pid = project.pid;
-            this.title = project.title;
-            this.main_cid = project.main_cid;
-            this.description = project.description;
-            this.upt_date = project.upt_date.slice(0, 10);
-            this.codeManager;
-        };
+        this.pid = project.pid;
+        this.title = project.title;
+        this.main_cid = project.main_cid;
+        this.description = project.description;
+        this.upt_date = project.upt_date.slice(0, 10);
+        this.codeManager;
+    };
 
     var Code = function (code) {
         this.cid = code.cid;
@@ -75,7 +89,7 @@
         this.title = code.title;
         this.ctext = code.ctext;
         this.mstatus = code.mstatus || 0;
-        this.deps = code.deps || "";
+        this.deps = code.deps || [];
         this.description = code.description;
         this.upt_date = code.upt_date.slice(0, 10);
     };
@@ -85,7 +99,7 @@
         this.title = module.title;
         this.description = module.description;
         this.upt_date = module.upt_date.slice(0, 10);
-        ;
+        this.selected = false;
     };
 
     var buildProject = function (obj) {
@@ -203,25 +217,27 @@
         };
 
         this.getCode = function (code, resolve, reject) {
-          $.get('/projects/codes/code', {cid: code.cid})
-              .done(function (data) {
-                  if (data.resultCode === 0) {
-                      // copy properties
-                      for (var prop in data.code) {
-                          if (data.code.hasOwnProperty(prop)) {
-                              code[prop] = data.code[prop];
-                          }
-                      }
-                      if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
-                          code['upt_date'] = code['upt_date'].slice(0,10);
-                      if (typeof resolve === "function")
-                          resolve();
-                  } else {
-                      alert(data.msg);
-                      if (typeof resolve === "function")
-                          reject();
-                  }
-              });
+            $.get('/projects/codes/code', {cid: code.cid})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        // copy properties
+                        for (var prop in data.code) {
+                            if (data.code.hasOwnProperty(prop)) {
+                                code[prop] = data.code[prop];
+                            }
+                        }
+                        if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
+                            code['upt_date'] = code['upt_date'].slice(0, 10);
+                        if (typeof code['deps'] === 'string' || code['deps'] === null)
+                            code['deps'] = [];
+                        if (typeof resolve === "function")
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof resolve === "function")
+                            reject();
+                    }
+                });
         };
 
         this.getCodes = function () {
@@ -302,23 +318,46 @@
 
     var ModuleManager = function () {
 
-        var modules = [];
+        // modules는 모듈명(key)와 모듈 객체(value)의 쌍으로 이루어진 JSON object
+        var modules = {};
         var that = this;
 
         this.init = function () {
             that.getModules()
                 .done(function () {
-                    for (var i = 0; i < modules.length; i++) {
-                        newModuleBlock(modules[i]);
+                    for (var prop in modules) {
+                        if (modules.hasOwnProperty(prop)) {
+                            newModuleBlock(modules[prop]);
+                        }
                     }
                 });
         };
+
+        this.resetDeps = function () {
+            for (var prop in modules) {
+                if (modules.hasOwnProperty(prop)) {
+                    modules[prop].selected = false;
+                }
+            }
+        };
+
+        // set dependency of given code
+        this.setDeps = function (code) {
+            var deps = code.deps;
+            for (var i = 0; i < deps.length; i++) {
+                modules[deps[i]].selected = true;
+            }
+            ;
+        };
+
 
         this.getModules = function () {
             return $.get("/modules", {token: token})
                 .done(function (data) {
                     if (data.resultCode === 0) {
-                        modules = data.modules.map(buildModule);
+                        data.modules.forEach(function (module) {
+                            modules[module.title] = buildModule(module);
+                        });
                     } else {
                         alert(data.msg);
                     }
@@ -498,6 +537,9 @@
 
     // modulelist에 새로운 block을 추가하는 함수
     var newModuleBlock = function (module) {
+
+        // colors
+        var selOnColor = '#03A9F4', selOffColor = '#B3E5FC', unselOnColor = basicColorWeak, unselOffColor = '#fafafa';
         var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel(), 100).borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
@@ -512,20 +554,37 @@
         };
 
         var onHover = function () {
-            blockWrapper.color(basicColorWeak);
+            if (module.selected)
+                blockWrapper.color(selOnColor);
+            else
+                blockWrapper.color(unselOnColor);
             block.title.fontColor('#004D40');
             block.date.fontColor('white');
             block.author.fontColor('white');
             block.description.fontColor('white');
         };
         var offHover = function () {
-            blockWrapper.color('#fafafa');
+            if (module.selected)
+                blockWrapper.color(selOffColor);
+            else
+                blockWrapper.color(unselOffColor);
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
             block.author.fontColor('gray');
             block.description.fontColor('gray');
         };
-        blockWrapper.hover(onHover, offHover);
+        var onClickModule = function () {
+            module.selected = toggleModule(currentCode, module.title);
+            if (module.selected)
+                blockWrapper.color(selOffColor);
+            else
+                blockWrapper.color(unselOffColor);
+            block.title.fontColor('#333333');
+            block.date.fontColor('gray');
+            block.author.fontColor('gray');
+            block.description.fontColor('gray');
+        };
+        blockWrapper.hover(onHover, offHover).click(onClickModule);
     };
 
     /** functions for code list and project list **/
@@ -631,8 +690,8 @@
         uptCode.upt_date = getCurrentDate();
         uptCode.description = descEditor.text();
         uptCode.ctext = codeEditor.text();
+        uptCode.deps = JSON.stringify(uptCode.deps);
         currentCodeManager.updateCode(uptCode, function () {
-
             // update code block
             currentCodeBlock.syncWithEditor();
         });
