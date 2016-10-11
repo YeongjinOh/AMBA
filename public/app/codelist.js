@@ -60,7 +60,6 @@
 
     /** define Project, Code classes **/
 
-        // Q. insert, update date는 db에 들어간 시간을 기준? 클라이언트 리퀘스트 기준?
     var Project = function (project) {
             this.pid = project.pid;
             this.title = project.title;
@@ -103,7 +102,6 @@
 
 
     /** define ProjectManager, CodeManager classes **/
-        // TODO define functions using prototype
         // 모든 유저는 하나의 project manager를 가지고 project를 관리합니다.
     var ProjectManager = function () {
 
@@ -198,11 +196,30 @@
         };
 
         this.resetCodelist = function () {
-            listWrapper.empty()
+            listWrapper.empty();
             for (var i = 0; i < codes.length; i++) {
                 newCodeBlock(codes[i]);
             }
-            ;
+        };
+
+        this.getCode = function (code, resolve, reject) {
+          $.get('/projects/codes/code', {cid: code.cid})
+              .done(function (data) {
+                  if (data.resultCode === 0) {
+                      // copy properties
+                      for (var prop in data.code) {
+                          if (data.code.hasOwnProperty(prop)) {
+                              code[prop] = data.code[prop];
+                          }
+                      }
+                      if (typeof resolve === "function")
+                          resolve();
+                  } else {
+                      alert(data.msg);
+                      if (typeof resolve === "function")
+                          reject();
+                  }
+              });
         };
 
         this.getCodes = function () {
@@ -332,11 +349,19 @@
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
                 upt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.upt_date).fontSize(12).fontColor('gray'),
                 description: project.description,
-                refresh: function () {
-                    this.title.text(projectTitle.text());
+                syncWithEditor: function () {
+                    project.title = projectTitle.text();
+                    project.description = projectDesc.text();
                     project.upt_date = getCurrentDate();
+                    this.title.text(project.title);
                     this.upt_date.text(project.upt_date);
-                    this.description = projectDesc.text();
+                    this.description = project.description;
+                },
+                syncWithProject: function () {
+                    projectTitle.text(project.title);
+                    projectDesc.text(project.description);
+                    this.title.text(project.title);
+                    this.description = project.description;
                 }
             };
 
@@ -406,11 +431,21 @@
             title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold().disableSelection(),
             date: div().appendTo(blockWrapper).size('100%', '15px').text(code.upt_date).fontSize(12).fontColor('gray').disableSelection(),
             description: div().appendTo(blockWrapper).size('100%', '35px').text(code.description).fontSize(16).fontColor('gray').disableSelection(),
-            refresh: function () {
-                this.title.text(code.title);
+            syncWithEditor: function () {
+                code.title = titleEditor.text();
+                code.description = descEditor.text();
+                code.ctext = codeEditor.text();
                 code.upt_date = getCurrentDate();
+                this.title.text(code.title);
                 this.date.text(code.upt_date);
                 this.description.text(code.description);
+            },
+            syncWithCode: function () {
+                titleEditor.text(code.title);
+                descEditor.text(code.description);
+                dateEditor.text(code.upt_date);
+                codeEditor.text(code.ctext);
+                setModuleButtonColor();
             },
             run: function () {
                 // save code
@@ -439,17 +474,21 @@
             removeButton.color('inherit');
         };
         var onClickCode = function () {
+
             if (currentCodeBlock === undefined)
                 moduleListButton.fadeIn(fadeDuration);
             if (currentCodeBlock != block) {
-                codeWrapper.displayInlineBlock();
-                titleEditor.text(code.title);
-                descEditor.text(code.description);
-                dateEditor.text(code.upt_date);
-                codeEditor.text(code.ctext);
                 currentCode = code;
                 currentCodeBlock = block;
-                setModuleButtonColor();
+                if (code.ctext === undefined) {
+                    currentCodeManager.getCode(code, function () {
+                        block.syncWithCode();
+                        codeWrapper.displayInlineBlock();
+                    });
+                } else {
+                    block.syncWithCode();
+                    codeWrapper.displayInlineBlock();
+                }
             }
         };
         blockWrapper.hover(onHover, offHover).click(onClickCode);
@@ -580,7 +619,7 @@
             }
             currentCodeManager.updateMstatus(uptCode, function () {
                 currentCode.mstatus = uptCode.mstatus;
-                currentCodeBlock.refresh();
+                currentCodeBlock.syncWithEditor();
                 setModuleButtonColor();
             });
         }
@@ -593,13 +632,9 @@
         uptCode.description = descEditor.text();
         uptCode.ctext = codeEditor.text();
         currentCodeManager.updateCode(uptCode, function () {
-            // update code
-            currentCode.title = titleEditor.text();
-            currentCode.description = descEditor.text();
-            currentCode.ctext = codeEditor.text();
 
             // update code block
-            currentCodeBlock.refresh();
+            currentCodeBlock.syncWithEditor();
         });
     };
 
@@ -629,18 +664,14 @@
             newProject.description = projectDesc.text();
             projectManager.updateProject(newProject,
                 function () {
-                    curProject.title = newProject.title;
-                    curProject.description = newProject.description;
-                    curProjectBlock.refresh();
+                    curProjectBlock.syncWithEditor();
                 },
                 function () {
-                    projectTitle.text(curProject.title);
-                    projectDesc.text(curProject.description);
+                    curProjectBlock.syncWithProject();
                 }
             );
         } else {
-            projectTitle.text(curProject.title);
-            projectDesc.text(curProject.description);
+            curProjectBlock.syncWithProject();
         }
         offProjectEdit();
     };

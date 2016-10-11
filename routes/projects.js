@@ -160,7 +160,7 @@ router.post('/delete', function (req, res) {
  */
 router.get('/codes', function (req, res) {
     var params = getParams(req.url);
-    db.any("SELECT * FROM code_store WHERE pid=${pid}", params)
+    db.any("SELECT cid, title, mstatus, description, upt_date FROM code_store WHERE pid=${pid}", params)
         .then(function (data) {
             res.json({
                 resultCode:0,
@@ -175,6 +175,30 @@ router.get('/codes', function (req, res) {
             });
         });
 });
+
+/**
+ * GET projects/codes/code
+ * @param cid
+ * @return resultCode, code
+ */
+router.get('/codes/code', function (req, res) {
+    var params = getParams(req.url);
+    db.one("SELECT title, ctext, mstatus, deps, description, upt_date FROM code_store WHERE cid=${cid}", params)
+        .then(function (data) {
+            res.json({
+                resultCode:0,
+                code:data
+            })
+        })
+        .catch(function (error) {
+            console.log("ERROR:", error.message || error);
+            res.json({
+                resultCode: -1,
+                msg: generalErrMsg
+            });
+        });
+});
+
 
 /**
  * POST projects/codes
