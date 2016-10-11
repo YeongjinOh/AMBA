@@ -14,10 +14,10 @@
         var ainfo = JSON.parse(localStorage.getItem('ainfo'));
         var aauth = localStorage.getItem('aauth');
         return {
-            getUsername : function () {
+            getUsername: function () {
                 return (ainfo && ainfo.username);
             },
-            getToken : function () {
+            getToken: function () {
                 return aauth;
             }
         };
@@ -47,13 +47,13 @@
 
     var fadeInAfterOut = function (inObj, outObj, duration) {
         if (duration === undefined)
-            duration = fadeDuration/2;
+            duration = fadeDuration / 2;
         outObj.fadeOut(duration, function () {
             inObj.fadeIn(duration);
         })
     };
 
-     // list 내의 block을 지울 때, UI가 깨지는 것을 방지하기 위해 dummy div를 append 합니다.
+    // list 내의 block을 지울 때, UI가 깨지는 것을 방지하기 위해 dummy div를 append 합니다.
     var refreshList = function () {
         blank.append();
     };
@@ -77,6 +77,7 @@
         this.title = code.title;
         this.ctext = code.ctext;
         this.mstatus = code.mstatus || 0;
+        this.deps = code.deps || "";
         this.description = code.description;
         this.ipt_date = code.ipt_date.slice(0, 10);
         this.upt_date = code.upt_date.slice(0, 10);
@@ -86,7 +87,8 @@
         this.author = module.author;
         this.title = module.title;
         this.description = module.description;
-        this.upt_date = module.upt_date.slice(0, 10);;
+        this.upt_date = module.upt_date.slice(0, 10);
+        ;
     };
 
     var buildProject = function (obj) {
@@ -103,96 +105,96 @@
 
 
     /** define ProjectManager, CodeManager classes **/
-    // TODO define functions using prototype
+        // TODO define functions using prototype
         // 모든 유저는 하나의 project manager를 가지고 project를 관리합니다.
     var ProjectManager = function () {
 
-        var projects = [];
-        var that = this;
+            var projects = [];
+            var that = this;
 
-        this.init = function () {
-            that.getProjects()
-                .done(function () {
-                    for (var i = 0; i < projects.length; i++) {
-                        newProjectBlock(projects[i]);
-                    }
-                });
-        };
-
-        this.getProjects = function () {
-            return $.get("/projects", {token: token})
-                .done(function (data) {
-                    if (data.resultCode === 0) {
-                        projects = data.projects.map(buildProject);
-                    } else {
-                        alert(data.msg);
-                    }
-                });
-        };
-
-        this.createProject = function () {
-            var currentDate = getCurrentDate();
-            var defaultProject = {
-                title: prompt("프로젝트 명을 입력해주세요."),
-                description: "project description",
-                ipt_date: currentDate,
-                upt_date: currentDate
+            this.init = function () {
+                that.getProjects()
+                    .done(function () {
+                        for (var i = 0; i < projects.length; i++) {
+                            newProjectBlock(projects[i]);
+                        }
+                    });
             };
-            var project = buildProject(defaultProject);
-            return $.post("/projects", {token:token, project:JSON.stringify(project)})
-                .done(function (data) {
-                    if (data.resultCode === 0) {
-                        project.pid = data.pid;
-                        projects.push(project);
-                    } else {
-                        alert(data.msg);
-                    }
-                    data.project = project;
-                    return data;
-                });
-        };
 
-
-        this.updateProject = function (newProject, resolve, reject) {
-            $.post("/projects/update", newProject)
-                .done(function (data) {
-                    if (data.resultCode === 0) {
-                        for (var i = 0; i < projects.length; i++) {
-                            if (projects[i].pid == newProject.pid) {
-                                projects[i] = newProject;
-                                curProject = newProject;
-                                break;
-                            }
+            this.getProjects = function () {
+                return $.get("/projects", {token: token})
+                    .done(function (data) {
+                        if (data.resultCode === 0) {
+                            projects = data.projects.map(buildProject);
+                        } else {
+                            alert(data.msg);
                         }
-                        if (typeof resolve === 'function')
-                            resolve();
-                    } else {
-                        alert(data.msg);
-                        if (typeof reject === 'function')
-                            reject();
-                    }
-                });
-        };
+                    });
+            };
 
-        this.deleteProject = function (pid, resolve) {
-            $.post("/projects/delete", {token: token, pid:pid})
-                .done(function (data) {
-                    if (data.resultCode === 0) {
-                        // remove from array;
-                        for (var i = 0; i < projects.length; i++) {
-                            if (projects[i].pid == pid) {
-                                projects.splice(i, 1);
-                                break;
-                            }
+            this.createProject = function () {
+                var currentDate = getCurrentDate();
+                var defaultProject = {
+                    title: prompt("프로젝트 명을 입력해주세요."),
+                    description: "project description",
+                    ipt_date: currentDate,
+                    upt_date: currentDate
+                };
+                var project = buildProject(defaultProject);
+                return $.post("/projects", {token: token, project: JSON.stringify(project)})
+                    .done(function (data) {
+                        if (data.resultCode === 0) {
+                            project.pid = data.pid;
+                            projects.push(project);
+                        } else {
+                            alert(data.msg);
                         }
-                        if (typeof resolve == 'function')
-                            resolve();
-                    } else {
-                        alert(data.msg);
-                    }
-                });
+                        data.project = project;
+                        return data;
+                    });
+            };
+
+
+            this.updateProject = function (newProject, resolve, reject) {
+                $.post("/projects/update", newProject)
+                    .done(function (data) {
+                        if (data.resultCode === 0) {
+                            for (var i = 0; i < projects.length; i++) {
+                                if (projects[i].pid == newProject.pid) {
+                                    projects[i] = newProject;
+                                    curProject = newProject;
+                                    break;
+                                }
+                            }
+                            if (typeof resolve === 'function')
+                                resolve();
+                        } else {
+                            alert(data.msg);
+                            if (typeof reject === 'function')
+                                reject();
+                        }
+                    });
+            };
+
+            this.deleteProject = function (pid, resolve) {
+                $.post("/projects/delete", {token: token, pid: pid})
+                    .done(function (data) {
+                        if (data.resultCode === 0) {
+                            // remove from array;
+                            for (var i = 0; i < projects.length; i++) {
+                                if (projects[i].pid == pid) {
+                                    projects.splice(i, 1);
+                                    break;
+                                }
+                            }
+                            if (typeof resolve == 'function')
+                                resolve();
+                        } else {
+                            alert(data.msg);
+                        }
+                    });
+            };
         };
-    };
 
     // 각각의 project는 하나의 code manager를 가지고 code들을 관리합니다.
     var CodeManager = function (pid) {
@@ -235,7 +237,7 @@
                 upt_date: currentDate
             };
             var code = buildCode(defaultCode);
-            return $.post("/projects/codes", {token:token, code:JSON.stringify(code)})
+            return $.post("/projects/codes", {token: token, code: JSON.stringify(code)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         code.cid = data.cid;
@@ -248,14 +250,15 @@
                 });
         };
 
-        this.updateCode = function (newCode, resolve, reject) {
-            $.post("/projects/codes/update", newCode)
+        this.updateCode = function (uptCode, resolve, reject) {
+            $.post("/projects/codes/update", uptCode)
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         // update
                         for (var i = 0; i < codes.length; i++) {
-                            if (codes[i].cid == newCode.cid) {
-                                codes[i] = newCode;
+                            if (codes[i].cid == uptCode.cid) {
+                                uptCode.cid = data.newCid;
+                                codes[i] = uptCode;
                                 break;
                             }
                         }
@@ -326,13 +329,13 @@
                             curProjectBlock = undefined;
                         });
                     }
-            });
+                });
 
             var block = {
                 title: div().appendTo(blockWrapper).size('100%', '30px').text(project.title).fontSize(20).fontColor('#333333').fontBold(),
                 ipt_date: div().appendTo(blockWrapper).size('100%', '15px').text(project.ipt_date).fontSize(12).fontColor('gray'),
-                description:project.description,
-                refresh:function () {
+                description: project.description,
+                refresh: function () {
                     this.title.text(projectTitle.text());
                     this.description = projectDesc.text();
                 }
@@ -378,27 +381,27 @@
                     clearCurrentCode();
                     refreshList();
                 }
-        });
+            });
 
         // set viewer
         var viewerWrapper = div().width(codelist.widthPixel()).padding(3).backgroundColor('green').position('absolute').resizable().draggable().zIndex(5);
         var viewerHeader = div().appendTo(viewerWrapper);
-        div().appendTo(viewerHeader).size(5,'100%'); // left space
-        viewerHeader.size('100%',33).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
+        div().appendTo(viewerHeader).size(5, '100%'); // left space
+        viewerHeader.size('100%', 33).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
             .borderBottom('2px solid green').cursorDefault();
-        var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().backgroundColor('white');
+        var viewer = div().appendTo(viewerWrapper).size('100%', '100%').overflowAuto().backgroundColor('white');
         var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
             .marginRight(5).cursorPointer()
             .click(function () {
-            viewerWrapper.fadeOut().detach();
-        });
+                viewerWrapper.fadeOut().detach();
+            });
 
 
         // trick to adjust resizing control point
         var virtualHeight = 35;
         viewerWrapper.borderTop(virtualHeight + 'px solid green');
         viewerHeader.marginTop(-virtualHeight);
-        viewer.marginTop(-virtualHeight+16);
+        viewer.marginTop(-virtualHeight + 16);
 
         var block = {
             title: div().appendTo(blockWrapper).size('100%', '30px').text(code.title).fontSize(20).fontColor('#333333').fontBold().disableSelection(),
@@ -472,7 +475,7 @@
             block.title.fontColor('#004D40');
             block.date.fontColor('white');
             block.author.fontColor('white')
-                // .fontBold();
+            // .fontBold();
             block.description.fontColor('white');
         };
         var offHover = function () {
@@ -480,7 +483,7 @@
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
             block.author.fontColor('gray')
-                // .fontNormal();
+            // .fontNormal();
             block.description.fontColor('gray');
         };
         blockWrapper.hover(onHover, offHover);
@@ -488,20 +491,20 @@
 
     /** functions for code list and project list **/
 
-    // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
+        // project의 codeManager를 세팅하고, codelist를 현재 project 하위의 코드들로 세팅합니다.
     var resetCodes = function (project) {
-        if (project.codeManager) {
-            project.codeManager.resetCodelist();
-        } else {
-            project.codeManager = new CodeManager(project.pid);
-            project.codeManager.init();
-        }
-        currentCodeManager = project.codeManager;
+            if (project.codeManager) {
+                project.codeManager.resetCodelist();
+            } else {
+                project.codeManager = new CodeManager(project.pid);
+                project.codeManager.init();
+            }
+            currentCodeManager = project.codeManager;
 
-        return new Promise(function(resolve) {
-            resolve();
-        });
-    };
+            return new Promise(function (resolve) {
+                resolve();
+            });
+        };
 
     var clearCurrentCode = function () {
         currentCode = undefined;
@@ -581,8 +584,12 @@
     };
 
     var onSave = function () {
-
-        currentCodeManager.updateCode(currentCode, function () {
+        var uptCode = buildCode(currentCode);
+        uptCode.title = titleEditor.text();
+        uptCode.upt_date = getCurrentDate();
+        uptCode.description = descEditor.text();
+        uptCode.ctext = codeEditor.text();
+        currentCodeManager.updateCode(uptCode, function () {
             // update code
             currentCode.title = titleEditor.text();
             currentCode.upt_date = getCurrentDate();
@@ -591,7 +598,7 @@
 
             // update code block
             currentCodeBlock.refresh();
-            });
+        });
     };
 
     var onProjectList = function () {
@@ -621,8 +628,8 @@
             projectManager.updateProject(newProject,
                 function () {
                     curProjectBlock.refresh();
-            },
-                function() {
+                },
+                function () {
                     projectTitle.text(curProject.title);
                     projectDesc.text(curProject.description);
                 }
@@ -651,25 +658,25 @@
 
     /** design **/
 
-    // basic layout
+        // basic layout
     var parent = div().append().size(outerWidth, '100%');
-    var sidebar = div().appendTo(parent).size(outerWidth/20, '100%').color('white');
-    var content = div().appendTo(parent).size(outerWidth*19/20, '100%');
-    var projectList = div().appendTo(content).zIndex(3).size(outerWidth/4, '100%').color(projectColor)
+    var sidebar = div().appendTo(parent).size(outerWidth / 20, '100%').color('white');
+    var content = div().appendTo(parent).size(outerWidth * 19 / 20, '100%');
+    var projectList = div().appendTo(content).zIndex(3).size(outerWidth / 4, '100%').color(projectColor)
         .border(1).borderColor('#aaaaaa').position('absolute').left(content.positionLeft()).top(content.positionTop());
     var moduleList = div().appendTo(content).cssSameWith(projectList).color(moduleColor).displayNone();
-    var codelist = div().appendTo(content).zIndex(1).size(outerWidth/4, '100%').border(1).borderOption('#aaaaaa', 'color').paddingBottom(1);
-    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth*14/20, '100%').padding(15).color('white').displayNone();
+    var codelist = div().appendTo(content).zIndex(1).size(outerWidth / 4, '100%').border(1).borderOption('#aaaaaa', 'color').paddingBottom(1);
+    var codeWrapper = div().appendTo(content).zIndex(1).size(outerWidth * 14 / 20, '100%').padding(15).color('white').displayNone();
     var blank = div();
 
     // design sidebar
     var decoButton = function (div) {
-            div.size(30, 30).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
-                .fontBold().fontSize(20).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
-        };
-    var logoutButton = div().appendTo(sidebar).size(50,24).margin(5).marginTop(15).paddingTop(4).color('green')
+        div.size(30, 30).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
+            .fontBold().fontSize(20).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
+    };
+    var logoutButton = div().appendTo(sidebar).size(50, 24).margin(5).marginTop(15).paddingTop(4).color('green')
         .border(2).borderRadius(4).borderColor('green').textAlignCenter().text('logout').fontSize(14).fontColor('white')
-        .cursorPointer().hoverColor('white','green').hoverTextColor('green','white').click(onLogout);
+        .cursorPointer().hoverColor('white', 'green').hoverTextColor('green', 'white').click(onLogout);
     var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(30)
         .paddingTop(0).text('+').fontSize(28).click(onAddCode).displayNone();
     var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(30).text('new').fontSize(12).click(onAddProject);
@@ -691,11 +698,11 @@
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
-    var projectEditButton = div().appendTo(listHeader).size(10,10).margin(10).marginBottom(20).float('right').color('green')
-        .borderRadius(2).hoverColor(projectColor,'green').cursorPointer().click(onProjectEdit);
-    var projectSaveButton = div().appendTo(listHeader).cssSameWith(projectEditButton).size(40,20).margin(10)
+    var projectEditButton = div().appendTo(listHeader).size(10, 10).margin(10).marginBottom(20).float('right').color('green')
+        .borderRadius(2).hoverColor(projectColor, 'green').cursorPointer().click(onProjectEdit);
+    var projectSaveButton = div().appendTo(listHeader).cssSameWith(projectEditButton).size(40, 20).margin(10)
         .text('Save').fontSize(12).fontColor('white').textAlignCenter()
-        .hoverColor(projectColor,'green').hoverTextColor('green','white').displayNone().click(onProjectSave);
+        .hoverColor(projectColor, 'green').hoverTextColor('green', 'white').displayNone().click(onProjectSave);
     var projectTitle = div().appendTo(listHeader).size('100%', '40px').text('Project name')
         .fontSize(28).fontBold().fontColor('white').textAlignCenter();
     var projectDesc = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)

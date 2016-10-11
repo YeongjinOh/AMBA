@@ -216,22 +216,26 @@ router.post('/codes', function (req, res) {
 
 /**
  * POST projects/codes/update
- * @param code {cid, uid, pid, title, ctext, mstatus, description, ipt_date, upt_date}
+ * @param code {cid, title, ctext, description,}
  * @return resultCode
  */
 router.post('/codes/update', function (req, res) {
     var params = req.body;
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
-    var query = "UPDATE code_store SET (cid, title, ctext, mstatus, description, upt_date) " +
-        "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${description}, now()) WHERE cid=${cid}";
+    console.log('code update param :');
+    console.log(params);
+    var query = "UPDATE code_store SET (cid, title, ctext, mstatus, deps, description, upt_date) " +
+        "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${deps}, ${description}, now()) WHERE cid=${cid}";
     db.none(query, params)
         .then(function () {
             res.json({
-                resultCode:0
+                resultCode:0,
+                newCid:newCid
             })
         })
         .catch(function (error) {
+            console.log("ERROR:", error.message || error);
             console.log("ERROR:", error.message || error);
             if (error.code == 23505) {
                 res.json({
