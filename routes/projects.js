@@ -223,8 +223,6 @@ router.post('/codes/update', function (req, res) {
     var params = req.body;
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
-    console.log('code update param :');
-    console.log(params);
     var query = "UPDATE code_store SET (cid, title, ctext, mstatus, deps, description, upt_date) " +
         "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${deps}, ${description}, now()) WHERE cid=${cid}";
     db.none(query, params)
@@ -235,7 +233,6 @@ router.post('/codes/update', function (req, res) {
             })
         })
         .catch(function (error) {
-            console.log("ERROR:", error.message || error);
             console.log("ERROR:", error.message || error);
             if (error.code == 23505) {
                 res.json({
@@ -249,6 +246,61 @@ router.post('/codes/update', function (req, res) {
                 });
             }
         });
+});
+
+
+/**
+ * POST projects/codes/mstatus/update
+ * @param code {cid, title, mstatus}
+ * @return resultCode
+ */
+router.post('/codes/mstatus/update', function (req, res) {
+    var params = req.body;
+
+    var updateMstatus = function () {
+        db.none("UPDATE code_store SET (mstatus, upt_date) = (${mstatus}, now()) WHERE cid=${cid}", params)
+            .then(function () {
+                res.json({
+                    resultCode: 0
+                })
+            })
+            .catch(function (error) {
+                console.log("ERROR:", error.message || error);
+                {
+                    res.json({
+                        resultCode: -1,
+                        msg: '모듈화에 실패하였습니다.\n다시 시도하여 주세요.'
+                    });
+                }
+            });
+    };
+
+    if (params.mstatus == 0) {
+        // off module
+        updateMstatus();
+    } else {
+        // on module, check duplicate title
+        db.any("SELECT * FROM code_store WHERE mstatus=1 AND title=${title}", params)
+            .then(function (data) {
+
+                // on conflict
+                if (data.length > 0) {
+                    res.json({
+                        resultCode: -2,
+                        msg: "모듈명이 중복됩니다.\n다른 이름으로 저장하여 주세요."
+                    })
+                } else {
+                    updateMstatus();
+                }
+            })
+            .catch(function (error) {
+                console.log("ERROR:", error.message || error);
+                res.json({
+                    resultCode: -1,
+                    msg: generalErrMsg
+                });
+            });
+    }
 });
 
 

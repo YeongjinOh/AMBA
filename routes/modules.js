@@ -35,11 +35,12 @@ var buildModule = function (obj) {
 router.get('', function (req, res) {
     // TODO authentication
     // var params = getParams(req.url);
-    db.any("SELECT * FROM users JOIN code_store USING (uid) WHERE mstatus=1")
+    db.any("SELECT A.username, B.title, B.description, B.upt_date " +
+        "FROM users A JOIN code_store B USING (uid) WHERE mstatus=1")
         .then(function (data) {
             res.json({
-                resultCode:0,
-                modules:data.map(buildModule)
+                resultCode: 0,
+                modules: data.map(buildModule)
             })
         })
         // TODO error handling

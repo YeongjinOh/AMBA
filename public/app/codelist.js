@@ -159,13 +159,6 @@
                 $.post("/projects/update", newProject)
                     .done(function (data) {
                         if (data.resultCode === 0) {
-                            for (var i = 0; i < projects.length; i++) {
-                                if (projects[i].pid == newProject.pid) {
-                                    projects[i] = newProject;
-                                    curProject = newProject;
-                                    break;
-                                }
-                            }
                             if (typeof resolve === 'function')
                                 resolve();
                         } else {
@@ -255,13 +248,21 @@
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         // update
-                        for (var i = 0; i < codes.length; i++) {
-                            if (codes[i].cid == uptCode.cid) {
-                                uptCode.cid = data.newCid;
-                                codes[i] = uptCode;
-                                break;
-                            }
-                        }
+                        currentCode.cid = data.newCid;
+                        if (typeof resolve === 'function')
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof reject === 'function')
+                            reject();
+                    }
+                });
+        };
+
+        this.updateMstatus = function (uptCode, resolve, reject) {
+            $.post("/projects/codes/mstatus/update", uptCode)
+                .done(function (data) {
+                    if (data.resultCode === 0) {
                         if (typeof resolve === 'function')
                             resolve();
                     } else {
@@ -463,7 +464,7 @@
         var block = {
             title: div().appendTo(blockWrapper).size('55%', '20px').text(module.title).fontSize(18).fontColor('#333333').fontBold().disableSelection(),
             date: div().appendTo(blockWrapper).size('40%', '15px').text(module.upt_date).fontSize(12).fontColor('gray')
-                .textAlignRight().disableSelection(),
+                .textAlignRight().disableSelection().float('right'),
             author: div().appendTo(blockWrapper).size('30%', '15px').text('by ' + module.author).fontSize(12).fontColor('gray')
                 .float('right').textAlignRight().disableSelection(),
             description: div().appendTo(blockWrapper).marginTop(8).size('70%', '35px').text(module.description)
@@ -564,22 +565,24 @@
 
     var onModule = function () {
         var msg;
-        console.log(currentCode.mstatus);
-        if (currentCode.mstatus == 0)
+        var uptCode = buildCode(currentCode);
+        if (uptCode.mstatus == 0)
             msg = '모듈화를 하시겠습니까?';
         else
             msg = '모듈화를 취소 하시겠습니까?';
         if (confirm(msg)) {
-            if (currentCode.mstatus == 0) {
+            if (uptCode.mstatus == 0) {
                 // 모듈화
-                currentCode.mstatus = 1;
+                uptCode.mstatus = 1;
 
             } else {
                 // 모듈화 취소
-                currentCode.mstatus = 0;
+                uptCode.mstatus = 0;
             }
-            currentCodeManager.updateCode(currentCode);
-            setModuleButtonColor();
+            currentCodeManager.updateMstatus(uptCode, function () {
+                currentCode.mstatus = uptCode.mstatus;
+                setModuleButtonColor();
+            });
         }
     };
 
@@ -627,6 +630,8 @@
             newProject.description = projectDesc.text();
             projectManager.updateProject(newProject,
                 function () {
+                    curProject.title = newProject.title;
+                    curProject.description = newProject.description;
                     curProjectBlock.refresh();
                 },
                 function () {
