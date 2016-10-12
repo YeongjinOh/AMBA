@@ -917,3 +917,30 @@ Div.prototype.verticalAlignMiddle = function() {
 
     return this;
 };
+
+Div.prototype.disqus = function () {
+    var disqus_config = function () {
+        this.page.url = 'http://example.com/unique-path-to-article-1/';
+        this.page.identifier = 'newid1';
+        this.page.title = 'soma-amba';
+        this.page.language = "en";
+    };
+
+    this.$script = $('<script>').attr('type', 'text/javascript').attr('async', true)
+        .attr('src', '//example.disqus.com/embed.js').width('100%').height('100%');
+    this.$script.appendTo(this.$);
+
+    // /* * * DON'T EDIT BELOW THIS LINE * * */
+    // (function() {
+    //     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    //     dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+    //     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    // })();
+
+    return this;
+};
+
+Div.prototype.appendChild = function (child) {
+    child.$.appendTo(this.$);
+    return this;
+};
