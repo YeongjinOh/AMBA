@@ -918,29 +918,34 @@ Div.prototype.verticalAlignMiddle = function() {
     return this;
 };
 
-Div.prototype.disqus = function () {
-    var disqus_config = function () {
-        this.page.url = 'http://example.com/unique-path-to-article-1/';
-        this.page.identifier = 'newid1';
-        this.page.title = 'soma-amba';
-        this.page.language = "en";
-    };
+Div.prototype.disqus = function (sector, title) {
+    div().appendTo(this).attr('id', 'disqus_thread').size('100%', '100%');
 
-    this.$script = $('<script>').attr('type', 'text/javascript').attr('async', true)
-        .attr('src', '//example.disqus.com/embed.js').width('100%').height('100%');
+    if (this.$script) {
+        this.$.empty();
+        return this;
+    }
+
+    sector = parseInt(sector);
+    if (!sector)
+        sector = 1;
+    if (title === undefined || title === '')
+        title = 'amba';
+
+    this.$script = $('<script></script>').attr('type', 'text/javascript').text("\n" +
+        "var disqus_config = function () {" + "\n" +
+        "   this.page.identifier = amba;" + "\n" +
+        "   this.page.url = '//amba.com/unique-path-" + sector + "/';" + "\n" +
+        "   this.page.title = '" + title + "';" + "\n" +
+        "};" + "\n" +
+        "(function() {" + "\n" +
+        "   var d = document, s = d.createElement('script');" + "\n" +
+        "   s.src = '//amba.disqus.com/embed.js';" + "\n" +
+        "   s.setAttribute('data-timestamp', +new Date());" + "\n" +
+        "   (d.head || d.body).appendChild(s);" + "\n" +
+        "})();"
+    );
     this.$script.appendTo(this.$);
 
-    // /* * * DON'T EDIT BELOW THIS LINE * * */
-    // (function() {
-    //     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-    //     dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-    //     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    // })();
-
-    return this;
-};
-
-Div.prototype.appendChild = function (child) {
-    child.$.appendTo(this.$);
     return this;
 };
