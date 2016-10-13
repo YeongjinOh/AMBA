@@ -25,7 +25,7 @@ gulp.task('jsdoc', function (cb) {
 
 // 자바스크립트 파일을 하나로 합치고 압축한다. + 난독화
 gulp.task('combine-js', function () {
-    return gulp.src('routes/*.js')
+    return gulp.src('public/module/kakao.js')
         .pipe(concat('script.js'))
         .pipe(uglify())
         .pipe(gulp.dest('public/dist/js'));
@@ -39,7 +39,8 @@ gulp.task('compress-html', function () {
         .pipe(gulp.dest('public/dist/html'));
 });
 
-gulp.task('default', ['combine-js', 'compress-html', 'jsdoc'])
+//gulp.task('default', ['combine-js', 'compress-html', 'jsdoc'])
+gulp.task('default', ['combine-js']);
 
 gulp.task('watch', function () {
     //routes 디렉토리 안에 js 확장자를 가진 파일이 변경되면 combine-js task 실행

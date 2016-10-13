@@ -1,6 +1,14 @@
-/**
- * Created by Lights on 2016. 9. 21..
- */
+requirejs(['http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0'],
+//requirejs(['test'],
+//requirejs(['kakao'],
+    function (kakao) {
+    console.log('kakao : \n', kakao);
+    var chat = div().size('auto','auto').append();
+    ////kakaotest모듈을 chat div에 붙인다
+    kakao.appendTo(chat);
+});
+
+
 
 /**
  * 추가해야될것
@@ -9,17 +17,15 @@
  * 3. 메모들에 타이틀 적용(var memo에서 특정 디브를 찾아서 적용)
  */
 //require()이것도 된다.
-//크롭에서는 렌더링이 잘 되는데, 사파리에서는 모듈이 늦게 불려진다..모듈 로딩 순서를 정의해줘야 되는듯 하다
-requirejs(['kakao'], function (kakaotest) {
-    var chat = div().size('auto','auto').append();
-    //kakaotest모듈을 chat div에 붙인다
-    kakaotest.appendTo(chat);
-});
+//크롬에서는 렌더링이 잘 되는데, 사파리에서는 모듈이 늦게 불려진다..모듈 로딩 순서를 정의해줘야 되는듯 하다
 
-//var kko = requirejs('kakaotest');
-//
-//var chat = div().size('auto','auto').append();
-//kko.appendTo(chat);
+//requirejs(['kakao'], function (kakao) {
+//    console.log('kakao : \n', kakao);
+//    var chat = div().size('auto','auto').append();
+//    ////kakaotest모듈을 chat div에 붙인다
+//    kakao.appendTo(chat);
+//});
+
 
 //
 //
@@ -129,8 +135,3 @@ requirejs(['kakao'], function (kakaotest) {
 //
 //
 //    });
-
-
-//var submitDiv = div().appendTo(bottomDiv2).size('100%', '100%').color('red').padding(10);
-
-
