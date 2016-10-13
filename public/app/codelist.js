@@ -3,7 +3,8 @@
     /** initialize variables **/
 
     var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)',
-        projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33';
+        projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33',
+        basicBlue = '#03A9F4', basicBlueWeak = '#B3E5FC';
     var currentCodeBlock, currentCode, currentCodeManager, curProject, curProjectBlock;
     var projectHide = false, moduleHide = true;
     var fadeDuration = 300;
@@ -58,19 +59,6 @@
         blank.append();
     };
 
-
-    // 주어진 모듈이 없으면 추가하고 true를, 이미 있으면 제거하고 false를 리턴합니다.
-    toggleModule = function (code, title) {
-        var deps = code.deps;
-        for (var i = 0; i < deps.length; i++) {
-            if (deps[i] === title) {
-                deps.splice(i, 1);
-                return false;
-            }
-        }
-        deps.push(title);
-        return true;
-    };
 
     /** define Project, Code classes **/
 
@@ -303,6 +291,20 @@
                 });
         };
 
+        this.updateDeps = function (uptCode, resolve, reject) {
+            $.post("/projects/codes/deps/update", {cid:uptCode.cid, deps:JSON.stringify(uptCode.deps)})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        if (typeof resolve === 'function')
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof reject === 'function')
+                            reject();
+                    }
+                });
+        };
+
         this.deleteCode = function (cid) {
             // remove from array;
             for (var i = 0; i < codes.length; i++) {
@@ -319,6 +321,9 @@
 
         // modules는 모듈명(key)와 모듈 객체(value)의 쌍으로 이루어진 JSON object
         var modules = {};
+
+        // 현재 코드의 dependency를 임시 저장.
+        var deps = [];
         var that = this;
 
         this.init = function () {
@@ -332,17 +337,33 @@
                 });
         };
 
-        // reset dependency of given code
-        this.reset = function (code) {
-            for (var prop in modules) {
-                if (modules.hasOwnProperty(prop)) {
-                    modules[prop].selected = false;
-                    modules[prop].setColor();
+        // 주어진 모듈이 없으면 추가하고 true를, 이미 있으면 제거하고 false를 리턴합니다.
+        this.toggleModule = function (title) {
+            for (var i = 0; i < deps.length; i++) {
+                if (deps[i] === title) {
+                    deps.splice(i, 1);
+                    return false;
                 }
             }
-            var deps = code.deps;
-            console.log(deps);
-            for (var i = 0; i < deps.length; i++) {
+            deps.push(title);
+            return true;
+        };
+
+        this.save = function (code) {
+            code.deps = deps.slice();
+        };
+
+        // reset dependency of given code
+        this.reset = function (code) {
+            // 원래 코드의 dependency 초기화
+            var i;
+            for (i = 0; i < deps.length; i++) {
+                modules[deps[i]].selected = false;
+                modules[deps[i]].setColor();
+            }
+            // 현재 코드의 dependency 설정
+            deps = code.deps.slice();
+            for (i = 0; i < deps.length; i++) {
                 modules[deps[i]].selected = true;
                 modules[deps[i]].setColor();
             }
@@ -536,7 +557,7 @@
     var newModuleBlock = function (module) {
 
         // colors
-        var selOnColor = '#03A9F4', selOffColor = '#B3E5FC', unselOnColor = basicColorWeak, unselOffColor = '#fafafa';
+        var selOnColor = basicBlue, selOffColor = basicBlueWeak, unselOnColor = basicColorWeak, unselOffColor = '#fafafa';
         module.setColor = function () {
             if(module.selected)
                 blockWrapper.color(selOffColor);
@@ -575,7 +596,7 @@
             block.description.fontColor('gray');
         };
         var onClickModule = function () {
-            module.selected = toggleModule(currentCode, module.title);
+            module.selected = moduleManager.toggleModule(module.title);
             module.setColor();
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
@@ -742,6 +763,11 @@
             closeModuleList();
     };
 
+    var onModuleSave = function () {
+        moduleManager.save(currentCode);
+        currentCodeManager.updateDeps(currentCode);
+    };
+
     var onLogout = function () {
         localStorage.clear('aauth');
         localStorage.clear('ainfo');
@@ -784,10 +810,14 @@
 
 
     // design modulelist
-    var moduleHeader = div().appendTo(moduleList).size('100%', '170px').color('#white').borderBottom('3px solid #26A69A');
-    var moduleHeaderTitle = div().appendTo(moduleHeader).size('100%', '40px').marginTop(50).text('Module List').fontSize(28).textAlignCenter();
-    var moduleName = div().appendTo(moduleHeader).size('100%', '50px').marginTop(20).text('AMBA').fontSize(22).fontColor('gray').textAlignCenter();
+    var moduleHeader = div().appendTo(moduleList).size('100%', 170).color('#white').borderBottom('3px solid #26A69A');
+    var moduleSaveButton = div().appendTo(moduleHeader).size(40, 20).margin(10).float('right').color(basicBlue)
+        .borderRadius(2).text('Save').fontSize(12).fontColor('white').textAlignCenter().cursorPointer()
+        .hoverColor(basicBlueWeak, basicBlue).hoverTextColor('blue', 'white').click(onModuleSave);
+    var moduleHeaderTitle = div().appendTo(moduleHeader).size('100%', 40).text('Module List').fontSize(28).textAlignCenter();
+    var moduleName = div().appendTo(moduleHeader).size('100%', 50).marginTop(20).text('AMBA').fontSize(22).fontColor('gray').textAlignCenter();
     var moduleListWrapper = div().appendTo(moduleList).size('100%', moduleList.heightPixel() - moduleHeader.heightPixel()).overflowAuto();
+
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);

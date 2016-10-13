@@ -473,7 +473,7 @@ Div.prototype.fontNormal = function () {
 Div.prototype.border = function (value) {
     if (typeof value === 'number') {
         var style = this.borderStyle();
-        if(style == 'none')
+        if(style == 'none' || style == '')
             style = 'solid';
         return this.css('border', value + 'px ' + style);
     }
