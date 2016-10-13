@@ -516,7 +516,7 @@
                 localStorage.setItem('acode', txt);
 
                 // set viewer
-                viewer.empty().iframe('/?app=ab_previewer');
+                viewer.empty().iframe('/?app=viewer');
                 viewer.$iframe.appendTo(viewer.$); // attach again
                 viewerHeader.text('  ' + titleEditor.text());
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
