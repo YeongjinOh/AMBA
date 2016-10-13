@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" /> 
-    <meta http-Equiv="Cache-Control" Content="no-cache" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+    <meta http-Equiv="Cache-Control" Content="no-cache"/>
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
     <META HTTP-EQUIV="Expires" CONTENT="0">
     <title>AMBA</title>
 
     <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" rel="stylesheet" type="text/css">
     <style type="text/css">
-	html, body {
-	    height:100%;
-        width : 100%;
-	    margin: 0;
-	    padding: 0;
-	}
-	</style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 
     <script src="/primus/primus.js"></script>
     <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js'></script>
@@ -29,15 +29,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js"></script>
 
     <script>
-    	$(document).ready(function(){
+        $(document).ready(function () {
 
-    		var path = AB.getParameter('app');
-            if(!path) {
+            var path = AB.getParameter('app');
+            if (!path) {
                 div().append().text('Please make first application');
                 return;
+            } else if (path === "viewer") {
+                require(['viewer'], function (viewer) {
+                    viewer.run();
+                });
+                return;
             }
-            AB.loadScript('/app/'+path+'.js');
-    	});
+            AB.loadScript('/app/' + path + '.js');
+        });
     </script>
 </head>
 <body>
