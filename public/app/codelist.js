@@ -59,21 +59,6 @@
         blank.append();
     };
 
-    var resetDeps = function () {
-        depsWrapper.empty();
-        var deps = currentCode.deps;
-        for (var i = 0; i < deps.length; i++) {
-            div().appendTo(depsWrapper).float('left').height(28).marginRight(10).color(basicBlue).verticalAlign('middle')
-                .text(deps[i]).fontBold().fontColor('white').borderRadius(12).padding(5).cursorPointer()
-                .click((function (j) {
-                    return function () {
-                        alert('Description : ' + moduleManager.getModule(deps[j]).description);
-                    };
-                })(i));
-        }
-        ;
-    };
-
 
     /** define Project, Code classes **/
 
@@ -524,7 +509,6 @@
                 dateEditor.text(code.upt_date);
                 codeEditor.text(code.ctext);
                 setModuleButtonColor();
-                resetDeps();
             },
             run: function () {
                 // save code
@@ -532,7 +516,7 @@
                 localStorage.setItem('acode', txt);
 
                 // set viewer
-                viewer.empty().iframe('/?app=ab_previewer');
+                viewer.empty().iframe('/?app=viewer');
                 viewer.$iframe.appendTo(viewer.$); // attach again
                 viewerHeader.text('  ' + titleEditor.text());
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
@@ -563,10 +547,12 @@
                     currentCodeManager.getCode(code, function () {
                         block.syncWithCode();
                         codeWrapper.displayInlineBlock();
+                        resetDeps();
                     });
                 } else {
                     block.syncWithCode();
                     codeWrapper.displayInlineBlock();
+                    resetDeps();
                 }
             }
         };
@@ -642,6 +628,26 @@
                 resolve();
             });
         };
+
+    var resetDeps = function () {
+
+        var marginRight = 10;
+        var defaultWidth = 50, minWidthPerTag = 50;
+        var deps = currentCode.deps;
+        depsTags.empty().width(defaultWidth);
+        for (var i = 0; i < deps.length; i++) {
+            var tag = div().appendTo(depsTags).float('left').height(28).marginRight(marginRight).padding(5).color(basicBlue)
+                .text(deps[i]).verticalAlign('middle').fontBold().fontColor('white').borderRadius(12).cursorPointer()
+                .click((function (j) {
+                    return function () {
+                        alert('Description : ' + moduleManager.getModule(deps[j]).description);
+                    };
+                })(i));
+            depsTags.width(parseInt(depsTags.width()) + parseInt(tag.width()) + marginRight);
+        }
+        if (depsTags.width() < minWidthPerTag*deps.length)
+            depsTags.width(minWidthPerTag*deps.length);
+    };
 
     var clearCurrentCode = function () {
         currentCode = undefined;
@@ -862,7 +868,8 @@
         .fontColor(basicColor).overflowAuto();
     var descEditor = div().appendTo(leftWrapperHeader).size(600, 45).editable().marginTop(10).marginLeft(10)
         .fontSize(20).fontBold().fontColor('gray').overflowAuto();
-    var depsWrapper = div().appendTo(leftWrapperHeader).size(600, 30).overflowAuto();
+    var depsTagsWrapper = div().appendTo(leftWrapperHeader).size(600, 30).overflowYHidden().overflowXScroll();
+    var depsTags = div().appendTo(depsTagsWrapper);
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
     var saveButton = div().appendTo(rightWrapperHeader).size(60, 30).padding(5).color(buttonColor)
