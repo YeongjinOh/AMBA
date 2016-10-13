@@ -921,12 +921,12 @@ Div.prototype.verticalAlignMiddle = function() {
 Div.prototype.disqus = function (sector, title) {
     var that = this;
 
-    div().appendTo(this).attr('id', 'disqus_thread').size('100%', '100%');
-
     if (this.$script) {
         this.$.empty();
         return this;
     }
+
+    div().appendTo(this).attr('id', 'disqus_thread').size('100%', '100%');
 
     sector = parseInt(sector);
     if (!sector)
