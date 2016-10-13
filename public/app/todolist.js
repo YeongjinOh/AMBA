@@ -1,4 +1,3 @@
-$(document).ready(function(){
 
 
 	div().text('open Chat').append().height(100).color('red').click(function(){
@@ -60,4 +59,3 @@ $(document).ready(function(){
 		});
 		blank.appendTo(viewer);
 	});
-});
