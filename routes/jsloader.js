@@ -2,22 +2,20 @@ var express = require('express');
 var router = express.Router();
 var db = require('../db');
 
-// get parameters from given url
-function getParams(url) {
-    var decUrl = decodeURIComponent(url);
-    var regex = /[?&]([^=#]+)=([^&#]*)/g,
-        params = {},
-        match;
-    while (match = regex.exec(decUrl)) {
-        params[match[1]] = match[2];
-    }
-    return params;
-}
-
-router.get('/', function (req, res) {
-    res.send('div().size(50,50).border(1).append()');
+router.get('/:dep', function (req, res) {
+    db.one("SELECT ctext FROM code_store WHERE mstatus=1 AND title=${dep}", req.params)
+        .then(function (data) {
+            var code = data.ctext;
+            res.send('(function(){' + code + '\n})();');
+        })
+        .catch(function (error) {
+            console.log("ERROR:", error.message || error);
+            res.json({
+                resultCode: -1,
+                msg: "모듈을 불러올 수 없습니다."
+            });
+        });
 });
-
 
 module.exports = router;
 

@@ -41,9 +41,6 @@
                     viewer.run();
                 });
                 return;
-            } else if (path === 'jsloader') {
-                require(['/jsloader'], function () {});
-                return;
             }
             AB.loadScript('/app/' + path + '.js');
         });

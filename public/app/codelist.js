@@ -358,14 +358,18 @@
             // 원래 코드의 dependency 초기화
             var i;
             for (i = 0; i < deps.length; i++) {
-                modules[deps[i]].selected = false;
-                modules[deps[i]].setColor();
+                if (modules[deps[i]]) {
+                    modules[deps[i]].selected = false;
+                    modules[deps[i]].setColor();
+                }
             }
             // 현재 코드의 dependency 설정
             deps = code.deps.slice();
             for (i = 0; i < deps.length; i++) {
-                modules[deps[i]].selected = true;
-                modules[deps[i]].setColor();
+                if (modules[deps[i]]) {
+                    modules[deps[i]].selected = true;
+                    modules[deps[i]].setColor();
+                }
             }
         };
 
@@ -511,9 +515,9 @@
                 setModuleButtonColor();
             },
             run: function () {
-                // save code
-                var txt = '(function(){' + codeEditor.text() + '\n})();'; // get text from code editor and modularize it
-                localStorage.setItem('acode', txt);
+                // save code and dependencies
+                localStorage.setItem('acode', codeEditor.text());
+                localStorage.setItem('adeps', JSON.stringify(code.deps));
 
                 // set viewer
                 viewer.empty().iframe('/?app=viewer');
