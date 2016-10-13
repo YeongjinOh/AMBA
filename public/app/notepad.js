@@ -2,13 +2,14 @@
  * RequireJS takes a different approach to script loading than traditional <script> tags.
  * While it can also run fast and optimize well, the primary goal is to encourage modular code.
  * As part of that, it encourages using module IDs instead of URLs for script tags.
- *
  * script 태그의 URL이 아니라 baseUrl을 통해서 모듈의 ID로딩해서 사용하는것을 권장한다.
  */
 
-//requirejs(['http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0'],
+
+
+requirejs(['http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0'],
 //requirejs(['test'],
-requirejs(['kakao'],
+//requirejs(['kakao'],
     function (kakao) {
     console.log('kakao : \n', kakao);
     var chat = div().size('auto','auto').append();

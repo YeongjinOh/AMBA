@@ -69,7 +69,12 @@ router.get('/get', function (req, res,next) {
             res.status(200).json(data);
             next(err);
         }
+        console.log('requested!!!');
+        //res.setHeader('Content-Type', 'text/javascript');
+
+        //res.writeHead(200, {'Content-Type': 'text/javascript'});
         res.status(200).send(result);
+
         //res.status(200).json(result)
     });
 });

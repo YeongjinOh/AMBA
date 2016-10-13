@@ -31,10 +31,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 //라우터보다 먼저 미들웨어 등록!!
-//app.use(function (req, res, next) {
-//  req.cache = cache;
-//  next();
-//});
+app.use(function (req, res, next) {
+  req.cache = cache;
+  next();
+});
 
 app.use('/', routes);
 app.use('/users', users);
