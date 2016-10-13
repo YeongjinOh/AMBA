@@ -59,6 +59,21 @@
         blank.append();
     };
 
+    var resetDeps = function () {
+        depsWrapper.empty();
+        var deps = currentCode.deps;
+        for (var i = 0; i < deps.length; i++) {
+            div().appendTo(depsWrapper).float('left').height(28).marginRight(10).color(basicBlue).verticalAlign('middle')
+                .text(deps[i]).fontBold().fontColor('white').borderRadius(12).padding(5).cursorPointer()
+                .click((function (j) {
+                    return function () {
+                        alert('Description : ' + moduleManager.getModule(deps[j]).description);
+                    };
+                })(i));
+        }
+        ;
+    };
+
 
     /** define Project, Code classes **/
 
@@ -292,7 +307,7 @@
         };
 
         this.updateDeps = function (uptCode, resolve, reject) {
-            $.post("/projects/codes/deps/update", {cid:uptCode.cid, deps:JSON.stringify(uptCode.deps)})
+            $.post("/projects/codes/deps/update", {cid: uptCode.cid, deps: JSON.stringify(uptCode.deps)})
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         if (typeof resolve === 'function')
@@ -367,6 +382,10 @@
                 modules[deps[i]].selected = true;
                 modules[deps[i]].setColor();
             }
+        };
+
+        this.getModule = function (title) {
+            return modules[title];
         };
 
         this.getModules = function () {
@@ -505,6 +524,7 @@
                 dateEditor.text(code.upt_date);
                 codeEditor.text(code.ctext);
                 setModuleButtonColor();
+                resetDeps();
             },
             run: function () {
                 // save code
@@ -559,7 +579,7 @@
         // colors
         var selOnColor = basicBlue, selOffColor = basicBlueWeak, unselOnColor = basicColorWeak, unselOffColor = '#fafafa';
         module.setColor = function () {
-            if(module.selected)
+            if (module.selected)
                 blockWrapper.color(selOffColor);
             else
                 blockWrapper.color(unselOffColor);
@@ -766,6 +786,7 @@
     var onModuleSave = function () {
         moduleManager.save(currentCode);
         currentCodeManager.updateDeps(currentCode);
+        resetDeps();
     };
 
     var onLogout = function () {
@@ -834,13 +855,14 @@
         .borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
-    var wrapperHeader = div().appendTo(codeWrapper).size('95%', 120).padding(10).borderOption('1px solid gray', 'bottom');
+    var wrapperHeader = div().appendTo(codeWrapper).size('95%', 140).padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold()
+    var titleEditor = div().appendTo(leftWrapperHeader).size(600, 40).editable().fontSize(30).fontBold()
         .fontColor(basicColor).overflowAuto();
-    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').editable().marginTop(10).marginLeft(10)
+    var descEditor = div().appendTo(leftWrapperHeader).size(600, 45).editable().marginTop(10).marginLeft(10)
         .fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var depsWrapper = div().appendTo(leftWrapperHeader).size(600, 30).overflowAuto();
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
     var saveButton = div().appendTo(rightWrapperHeader).size(60, 30).padding(5).color(buttonColor)
@@ -848,7 +870,7 @@
         .border(2).borderColor(buttonColor).borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
     var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
     var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(15).click(onModule);
-    var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
+    var dateEditor = div().appendTo(rightWrapperHeader).marginTop(70).fontSize(18).fontColor('gray').clear('right').float('right');
 
     var setModuleButtonColor = function () {
         if (currentCode.mstatus == 1)
