@@ -3,7 +3,8 @@
     /** initialize variables **/
 
     var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)',
-        projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33';
+        projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33',
+        basicBlue = '#03A9F4', basicBlueWeak = '#B3E5FC';
     var currentCodeBlock, currentCode, currentCodeManager, curProject, curProjectBlock;
     var projectHide = false, moduleHide = true;
     var fadeDuration = 300;
@@ -58,16 +59,17 @@
         blank.append();
     };
 
+
     /** define Project, Code classes **/
 
     var Project = function (project) {
-            this.pid = project.pid;
-            this.title = project.title;
-            this.main_cid = project.main_cid;
-            this.description = project.description;
-            this.upt_date = project.upt_date.slice(0, 10);
-            this.codeManager;
-        };
+        this.pid = project.pid;
+        this.title = project.title;
+        this.main_cid = project.main_cid;
+        this.description = project.description;
+        this.upt_date = project.upt_date.slice(0, 10);
+        this.codeManager;
+    };
 
     var Code = function (code) {
         this.cid = code.cid;
@@ -75,7 +77,7 @@
         this.title = code.title;
         this.ctext = code.ctext;
         this.mstatus = code.mstatus || 0;
-        this.deps = code.deps || "";
+        this.deps = code.deps || [];
         this.description = code.description;
         this.upt_date = code.upt_date.slice(0, 10);
     };
@@ -85,7 +87,7 @@
         this.title = module.title;
         this.description = module.description;
         this.upt_date = module.upt_date.slice(0, 10);
-        ;
+        this.selected = false;
     };
 
     var buildProject = function (obj) {
@@ -203,25 +205,26 @@
         };
 
         this.getCode = function (code, resolve, reject) {
-          $.get('/projects/codes/code', {cid: code.cid})
-              .done(function (data) {
-                  if (data.resultCode === 0) {
-                      // copy properties
-                      for (var prop in data.code) {
-                          if (data.code.hasOwnProperty(prop)) {
-                              code[prop] = data.code[prop];
-                          }
-                      }
-                      if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
-                          code['upt_date'] = code['upt_date'].slice(0,10);
-                      if (typeof resolve === "function")
-                          resolve();
-                  } else {
-                      alert(data.msg);
-                      if (typeof resolve === "function")
-                          reject();
-                  }
-              });
+            $.get('/projects/codes/code', {cid: code.cid})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        // copy properties
+                        for (var prop in data.code) {
+                            if (data.code.hasOwnProperty(prop)) {
+                                code[prop] = data.code[prop];
+                            }
+                        }
+                        if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
+                            code['upt_date'] = code['upt_date'].slice(0, 10);
+                        code['deps'] = JSON.parse(code['deps']);
+                        if (typeof resolve === "function")
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof resolve === "function")
+                            reject();
+                    }
+                });
         };
 
         this.getCodes = function () {
@@ -288,6 +291,20 @@
                 });
         };
 
+        this.updateDeps = function (uptCode, resolve, reject) {
+            $.post("/projects/codes/deps/update", {cid: uptCode.cid, deps: JSON.stringify(uptCode.deps)})
+                .done(function (data) {
+                    if (data.resultCode === 0) {
+                        if (typeof resolve === 'function')
+                            resolve();
+                    } else {
+                        alert(data.msg);
+                        if (typeof reject === 'function')
+                            reject();
+                    }
+                });
+        };
+
         this.deleteCode = function (cid) {
             // remove from array;
             for (var i = 0; i < codes.length; i++) {
@@ -302,23 +319,67 @@
 
     var ModuleManager = function () {
 
-        var modules = [];
+        // modules는 모듈명(key)와 모듈 객체(value)의 쌍으로 이루어진 JSON object
+        var modules = {};
+
+        // 현재 코드의 dependency를 임시 저장.
+        var deps = [];
         var that = this;
 
         this.init = function () {
             that.getModules()
                 .done(function () {
-                    for (var i = 0; i < modules.length; i++) {
-                        newModuleBlock(modules[i]);
+                    for (var prop in modules) {
+                        if (modules.hasOwnProperty(prop)) {
+                            newModuleBlock(modules[prop]);
+                        }
                     }
                 });
+        };
+
+        // 주어진 모듈이 없으면 추가하고 true를, 이미 있으면 제거하고 false를 리턴합니다.
+        this.toggleModule = function (title) {
+            for (var i = 0; i < deps.length; i++) {
+                if (deps[i] === title) {
+                    deps.splice(i, 1);
+                    return false;
+                }
+            }
+            deps.push(title);
+            return true;
+        };
+
+        this.save = function (code) {
+            code.deps = deps.slice();
+        };
+
+        // reset dependency of given code
+        this.reset = function (code) {
+            // 원래 코드의 dependency 초기화
+            var i;
+            for (i = 0; i < deps.length; i++) {
+                modules[deps[i]].selected = false;
+                modules[deps[i]].setColor();
+            }
+            // 현재 코드의 dependency 설정
+            deps = code.deps.slice();
+            for (i = 0; i < deps.length; i++) {
+                modules[deps[i]].selected = true;
+                modules[deps[i]].setColor();
+            }
+        };
+
+        this.getModule = function (title) {
+            return modules[title];
         };
 
         this.getModules = function () {
             return $.get("/modules", {token: token})
                 .done(function (data) {
                     if (data.resultCode === 0) {
-                        modules = data.modules.map(buildModule);
+                        data.modules.forEach(function (module) {
+                            modules[module.title] = buildModule(module);
+                        });
                     } else {
                         alert(data.msg);
                     }
@@ -455,7 +516,7 @@
                 localStorage.setItem('acode', txt);
 
                 // set viewer
-                viewer.empty().iframe('/?app=ab_previewer');
+                viewer.empty().iframe('/?app=viewer');
                 viewer.$iframe.appendTo(viewer.$); // attach again
                 viewerHeader.text('  ' + titleEditor.text());
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
@@ -486,10 +547,12 @@
                     currentCodeManager.getCode(code, function () {
                         block.syncWithCode();
                         codeWrapper.displayInlineBlock();
+                        resetDeps();
                     });
                 } else {
                     block.syncWithCode();
                     codeWrapper.displayInlineBlock();
+                    resetDeps();
                 }
             }
         };
@@ -498,6 +561,16 @@
 
     // modulelist에 새로운 block을 추가하는 함수
     var newModuleBlock = function (module) {
+
+        // colors
+        var selOnColor = basicBlue, selOffColor = basicBlueWeak, unselOnColor = basicColorWeak, unselOffColor = '#fafafa';
+        module.setColor = function () {
+            if (module.selected)
+                blockWrapper.color(selOffColor);
+            else
+                blockWrapper.color(unselOffColor);
+        };
+
         var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel(), 100).borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
@@ -512,20 +585,31 @@
         };
 
         var onHover = function () {
-            blockWrapper.color(basicColorWeak);
+            if (module.selected)
+                blockWrapper.color(selOnColor);
+            else
+                blockWrapper.color(unselOnColor);
             block.title.fontColor('#004D40');
             block.date.fontColor('white');
             block.author.fontColor('white');
             block.description.fontColor('white');
         };
         var offHover = function () {
-            blockWrapper.color('#fafafa');
+            module.setColor()
             block.title.fontColor('#333333');
             block.date.fontColor('gray');
             block.author.fontColor('gray');
             block.description.fontColor('gray');
         };
-        blockWrapper.hover(onHover, offHover);
+        var onClickModule = function () {
+            module.selected = moduleManager.toggleModule(module.title);
+            module.setColor();
+            block.title.fontColor('#333333');
+            block.date.fontColor('gray');
+            block.author.fontColor('gray');
+            block.description.fontColor('gray');
+        };
+        blockWrapper.hover(onHover, offHover).click(onClickModule);
     };
 
     /** functions for code list and project list **/
@@ -544,6 +628,26 @@
                 resolve();
             });
         };
+
+    var resetDeps = function () {
+
+        var marginRight = 10;
+        var defaultWidth = 50, minWidthPerTag = 50;
+        var deps = currentCode.deps;
+        depsTags.empty().width(defaultWidth);
+        for (var i = 0; i < deps.length; i++) {
+            var tag = div().appendTo(depsTags).float('left').height(28).marginRight(marginRight).padding(5).color(basicBlue)
+                .text(deps[i]).verticalAlign('middle').fontBold().fontColor('white').borderRadius(12).cursorPointer()
+                .click((function (j) {
+                    return function () {
+                        alert('Description : ' + moduleManager.getModule(deps[j]).description);
+                    };
+                })(i));
+            depsTags.width(parseInt(depsTags.width()) + parseInt(tag.width()) + marginRight);
+        }
+        if (depsTags.width() < minWidthPerTag*deps.length)
+            depsTags.width(minWidthPerTag*deps.length);
+    };
 
     var clearCurrentCode = function () {
         currentCode = undefined;
@@ -568,6 +672,7 @@
     };
 
     var openModuleList = function () {
+        moduleManager.reset(currentCode);
         moduleList.fadeIn(fadeDuration);
         closeProjectList();
         moduleHide = false;
@@ -631,8 +736,8 @@
         uptCode.upt_date = getCurrentDate();
         uptCode.description = descEditor.text();
         uptCode.ctext = codeEditor.text();
+        uptCode.deps = JSON.stringify(uptCode.deps);
         currentCodeManager.updateCode(uptCode, function () {
-
             // update code block
             currentCodeBlock.syncWithEditor();
         });
@@ -684,6 +789,12 @@
             closeModuleList();
     };
 
+    var onModuleSave = function () {
+        moduleManager.save(currentCode);
+        currentCodeManager.updateDeps(currentCode);
+        resetDeps();
+    };
+
     var onLogout = function () {
         localStorage.clear('aauth');
         localStorage.clear('ainfo');
@@ -726,10 +837,14 @@
 
 
     // design modulelist
-    var moduleHeader = div().appendTo(moduleList).size('100%', '170px').color('#white').borderBottom('3px solid #26A69A');
-    var moduleHeaderTitle = div().appendTo(moduleHeader).size('100%', '40px').marginTop(50).text('Module List').fontSize(28).textAlignCenter();
-    var moduleName = div().appendTo(moduleHeader).size('100%', '50px').marginTop(20).text('AMBA').fontSize(22).fontColor('gray').textAlignCenter();
+    var moduleHeader = div().appendTo(moduleList).size('100%', 170).color('#white').borderBottom('3px solid #26A69A');
+    var moduleSaveButton = div().appendTo(moduleHeader).size(40, 20).margin(10).float('right').color(basicBlue)
+        .borderRadius(2).text('Save').fontSize(12).fontColor('white').textAlignCenter().cursorPointer()
+        .hoverColor(basicBlueWeak, basicBlue).hoverTextColor('blue', 'white').click(onModuleSave);
+    var moduleHeaderTitle = div().appendTo(moduleHeader).size('100%', 40).text('Module List').fontSize(28).textAlignCenter();
+    var moduleName = div().appendTo(moduleHeader).size('100%', 50).marginTop(20).text('AMBA').fontSize(22).fontColor('gray').textAlignCenter();
     var moduleListWrapper = div().appendTo(moduleList).size('100%', moduleList.heightPixel() - moduleHeader.heightPixel()).overflowAuto();
+
 
     // design codelist
     var listHeader = div().appendTo(codelist).size('100%', '150px').color(basicColor);
@@ -746,13 +861,15 @@
         .borderOption('1px solid gray', 'top').overflowAuto().color('white');
 
     // design codeWrapper
-    var wrapperHeader = div().appendTo(codeWrapper).size('95%', 120).padding(10).borderOption('1px solid gray', 'bottom');
+    var wrapperHeader = div().appendTo(codeWrapper).size('95%', 140).padding(10).borderOption('1px solid gray', 'bottom');
     var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size('600px', '40px').editable().fontSize(30).fontBold()
+    var titleEditor = div().appendTo(leftWrapperHeader).size(600, 40).editable().fontSize(30).fontBold()
         .fontColor(basicColor).overflowAuto();
-    var descEditor = div().appendTo(leftWrapperHeader).size('600px', '60px').editable().marginTop(10).marginLeft(10)
+    var descEditor = div().appendTo(leftWrapperHeader).size(600, 45).editable().marginTop(10).marginLeft(10)
         .fontSize(20).fontBold().fontColor('gray').overflowAuto();
+    var depsTagsWrapper = div().appendTo(leftWrapperHeader).size(600, 30).overflowYHidden().overflowXScroll();
+    var depsTags = div().appendTo(depsTagsWrapper);
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
     var saveButton = div().appendTo(rightWrapperHeader).size(60, 30).padding(5).color(buttonColor)
@@ -760,7 +877,7 @@
         .border(2).borderColor(buttonColor).borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
     var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
     var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(15).click(onModule);
-    var dateEditor = div().appendTo(rightWrapperHeader).marginTop(50).fontSize(18).fontColor('gray').clear('right').float('right');
+    var dateEditor = div().appendTo(rightWrapperHeader).marginTop(70).fontSize(18).fontColor('gray').clear('right').float('right');
 
     var setModuleButtonColor = function () {
         if (currentCode.mstatus == 1)
