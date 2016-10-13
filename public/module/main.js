@@ -12,15 +12,20 @@
  */
 
 requirejs.config({
-
-    baseUrl: "../module",
+    baseUrl: "/module",
     waitSeconds: 20,//모듈이 로딩 되는 시간, 20초가 넘어가면 error를 던진다
     //나중에 requirejs에서 의존 파일을 불러올때 baseUrl에 없는 파일도 여기서 경로를 등록해두면 사용할수있다.
-
+    /**
+     * If i want to define a module with a name
+     * requirejs의 optimization tool에서 모듈을 만든다.
+     * 하지만 이를 추천하지 않는다.
+     * 1. define()파일의 경로를 바꿀때 마다 paths: {}에서도 경로를 수정해줘야하기 때문에 portable하지 못하다!
+     * 2. 브라우저에서 로딩할 때, paths:{}를 확인해 서모듈의 이름을 추가하는 과정을 거쳐야 하기 때문에 로딩하는데 더 오래걸린다고 한다.
+     */
     paths: {
-        test : 'http://127.0.0.1:3000/cachestore/get?cid=ida&key=src1'
+        //test : 'http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0',
+        //kko : '../module/kakao'
         //amba : '../javascripts/amba'
-        //'amba' : 'amba'
         //jquery: 'jquery'
     }
 

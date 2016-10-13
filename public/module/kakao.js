@@ -10,7 +10,6 @@
  */
 
 (function() {
-
 //define('kakao',[],function () {
 
     var kakao = {};
@@ -152,7 +151,7 @@
         });
     };
 
-    define('kakao',[],function () {
+    define([],function () {
         return kakao;
     });
     return kakao;
