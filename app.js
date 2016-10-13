@@ -5,12 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var projects = require('./routes/projects');
-var modules = require('./routes/modules');
-var datastore = require('./routes/datastore');
-var cachestore = require('./routes/cachestore');
+
 
 var app = express();
 //var redis = require('redis');
@@ -36,12 +31,14 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use('/', routes);
-app.use('/users', users);
-app.use('/projects', projects);
-app.use('/modules', modules);
-app.use('/datastore', datastore);
-app.use('/cachestore', cachestore);
+
+app.use('/', require('./routes/index'));
+app.use('/users', require('./routes/users'));
+app.use('/projects', require('./routes/projects'));
+app.use('/modules', require('./routes/modules'));
+app.use('/datastore', require('./routes/datastore'));
+app.use('/cachestore', require('./routes/cachestore'));
+app.use('/jsloader', require('./routes/jsloader'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

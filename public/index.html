@@ -8,6 +8,8 @@
     <META HTTP-EQUIV="Expires" CONTENT="0">
     <title>AMBA</title>
 
+
+
     <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" rel="stylesheet" type="text/css">
     <style type="text/css">
         html, body {
@@ -24,8 +26,7 @@
     <script src="javascripts/underscore.js"></script>
     <script src="javascripts/amba.js"></script>
     <script src="javascripts/amba-util.js"></script>
-
-    <script data-main="/module/main" src="/javascripts/require.js"></script>
+    <script data-main="/main" src="/javascripts/require.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js"></script>
 
     <script>
@@ -36,9 +37,12 @@
                 div().append().text('Please make first application');
                 return;
             } else if (path === "viewer") {
-                require(['viewer'], function (viewer) {
+                require(['/module/viewer.js'], function (viewer) {
                     viewer.run();
                 });
+                return;
+            } else if (path === 'jsloader') {
+                require(['/jsloader'], function () {});
                 return;
             }
             AB.loadScript('/app/' + path + '.js');
