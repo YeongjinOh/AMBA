@@ -447,6 +447,7 @@
                 if (!deleted) {
                     curProject = project;
                     curProjectBlock = block;
+                    moduleDescWrapper.fadeOut(300);
                     projectTitle.text(block.title.text());
                     projectDesc.text(block.description);
                     clearCurrentCode();
@@ -547,6 +548,7 @@
             if (currentCodeBlock != block) {
                 currentCode = code;
                 currentCodeBlock = block;
+                moduleDescWrapper.fadeOut(300);
                 if (code.ctext === undefined) {
                     currentCodeManager.getCode(code, function () {
                         block.syncWithCode();
