@@ -941,28 +941,11 @@ Div.prototype.disqus = function (sector, title) {
     });
 
     return this;
+};
 
+Div.prototype.summernote = function (opt, src) {
+    div().appendTo(this).attr('id', 'summernote').size('100%', '100%');
+    $('#summernote').summernote(opt, src);
 
-    // sector = parseInt(sector);
-    // if (!sector)
-    //     sector = 1;
-    // if (title === undefined || title === '')
-    //     title = 'amba';
-    //
-    // this.$script = $('<script></script>').attr('type', 'text/javascript').text("\n" +
-    //     "var disqus_config = function () {" + "\n" +
-    //     "   this.page.identifier = amba;" + "\n" +
-    //     "   this.page.url = '//amba.com/unique-path-" + sector + "/';" + "\n" +
-    //     "   this.page.title = '" + title + "';" + "\n" +
-    //     "};" + "\n" +
-    //     "(function() {" + "\n" +
-    //     "   var d = document, s = d.createElement('script');" + "\n" +
-    //     "   s.src = '//amba.disqus.com/embed.js';" + "\n" +
-    //     "   s.setAttribute('data-timestamp', +new Date());" + "\n" +
-    //     "   (d.head || d.body).appendChild(s);" + "\n" +
-    //     "})();"
-    // );
-    // this.$script.appendTo(this.$);
-    //
-    // return this;
+    return this;
 };
