@@ -4,7 +4,7 @@
 
     var basicColor = 'rgb(17,187,85)', basicColorWeak = 'rgb(17,187,85,0.6)',
         projectColor = '#C8E6C9', moduleColor = '#B2DFDB', buttonColor = '#05aa33',
-        basicBlue = '#03A9F4', basicBlueWeak = '#B3E5FC';
+        basicBlue = '#03A9F4', basicBlueWeak = '#B3E5FC', basicBlueStrong = '#1565C0';
     var currentCodeBlock, currentCode, currentCodeManager, curProject, curProjectBlock;
     var projectHide = false, moduleHide = true;
     var fadeDuration = 300;
@@ -644,7 +644,10 @@
                 .text(deps[i]).verticalAlign('middle').fontBold().fontColor('white').borderRadius(12).cursorPointer()
                 .click((function (j) {
                     return function () {
-                        alert('Description : ' + moduleManager.getModule(deps[j]).description);
+                        moduleDescWrapper.fadeOut(50);
+                        moduleDescTitle.text('[' + deps[j] + ']')
+                        moduleDescContent.text(moduleManager.getModule(deps[j]).description);
+                        moduleDescWrapper.fadeIn();
                     };
                 })(i));
             depsTags.width(parseInt(depsTags.width()) + parseInt(tag.width()) + marginRight);
@@ -799,6 +802,11 @@
         resetDeps();
     };
 
+    var onModuleDescWrapper = function () {
+        // moduleDescWrapper.slideUp("slow");
+        moduleDescWrapper.fadeOut();
+    }
+
     var onLogout = function () {
         localStorage.clear('aauth');
         localStorage.clear('ainfo');
@@ -861,8 +869,13 @@
         .fontSize(28).fontBold().fontColor('white').textAlignCenter();
     var projectDesc = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)
         .fontColor('#1B5E20').textAlignCenter();
-    var listWrapper = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
-        .borderOption('1px solid gray', 'top').overflowAuto().color('white');
+    var listViewer = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
+        .borderOption('1px solid gray', 'top').overflowAuto().color('white');;
+    var listWrapper = div().appendTo(listViewer).width('100%');
+    var moduleDescWrapper = div().prependTo(listViewer).size('100%').minHeight(100).padding(10).displayNone()
+        .color(basicBlueWeak).borderBottom('1px solid ' + basicBlue).cursorPointer().click(onModuleDescWrapper);
+    var moduleDescTitle = div().appendTo(moduleDescWrapper).size('100%',20).fontSize(20).fontBold().fontColor(basicBlueStrong);
+    var moduleDescContent = div().appendTo(moduleDescWrapper).size('100%').fontSize(12).marginTop(10).fontColor(basicBlue);
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', 140).padding(10).borderOption('1px solid gray', 'bottom');
