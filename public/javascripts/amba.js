@@ -941,3 +941,10 @@ Div.prototype.disqus = function (sector, title) {
 
     return this;
 };
+
+Div.prototype.summernote = function (opt, src) {
+    div().appendTo(this).attr('id', 'summernote').size('100%', '100%');
+    $('#summernote').summernote(opt, src);
+
+    return this;
+};

@@ -1,21 +1,22 @@
+/**
+ * RequireJS takes a different approach to script loading than traditional <script> tags.
+ * While it can also run fast and optimize well, the primary goal is to encourage modular code.
+ * As part of that, it encourages using module IDs instead of URLs for script tags.
+ * script 태그의 URL이 아니라 baseUrl을 통해서 모듈의 ID로딩해서 사용하는것을 권장한다.
+ */
+
+
+
 requirejs(['http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0'],
 //requirejs(['test'],
 //requirejs(['kakao'],
     function (kakao) {
     console.log('kakao : \n', kakao);
     var chat = div().size('auto','auto').append();
-    ////kakaotest모듈을 chat div에 붙인다
+    //kakao모듈을 chat div에 붙인다
     kakao.appendTo(chat);
 });
 
-
-
-/**
- * 추가해야될것
- * 1. 마우스 우클릭 적용
- * 2. 폴더들 리스트화
- * 3. 메모들에 타이틀 적용(var memo에서 특정 디브를 찾아서 적용)
- */
 //require()이것도 된다.
 //크롬에서는 렌더링이 잘 되는데, 사파리에서는 모듈이 늦게 불려진다..모듈 로딩 순서를 정의해줘야 되는듯 하다
 

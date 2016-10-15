@@ -13,7 +13,7 @@
 
 requirejs.config({
 
-    baseUrl: "../module",
+    baseUrl: "/module",
     waitSeconds: 20,//모듈이 로딩 되는 시간, 20초가 넘어가면 error를 던진다
     //나중에 requirejs에서 의존 파일을 불러올때 baseUrl에 없는 파일도 여기서 경로를 등록해두면 사용할수있다.
 
