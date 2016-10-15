@@ -818,7 +818,6 @@ Div.prototype.editable = function (value) {
  * @desc    password
  * @since    2016-09-26
  * @author    Yoon JiSoo yjsgoon@naver.com
- * @todo    Source에 유연성을 추가해야 한다.
  */
 Div.prototype.textPassword = function(value) {
     if(value === false)
@@ -922,7 +921,7 @@ Div.prototype.disqus = function (sector, title) {
     var that = this;
 
     if (this.$script) {
-        this.$.empty();
+        this.empty();
         return this;
     }
 
@@ -941,28 +940,4 @@ Div.prototype.disqus = function (sector, title) {
     });
 
     return this;
-
-
-    // sector = parseInt(sector);
-    // if (!sector)
-    //     sector = 1;
-    // if (title === undefined || title === '')
-    //     title = 'amba';
-    //
-    // this.$script = $('<script></script>').attr('type', 'text/javascript').text("\n" +
-    //     "var disqus_config = function () {" + "\n" +
-    //     "   this.page.identifier = amba;" + "\n" +
-    //     "   this.page.url = '//amba.com/unique-path-" + sector + "/';" + "\n" +
-    //     "   this.page.title = '" + title + "';" + "\n" +
-    //     "};" + "\n" +
-    //     "(function() {" + "\n" +
-    //     "   var d = document, s = d.createElement('script');" + "\n" +
-    //     "   s.src = '//amba.disqus.com/embed.js';" + "\n" +
-    //     "   s.setAttribute('data-timestamp', +new Date());" + "\n" +
-    //     "   (d.head || d.body).appendChild(s);" + "\n" +
-    //     "})();"
-    // );
-    // this.$script.appendTo(this.$);
-    //
-    // return this;
 };
