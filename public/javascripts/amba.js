@@ -13,7 +13,7 @@ function div() {
 function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>');
-    this.$image = $('<img>').first();
+    this.$image = $('<img>');
     this.$.data('div', this);
     this.param = {};
     this.displayInlineBlock();
@@ -943,7 +943,11 @@ Div.prototype.disqus = function (sector, title) {
     });
 
     return this;
+};
 
+Div.prototype.summernote = function (opt, src) {
+    div().appendTo(this).attr('id', 'summernote').size('100%', '100%');
+    $('#summernote').summernote(opt, src);
 
     // sector = parseInt(sector);
     // if (!sector)

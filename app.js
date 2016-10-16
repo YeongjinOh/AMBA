@@ -8,8 +8,8 @@ var bodyParser = require('body-parser');
 
 
 var app = express();
-//var redis = require('redis');
-//var cache = redis.createClient();
+// var redis = require('redis');
+// var cache = redis.createClient();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
