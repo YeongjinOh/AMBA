@@ -13,6 +13,7 @@ function div() {
 function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>');
+    this.$image = $('<img>').first();
     this.$.data('div', this);
     this.param = {};
     this.displayInlineBlock();
@@ -537,6 +538,7 @@ Div.prototype.heightPixel = function () {
     return parseInt(this.$.css('height'));
 };
 Div.prototype.widthPixel = function () {
+
     return parseInt(this.$.css('width'));
 };
 
@@ -966,3 +968,21 @@ Div.prototype.disqus = function (sector, title) {
     //
     // return this;
 };
+
+Div.prototype.image = function (src) {
+    if (src === '') {
+        if (this.$image)
+            this.$image.remove();
+        return this;
+    }
+    this.$image.attr('src', '../javascripts/loadingBar.gif').height('100%').width('100%').appendTo(this.$);
+    this.$downloadingImage = $('<img>');
+    this.$downloadingImage.attr('src', src);
+    this.$downloadingImage.load(this.setImage(src));
+    return this;
+};
+
+Div.prototype.setImage = function (src) {
+    this.$image.attr('src', src).height('100%').width('100%');
+    return this
+}
