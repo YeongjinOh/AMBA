@@ -5,17 +5,20 @@
  * script 태그의 URL이 아니라 baseUrl을 통해서 모듈의 ID로딩해서 사용하는것을 권장한다.
  */
 
+div().size('200','150').append().image('https://www.google.co.kr/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+    .borderOption(1).borderOption('black', 'color');
 
 
-requirejs(['http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0'],
-//requirejs(['test'],
-//requirejs(['kakao'],
-    function (kakao) {
-    console.log('kakao : \n', kakao);
-    var chat = div().size('auto','auto').append();
-    //kakao모듈을 chat div에 붙인다
-    kakao.appendTo(chat);
-});
+
+//requirejs(['http://127.0.0.1:3000/cachestore/get?cid=ida&key=src0'],
+////requirejs(['test'],
+////requirejs(['kakao'],
+//    function (kakao) {
+//    console.log('kakao : \n', kakao);
+//    var chat = div().size('auto','auto').append();
+//    //kakao모듈을 chat div에 붙인다
+//    kakao.appendTo(chat);
+//});
 
 //require()이것도 된다.
 //크롬에서는 렌더링이 잘 되는데, 사파리에서는 모듈이 늦게 불려진다..모듈 로딩 순서를 정의해줘야 되는듯 하다
