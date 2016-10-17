@@ -948,3 +948,36 @@ Div.prototype.summernote = function (opt, src) {
 
     return this;
 };
+
+Div.prototype.upload = function () {
+    var that = this;
+    var i    = 0;
+    this.fileCount = 0;
+
+    div().appendTo(this).size('auto', 'auto').text('Upload').fontSize(25).disableSelection().cursorPointer()
+        .click(function() {
+        var formData = new FormData();
+
+        for (i = 0; i < that.fileCount; i++)
+            formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
+
+        $.ajax({
+            url: '/fileupload/put',
+            data: formData,
+            processData: false,
+            contentType: false,
+            type: 'post',
+            success: function(data){
+                alert('Success\n' + JSON.stringify(data));
+            }
+        });
+    });
+
+    div().appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
+        .click(function() {
+            // opt: max count!!
+            $('<input>').attr('type', 'file').attr('name', 'amba_file').appendTo(that.$);
+        });
+
+    return this;
+};
