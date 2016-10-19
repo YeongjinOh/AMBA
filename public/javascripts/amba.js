@@ -30,6 +30,37 @@ function Div() {
  * @returns {Div}
  */
 Div.prototype.aceEditor = function () {
+    // var that = this;
+    // var editor;
+    // require(['//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js'], function() {
+    //     editor = ace.edit(that.$.get(0));
+    //
+    //     editor.setTheme("ace/theme/tomorrow_night_eighties");
+    //
+    //     //js문법에 따라 하이라이팅을 준다
+    //     editor.getSession().setMode("ace/mode/javascript");
+    //     editor.getSession().on('change', function(e) {
+    //         // e.type, etc
+    //         //자동 저장 가능
+    //     });
+    //     editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
+    //     editor.$blockScrolling = Infinity;
+    //     that.aceValue = editor;
+    //
+    //     that.textInterceptor(function(txt){
+    //         if(txt === undefined)
+    //             return editor.getValue();
+    //         else
+    //             editor.setValue(txt);
+    //         return that;
+    //     });
+    //
+    //     return that;
+    // });
+    //
+    // return this;
+
+
     //var editor = oj.AceEditor.min.edit(this.$.get(0));
     var editor = ace.edit(this.$.get(0));
 
@@ -854,6 +885,11 @@ Div.prototype.remove = function () {
     return this;
 };
 
+Div.prototype.button = function() {
+    this.$.button();
+    return this;
+};
+
 Div.prototype.html = function (tag) {
     if (tag === undefined)
         return this.$text.html();
@@ -939,7 +975,7 @@ Div.prototype.disqus = function (sector, title) {
     AB.loadModule('disqus', function() {
         var dqModule = module.disqus;
         that.$script = dqModule.load(sector, title);
-        that.$script.appendTo(this.$);
+        that.$script.appendTo(that.$);
     });
 
     return this;
@@ -947,7 +983,12 @@ Div.prototype.disqus = function (sector, title) {
 
 Div.prototype.summernote = function (opt, src) {
     var note = div().appendTo(this).size('100%', '100%');
-    note.$.summernote(opt, src);
+
+    require(['http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', 'http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function() {
+        // $('<link>').attr('href', 'http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css').attr('rel', 'stylesheet');
+        // $('<link>').attr('href', 'http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css').attr('rel', 'stylesheet');
+        note.$.summernote(opt, src);
+    })
 };
 
 Div.prototype.image = function (src) {
@@ -963,7 +1004,7 @@ Div.prototype.image = function (src) {
     return this;
 };
 
-Div.prototype.upload = function () {
+Div.prototype.uploadTest = function () {
     var that = this;
     var i    = 0;
     this.fileCount = 0;
@@ -971,9 +1012,9 @@ Div.prototype.upload = function () {
     div().appendTo(this).size('auto', 'auto').text('Upload').fontSize(25).disableSelection().cursorPointer()
         .click(function() {
         var formData = new FormData();
-
-        for (i = 0; i < that.fileCount; i++)
+        for (i = 0; i < that.fileCount; i++) {
             formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
+        }
 
         $.ajax({
             url: '/fileupload/put',
@@ -983,20 +1024,6 @@ Div.prototype.upload = function () {
             type: 'post',
             success: function(data) {
                 alert('Success\n' + JSON.stringify(data));
-            },
-            progress: function(e) {
-                //make sure we can compute the length
-                if (e.lengthComputable) {
-                    //calculate the percentage loaded
-                    var pct = (e.loaded / e.total) * 100;
-
-                    //log percentage loaded
-                    console.log(pct);
-                }
-                //this usually happens when Content-Length isn't set
-                else {
-                    console.warn('Content Length not reported!');
-                }
             }
         });
     });
@@ -1014,6 +1041,81 @@ Div.prototype.upload = function () {
     return this;
 };
 
+Div.prototype.inputFileButton = function(fn) {
+    var that = this;
+
+    if (fn === undefined) {
+        this.click(function() {
+            $('<input>').attr('type', 'file').attr('name', 'amba_file').hide().appendTo(that.$).click(function(e) {
+                e.stopPropagation();
+            }).trigger('click');
+        })
+    }
+
+    this.click(function (e) {
+        if (fn) fn(that, e);
+    });
+
+    return this;
+};
+
+Div.prototype.uploadButton = function(fn) {
+    var that = this;
+
+    if (fn === undefined) {
+        this.click(function() {
+            var i;
+            var formData = new FormData();
+            for (i = 0; i < $('input[name=amba_file]').length; i++) {
+                formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
+            }
+
+            $.ajax({
+                url: '/fileupload/put',
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: 'post',
+                success: function (data) {
+                    alert('Success\n' + JSON.stringify(data));
+                },
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+
+                    // Upload progress
+                    xhr.upload.addEventListener('progress', function(evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            percentComplete = parseInt(percentComplete * 100);
+                            console.log(percentComplete);
+
+                            if (percentComplete === 100) {
+                                console.log('upload complete!!');
+                            }
+                        }
+                    }, false);
+
+                    // // Download progress
+                    // xhr.addEventListener("progress", function(evt){
+                    //     if (evt.lengthComputable) {
+                    //         var percentComplete = evt.loaded / evt.total;
+                    //         // Do something with download progress
+                    //         console.log(percentComplete);
+                    //     }
+                    // }, false);
+
+                    return xhr;
+                }
+            });
+        });
+    }
+
+    this.click(function (e) {
+        if (fn) fn(that, e);
+    });
+};
+
+
 Div.prototype.setImage = function (src) {
     this.$image.attr('src', src).height('100%').width('100%');
     return this
@@ -1021,5 +1123,8 @@ Div.prototype.setImage = function (src) {
 
 Div.prototype.tinymce = function () {
     $('<textarea></textarea>').text('Wellcome to AMBA').appendTo(this.$);
-    tinymce.init({ selector: 'textarea' });
-}
+
+    require(['//cdn.tinymce.com/4/tinymce.min.js'], function() {
+        tinymce.init({ selector: 'textarea' });
+    })
+};

@@ -19,7 +19,7 @@ AB.loadModule = function (name, callback) {
             callback(module[name]);
         });
     }
-}
+};
 
 AB.loadScript = function (url, callback, charset) {
     var head = document.getElementsByTagName('head')[0];
@@ -39,7 +39,7 @@ AB.loadScript = function (url, callback, charset) {
             if (callback)
                 callback();
         }
-    }
+    };
 
     /**
      * Ajax로 소스를 불러와서 eval함수로 실행. 그 return값을 변수로 넣어 콜백으로 보냄.
@@ -47,11 +47,33 @@ AB.loadScript = function (url, callback, charset) {
     script.onload = function () {
         if (callback)
             callback();
-    }
+    };
     script.src = url;
     head.appendChild(script);
 
 };
+
+AB.uploadList = {
+    upload: function(fileCount) {
+        var i;
+        var formData = new FormData();
+        for (i = 0; i < fileCount; i++) {
+            formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
+        }
+
+        $.ajax({
+            url: '/fileupload/put',
+            data: formData,
+            processData: false,
+            contentType: false,
+            type: 'POST',
+            success: function(data) {
+                alert('Success\n' + JSON.stringify(data));
+            }
+        });
+    }
+};
+
 
 AB.getParameter = function (name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");

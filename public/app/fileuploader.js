@@ -4,5 +4,7 @@
 
 var root = div().append().size('100%', '100%').color('lightblue');
 
-var fileupload = div().appendTo(root).size(300, 'auto').color('yellow').upload();
+div().appendTo(root).size('auto', 'auto').text('Upload File').fontSize(25).disableSelection().button().uploadButton();
+
+div().appendTo(root).size('auto', 'auto').text('Load File').fontSize(25).disableSelection().button().inputFileButton();
 
