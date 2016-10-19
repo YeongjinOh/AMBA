@@ -20,6 +20,8 @@
         }
     </style>
 
+
+
     <script src="/primus/primus.js"></script>
     <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js'></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -30,11 +32,17 @@
     <script data-main="/main" src="/javascripts/require.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js"></script>
 
-    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
     <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css" rel="stylesheet">
 
+    <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+    <script src="js/jquery.ajax-progress.js"></script>
+
     <script>
+        require(['//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js]', function() {
+
+        });
         $(document).ready(function () {
 
             var path = AB.getParameter('app');

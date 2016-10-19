@@ -912,6 +912,7 @@ Div.prototype.verticalAlignMiddle = function() {
     }
     minTop-=this.offset().top;
     maxBottom-=this.offset().top;
+
     var paddingTop = (parseInt(this.height())-maxBottom)/2;
     this.paddingTop(paddingTop);
     this.height(this.heightPixel()-paddingTop);
@@ -935,18 +936,18 @@ Div.prototype.disqus = function (sector, title) {
     if (title === undefined || title === '')
         title = 'amba';
 
-    AB.loadModule('disqus', function(){
+    AB.loadModule('disqus', function() {
         var dqModule = module.disqus;
         that.$script = dqModule.load(sector, title);
-        that.$script.appendTo(that.$);
+        that.$script.appendTo(this.$);
     });
 
     return this;
 };
 
 Div.prototype.summernote = function (opt, src) {
-    div().appendTo(this).attr('id', 'summernote').size('100%', '100%');
-    $('#summernote').summernote(opt, src);
+    var note = div().appendTo(this).size('100%', '100%');
+    note.$.summernote(opt, src);
 };
 
 Div.prototype.image = function (src) {
@@ -980,17 +981,35 @@ Div.prototype.upload = function () {
             processData: false,
             contentType: false,
             type: 'post',
-            success: function(data){
+            success: function(data) {
                 alert('Success\n' + JSON.stringify(data));
+            },
+            progress: function(e) {
+                //make sure we can compute the length
+                if (e.lengthComputable) {
+                    //calculate the percentage loaded
+                    var pct = (e.loaded / e.total) * 100;
+
+                    //log percentage loaded
+                    console.log(pct);
+                }
+                //this usually happens when Content-Length isn't set
+                else {
+                    console.warn('Content Length not reported!');
+                }
             }
         });
     });
 
-    div().appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
+    div().attr('id', 'utest').appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
         .click(function() {
             // opt: max count!!
-            $('<input>').attr('type', 'file').attr('name', 'amba_file').appendTo(that.$);
+            that.fileCount++;
+            // 이쁘게 바꾸기!! input tag를 숨기고 이미지를 누르면 파일 브라우저가 나오게!
+            $('<input>').attr('type', 'file').attr('name', 'amba_file').appendTo(that.$).button();
         });
+
+    // test.$.button();
 
     return this;
 };
@@ -998,4 +1017,9 @@ Div.prototype.upload = function () {
 Div.prototype.setImage = function (src) {
     this.$image.attr('src', src).height('100%').width('100%');
     return this
+}
+
+Div.prototype.tinymce = function () {
+    $('<textarea></textarea>').text('Wellcome to AMBA').appendTo(this.$);
+    tinymce.init({ selector: 'textarea' });
 }
