@@ -482,11 +482,13 @@
         viewerHeader.size('100%', 33).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
             .borderBottom('2px solid green').cursorDefault();
         var viewer = div().appendTo(viewerWrapper).size('100%', '100%').overflowAuto().backgroundColor('white');
-        var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
-            .marginRight(5).cursorPointer()
+        var viewerRemoveButton = div().appendTo(viewerHeader).size(13, 13).float('right').marginRight(5).cursorPointer()
+            .image('../images/close.png')
             .click(function () {
                 viewerWrapper.fadeOut().detach();
             });
+        var viewerFullscreenButton = div().appendTo(viewerHeader).cssSameWith(viewerRemoveButton).size(11,11)
+            .image('../images/fullscreen.png').click(onFullscreen);
 
 
         // trick to adjust resizing control point
