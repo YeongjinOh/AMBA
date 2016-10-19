@@ -13,11 +13,10 @@ define([], function () {
                 AB.module[deps[i]] = arguments[i];
             }
 
-            // 모듈을 모두 설정한 뒤, 현재 코드를 실행시키기 위해 script tag를 추가합니다.
+            // 현재 코드를 실행시키기 위한 script를 추가합니다.
             var head = document.getElementsByTagName('head')[0];
             var script = document.createElement('script');
-
-            script.text = '(function(){' + code + '\n})();'; // get text from code editor and modularize it
+            script.text = code;
             head.appendChild(script);
         });
     };

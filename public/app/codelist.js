@@ -519,7 +519,8 @@
             },
             run: function () {
                 // save code and dependencies
-                localStorage.setItem('acode', codeEditor.text());
+                var acode = '(function(){' + codeEditor.text() + '\n})();';
+                localStorage.setItem('acode', acode);
                 localStorage.setItem('adeps', JSON.stringify(code.deps));
 
                 // set viewer
@@ -529,10 +530,7 @@
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
             },
             fullscreen: function () {
-                var curCid = currentCode.cid;
-                var encCid = encodeURIComponent(curCid);
-                // console.log(curCid);
-                // console.log(encCid);
+                var encCid = encodeURIComponent(currentCode.cid);
                 window.open('/?cid=' + encCid);
             }
         };
