@@ -41,17 +41,19 @@
 
     <script>
         require(['//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js',
-                 'javascripts/underscore.js', 'javascripts/amba.js', 'javascripts/amba-util.js'], function () {
-            require(['//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js', '/primus/primus.js'], function() {
+            'javascripts/underscore.js', 'javascripts/amba.js', 'javascripts/amba-util.js'], function () {
+            require(['//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js', '/primus/primus.js'], function () {
+
                 $(document).ready(function () {
 
                     var path = AB.getParameter('app');
-                    if (!path) {
+                    var cid = AB.getParameter('cid');
+                    if (!path && !cid) {
                         div().append().text('Please make first application');
                         return;
-                    } else if (path === "viewer") {
+                    } else if (path === "viewer" || cid) {
                         require(['/module/viewer.js'], function (viewer) {
-                            viewer.run();
+                            viewer.run(cid);
                         });
                         return;
                     }
