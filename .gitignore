@@ -6,6 +6,3 @@ out/
 public/dist
 docs/
 datas/
-
-routes/fileupload.js
-public/app/datastore.js
