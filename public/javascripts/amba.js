@@ -944,9 +944,14 @@ Div.prototype.disqus = function (sector, title) {
     return this;
 };
 
+
 Div.prototype.summernote = function (opt, src) {
+
+
     div().appendTo(this).attr('id', 'summernote').size('100%', '100%');
     $('#summernote').summernote(opt, src);
+
+
 };
 
 Div.prototype.image = function (src) {
@@ -955,10 +960,32 @@ Div.prototype.image = function (src) {
             this.$image.remove();
         return this;
     }
-    this.$image.attr('src', '../javascripts/loadingBar.gif').height('100%').width('100%').appendTo(this.$);
+
+    if(src===undefined && this.$image)
+        return this.$image.attr('src');
+
+    //downloadingImage를 다운 받았을때,
+    this.$image.attr('src', '/javascripts/loadingBar.gif').appendTo(this.$);//.height('100%').width('100%');
     this.$downloadingImage = $('<img>');
     this.$downloadingImage.attr('src', src);
-    this.$downloadingImage.load(this.setImage(src));
+    var that = this;
+    this.$downloadingImage.load(function (image) {
+        //부모의 border 사이즈를 제외하고 출력된다.
+        //이미지의 사이즈,
+        var w = image.target.width;
+        var h = image.target.height;
+
+        //부모 div의 사이즈
+        var pw = parseInt(that.width(),10);
+        var ph = parseInt(that.height(),10);
+
+
+        if(w*ph<h*pw){
+            that.$image.height('100%').attr('src', src);
+        }else{
+            that.$image.width('100%').attr('src', src);
+        }
+    });
     return this;
 };
 
@@ -972,7 +999,7 @@ Div.prototype.upload = function () {
         var formData = new FormData();
 
         for (i = 0; i < that.fileCount; i++)
-            formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
+            formData.append('amba_file', $('input[multiple][name=amba_file]')[i].files[0]);
 
         $.ajax({
             url: '/fileupload/put',
@@ -986,16 +1013,13 @@ Div.prototype.upload = function () {
         });
     });
 
-    div().appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
+    var t = div().appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
         .click(function() {
             // opt: max count!!
             $('<input>').attr('type', 'file').attr('name', 'amba_file').appendTo(that.$);
         });
 
+    t.$.button();
     return this;
 };
 
-Div.prototype.setImage = function (src) {
-    this.$image.attr('src', src).height('100%').width('100%');
-    return this
-}

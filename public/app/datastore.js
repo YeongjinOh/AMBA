@@ -73,7 +73,7 @@ div().appendTo(formDiv).size('150px', '40px').marginLeft('10px').marginTop('7px'
     if (cid.text() === '' || key.text() === '')
         alert('cid, key를 입력해주세요.');
     else {
-        $.get("/datastore/delete", {cid: cid.text(), key: key.text()})
+        $.get("/datastore/delete", {cid: cid.text(), kㅋㅋey: key.text()})
             .done(function (data) {
                 if (data.resultCode === 0)
                     memo.text('Delete Success');
@@ -82,6 +82,7 @@ div().appendTo(formDiv).size('150px', '40px').marginLeft('10px').marginTop('7px'
             });
     }
 });
+
 
 div().appendTo(formDiv).size('150px', '40px').marginLeft('10px').marginTop('7px').color('violet').borderRadius(5).boxShadow('5px 5px 5px black')
     .text('keys').textAlignCenter().fontSize('25px').fontColor('white').fontBold().disableSelection().cursorPointer().hover(function (dv) {

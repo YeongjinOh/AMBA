@@ -18,6 +18,9 @@ var storage =   multer.diskStorage({
 var upload = multer({ storage: storage }).array('amba_file');
 
 router.post('/put', function(req, res) {
+    console.log(req.body);
+    console.log(req.files);
+
     upload(req, res, function(err) {
         if (err) {
             res.json({

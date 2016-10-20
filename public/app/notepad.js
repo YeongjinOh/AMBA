@@ -5,8 +5,23 @@
  * script 태그의 URL이 아니라 baseUrl을 통해서 모듈의 ID로딩해서 사용하는것을 권장한다.
  */
 
-div().size('200','150').append().image('https://www.google.co.kr/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+div().size('200','100').append().image('https://www.google.co.kr/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
     .borderOption(1).borderOption('black', 'color');
+
+div().size('100', '100%').append().image('https://www.google.co.kr/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+    .borderOption(1).borderOption('black', 'color');
+
+//div().size('200','10').append().image('https://www.google.co.kr/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+//    .borderOption(1).borderOption('black', 'color');
+
+
+div().size('300','550').append().image('http://image14.hanatour.com/uploads/2011/06/ScreenHunter_1369.jpg')
+    .borderOption(1).borderOption('black', 'color');
+
+div().size('300','250').append().image('http://image14.hanatour.com/uploads/2011/06/ScreenHunter_1369.jpg')
+    .borderOption(1).borderOption('black', 'color');
+
+
 
 
 
