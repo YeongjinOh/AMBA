@@ -960,7 +960,7 @@ Div.prototype.disqus = function (sector, title) {
 Div.prototype.summernote = function (opt, src) {
     var note = div().appendTo(this).size('100%', '100%');
 
-    require(['//netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', '//cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function () {
+    require(['https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', 'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function () {
         // $('<link>').attr('href', 'http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css').attr('rel', 'stylesheet');
         // $('<link>').attr('href', 'http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css').attr('rel', 'stylesheet');
         note.$.summernote(opt, src);
