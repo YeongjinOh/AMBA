@@ -3,8 +3,8 @@
  */
 
 (function () {
-    module.disqus = {
-        load: function (sector, title) {
+    module.disqus =  {
+        load : function (sector, title) {
             return $('<script></script>').attr('type', 'text/javascript').text("\n" +
                 "var disqus_config = function () {" + "\n" +
                 "   this.page.identifier = amba;" + "\n" +

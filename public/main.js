@@ -18,10 +18,14 @@ requirejs.config({
     //나중에 requirejs에서 의존 파일을 불러올때 baseUrl에 없는 파일도 여기서 경로를 등록해두면 사용할수있다.
 
     paths: {
-        test : 'http://127.0.0.1:3000/cachestore/get?cid=ida&key=src1'
-        //amba : '../javascripts/amba'
-        //'amba' : 'amba'
-        //jquery: 'jquery'
+        test : 'http://127.0.0.1:3000/cachestore/get?cid=ida&key=src1',
+        jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min',
+        jqueryUi: '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min',
+        underscore:'../javascripts/underscore',
+        aceCdn:'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace',
+        amba: '../javascripts/amba',
+        ambaUtils: '../javascripts/amba-util',
+        primus: '../primus/primus'
     }
 
     //require.js가 로딩되기전에 config파일에서 먼저 로딩되야하는 모듈 목록을 배열로 나열

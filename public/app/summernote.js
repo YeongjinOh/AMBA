@@ -3,3 +3,4 @@
  */
 
 div().append().size('100%', '100%').summernote();
+// div().append().size ('100%', '100%').tinymce();

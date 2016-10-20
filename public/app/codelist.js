@@ -482,11 +482,13 @@
         viewerHeader.size('100%', 33).paddingTop(6).color(projectColor).fontSize(18).fontBold().fontColor('green')
             .borderBottom('2px solid green').cursorDefault();
         var viewer = div().appendTo(viewerWrapper).size('100%', '100%').overflowAuto().backgroundColor('white');
-        var viewerRemoveButton = div().appendTo(viewerHeader).size(10, 15).text('X').fontColor('green').float('right')
-            .marginRight(5).cursorPointer()
+        var viewerRemoveButton = div().appendTo(viewerHeader).size(13, 13).float('right').marginRight(5).cursorPointer()
+            .image('../images/close.png')
             .click(function () {
                 viewerWrapper.fadeOut().detach();
             });
+        var viewerFullscreenButton = div().appendTo(viewerHeader).cssSameWith(viewerRemoveButton).size(11,11)
+            .image('../images/fullscreen.png').click(onFullscreen);
 
 
         // trick to adjust resizing control point
@@ -517,7 +519,8 @@
             },
             run: function () {
                 // save code and dependencies
-                localStorage.setItem('acode', codeEditor.text());
+                var acode = '(function(){' + codeEditor.text() + '\n})();';
+                localStorage.setItem('acode', acode);
                 localStorage.setItem('adeps', JSON.stringify(code.deps));
 
                 // set viewer
@@ -525,6 +528,10 @@
                 viewer.$iframe.appendTo(viewer.$); // attach again
                 viewerHeader.text('  ' + titleEditor.text());
                 viewerWrapper.append().displayNone().left(listWrapper.positionLeft()).top(listWrapper.positionTop()).fadeIn();
+            },
+            fullscreen: function () {
+                var encCid = encodeURIComponent(currentCode.cid);
+                window.open('/?cid=' + encCid);
             }
         };
 
@@ -654,8 +661,8 @@
                 })(i));
             depsTags.width(parseInt(depsTags.width()) + parseInt(tag.width()) + marginRight);
         }
-        if (depsTags.width() < minWidthPerTag*deps.length)
-            depsTags.width(minWidthPerTag*deps.length);
+        if (depsTags.width() < minWidthPerTag * deps.length)
+            depsTags.width(minWidthPerTag * deps.length);
     };
 
     var clearCurrentCode = function () {
@@ -713,6 +720,10 @@
 
     var onRun = function () {
         currentCodeBlock.run();
+    };
+
+    var onFullscreen = function () {
+        currentCodeBlock.fullscreen();
     };
 
     var onModule = function () {
@@ -831,15 +842,14 @@
 
     // design sidebar
     var decoButton = function (div) {
-        div.size(30, 30).padding(5).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
+        div.size(30, 30).margin(15).border(1).borderColor(basicColor).borderOption('100%', 'radius').marginTop(10)
             .fontBold().fontSize(20).fontColor('green').textAlign('center').verticalAlign('middle').cursorPointer();
     };
-    var logoutButton = div().appendTo(sidebar).size(50, 24).margin(5).marginTop(15).paddingTop(4).color('green')
+    var logoutButton = div().appendTo(sidebar).size(50, 24).margin(5).marginTop(15).color('green')
         .border(2).borderRadius(4).borderColor('green').textAlignCenter().text('logout').fontSize(14).fontColor('white')
         .cursorPointer().hoverColor('white', 'green').hoverTextColor('green', 'white').click(onLogout);
-    var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(30)
-        .paddingTop(0).text('+').fontSize(28).click(onAddCode).displayNone();
-    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(30).text('new').fontSize(12).click(onAddProject);
+    var addCodeButton = div().appendTo(sidebar).deco(decoButton).marginTop(30).text('+').fontSize(18).click(onAddCode).displayNone();
+    var projectAddButton = div().appendTo(sidebar).deco(decoButton).marginTop(30).text('new').paddingTop(3).fontSize(12).click(onAddProject);
     var projectListButton = div().appendTo(sidebar).deco(decoButton).text('P').click(onProjectList);
     var moduleListButton = div().appendTo(sidebar).deco(decoButton).text('M').click(onModuleList).displayNone();
 
@@ -872,11 +882,12 @@
     var projectDesc = div().appendTo(listHeader).size('100%', '20px').marginTop(10).text(username).fontSize(20)
         .fontColor('#1B5E20').textAlignCenter();
     var listViewer = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
-        .borderOption('1px solid gray', 'top').overflowAuto().color('white');;
+        .borderOption('1px solid gray', 'top').overflowAuto().color('white');
+    ;
     var listWrapper = div().appendTo(listViewer).width('100%');
     var moduleDescWrapper = div().prependTo(listViewer).size('100%').minHeight(100).padding(10).displayNone()
         .color(basicBlueWeak).borderBottom('1px solid ' + basicBlue).cursorPointer().click(onModuleDescWrapper);
-    var moduleDescTitle = div().appendTo(moduleDescWrapper).size('100%',20).fontSize(20).fontBold().fontColor(basicBlueStrong);
+    var moduleDescTitle = div().appendTo(moduleDescWrapper).size('100%', 20).fontSize(20).fontBold().fontColor(basicBlueStrong);
     var moduleDescContent = div().appendTo(moduleDescWrapper).size('100%').fontSize(12).marginTop(10).fontColor(basicBlue);
 
     // design codeWrapper
@@ -891,11 +902,12 @@
     var depsTags = div().appendTo(depsTagsWrapper);
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
-    var saveButton = div().appendTo(rightWrapperHeader).size(60, 30).padding(5).color(buttonColor)
-        .text('Save').fontColor('white').textAlignCenter().fontSize(18).verticalAlign('middle')
+    var saveButton = div().appendTo(rightWrapperHeader).size(50, 25).padding(1).color(buttonColor)
+        .text('Save').fontColor('white').textAlignCenter().fontSize(16).verticalAlign('middle')
         .border(2).borderColor(buttonColor).borderOption(5, 'radius').float('right').cursorPointer().click(onSave);
     var runButton = div().appendTo(rightWrapperHeader).cssSameWith(saveButton).text('Run').marginRight(20).click(onRun);
-    var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(15).click(onModule);
+    var fullscreenButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Full').click(onFullscreen);
+    var moduleButton = div().appendTo(rightWrapperHeader).cssSameWith(runButton).text('Module').fontSize(13).click(onModule);
     var dateEditor = div().appendTo(rightWrapperHeader).marginTop(70).fontSize(18).fontColor('gray').clear('right').float('right');
 
     var setModuleButtonColor = function () {

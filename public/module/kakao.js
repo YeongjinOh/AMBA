@@ -50,6 +50,10 @@
 
     kakao.appendTo = function(target) {
 
+
+        // var primus = require(['/primus/primus.js'], function() {
+        //     return Primus.connect();
+        // });
         var primus = Primus.connect();
 
         //처음 접속시 채널에 가입한다

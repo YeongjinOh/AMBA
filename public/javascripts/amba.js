@@ -30,28 +30,37 @@ function Div() {
  * @returns {Div}
  */
 Div.prototype.aceEditor = function () {
-    //var editor = oj.AceEditor.min.edit(this.$.get(0));
-    var editor = ace.edit(this.$.get(0));
-
-    editor.setTheme("ace/theme/tomorrow_night_eighties");
-
-    //js문법에 따라 하이라이팅을 준다
-    editor.getSession().setMode("ace/mode/javascript");
-    editor.getSession().on('change', function(e) {
-        // e.type, etc
-        //자동 저장 가능
-    });
-    editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
-    editor.$blockScrolling = Infinity;
-    this.aceValue = editor;
-
     var that = this;
-    this.textInterceptor(function(txt){
-        if(txt === undefined)
-            return editor.getValue();
-        else
-            editor.setValue(txt);
-        return that;
+
+    // set ace module
+    require(["aceCdn"], function () {
+
+        // read ace module
+        require(['ace/ace'], function (ace) {
+
+            /** set amba aceditor **/
+
+            var editor = ace.edit(that.$.get(0));
+            editor.setTheme("ace/theme/tomorrow_night_eighties");
+
+            //js문법에 따라 하이라이팅을 준다
+            editor.getSession().setMode("ace/mode/javascript");
+            editor.getSession().on('change', function (e) {
+                // e.type, etc
+                //자동 저장 가능
+            });
+            editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
+            editor.$blockScrolling = Infinity;
+            that.aceValue = editor;
+
+            that.textInterceptor(function (txt) {
+                if (txt === undefined)
+                    return editor.getValue();
+                else
+                    editor.setValue(txt);
+                return that;
+            });
+        });
     });
 
     return this;
@@ -105,7 +114,7 @@ Div.prototype.parent = function () {
 Div.prototype.children = function () {
     var arr = this.$.children();
     var result = [];
-    for(var i=0; i<arr.length; i++) {
+    for (var i = 0; i < arr.length; i++) {
         if (arr.eq(i).data('div'))
             result.push(arr.eq(i).data('div'));
     }
@@ -155,7 +164,7 @@ Div.prototype.cssText = function (key, value) {
 Div.prototype.cssSameWith = function (other) {
     var params = other.params();
     for (var prop in params) {
-        this.css(prop,params[prop]);
+        this.css(prop, params[prop]);
     }
     return this;
 };
@@ -176,7 +185,7 @@ var getMethodName = function (propertyName) {
     var hyphenLowerToUpper = function (match) {
         return match.slice(1).toUpperCase();
     };
-    return propertyName.replace(/-[a-z]/g,hyphenLowerToUpper);
+    return propertyName.replace(/-[a-z]/g, hyphenLowerToUpper);
 };
 
 /**
@@ -191,7 +200,7 @@ var addCssMethod = function (propertyName, valueName) {
             return this.css(propertyName, value);
         };
     } else {
-        Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
+        Div.prototype[getMethodName(propertyName + '-' + valueName)] = function () {
             return this.css(propertyName, valueName);
         };
     }
@@ -207,7 +216,7 @@ var addCssTextMethod = function (propertyName, valueName) {
             return this.cssText(propertyName, value);
         };
     } else {
-        Div.prototype[getMethodName(propertyName+'-'+valueName)] = function () {
+        Div.prototype[getMethodName(propertyName + '-' + valueName)] = function () {
             return this.cssText(propertyName, valueName);
         };
     }
@@ -220,8 +229,8 @@ var addCssTextMethod = function (propertyName, valueName) {
 var addAllCssMethods = function () {
 
     var cssProperties = {
-        "align-content" : [],
-        "align-items" : [],
+        "align-content": [],
+        "align-items": [],
         "align-self": [],
         "all": [],
         "animation": [],
@@ -412,7 +421,7 @@ var addAllCssMethods = function () {
     // cssProperties안에 정의된 모든 css property를 Div의 메서드에 추가합니다.
     for (property in cssProperties) {
         addCssMethod(property);
-        for (var i=0; i<cssProperties[property].length; i++) {
+        for (var i = 0; i < cssProperties[property].length; i++) {
             var value = cssProperties[property][i];
             addCssMethod(property, value);
         }
@@ -421,7 +430,7 @@ var addAllCssMethods = function () {
     // cssTextProperties안에 정의된 모든 css의 text관련 property를 Div의 메서드에 추가합니다.
     for (property in cssTextProperties) {
         addCssTextMethod(property);
-        for (var i=0; i<cssTextProperties[property].length; i++) {
+        for (var i = 0; i < cssTextProperties[property].length; i++) {
             var value = cssTextProperties[property][i];
             addCssTextMethod(property, value);
         }
@@ -435,7 +444,7 @@ Div.prototype.textInterceptor = function (fn) {
 }
 
 Div.prototype.text = function (txt) {
-    if(this.fnText) {
+    if (this.fnText) {
         return this.fnText(txt);
     }
 
@@ -456,7 +465,7 @@ Div.prototype.text = function (txt) {
 };
 
 Div.prototype.fontColor = function (color) {
-    return this.cssText('color',color);
+    return this.cssText('color', color);
 };
 
 /**
@@ -464,23 +473,22 @@ Div.prototype.fontColor = function (color) {
  * @author Yeongjin Oh
  */
 Div.prototype.fontBold = function () {
-    return this.cssText('font-weight','bold');
+    return this.cssText('font-weight', 'bold');
 };
 
 Div.prototype.fontNormal = function () {
-    return this.cssText('font-weight','normal');
+    return this.cssText('font-weight', 'normal');
 };
 
 Div.prototype.border = function (value) {
     if (typeof value === 'number') {
         var style = this.borderStyle();
-        if(style == 'none' || style == '')
+        if (style == 'none' || style == '')
             style = 'solid';
         return this.css('border', value + 'px ' + style);
     }
     return this.css('border', value);
 };
-
 
 
 // TODO remove borderOption
@@ -507,11 +515,11 @@ Div.prototype.color = function (c) {
 };
 
 Div.prototype.parentWidth = function () {
-    return this.parent().widthPixel();
+    return parseInt(this.$.parent().css('width'));
 };
 
 Div.prototype.parentHeight = function () {
-    return this.parent().heightPixel();
+    return parseInt(this.$.parent().css('height'));
 };
 
 /**
@@ -582,7 +590,7 @@ Div.prototype.selectable = function (value) {
  * @since    2016-09-25
  * @author   Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.overflowAuto = function() {
+Div.prototype.overflowAuto = function () {
     return this.css('overflow', 'auto');
 };
 
@@ -695,37 +703,37 @@ Div.prototype.fadeOut = function (duration, easing, complete) {
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
 
-Div.prototype.hover = function(fn1, fn2) {
-	var that = this;
-	if (fn1) {
-		var fn1Func = fn1;
-		fn1 = function () {
-			fn1Func(that);
-		};
-	}
+Div.prototype.hover = function (fn1, fn2) {
+    var that = this;
+    if (fn1) {
+        var fn1Func = fn1;
+        fn1 = function () {
+            fn1Func(that);
+        };
+    }
 
-	if (fn2) {
-		var fn2Func = fn2;
-		fn2 = function () {
-			fn2Func(that);
-		};
-	}
+    if (fn2) {
+        var fn2Func = fn2;
+        fn2 = function () {
+            fn2Func(that);
+        };
+    }
 
-	this.$.hover(fn1, fn2);
-	return this;
+    this.$.hover(fn1, fn2);
+    return this;
 };
 
-Div.prototype.hoverColor = function(color1, color2) {
+Div.prototype.hoverColor = function (color1, color2) {
     var that = this;
     var fn1Func, fn2Func;
     if (color1) {
-        fn1Func = function(){
+        fn1Func = function () {
             that.color(color1);
         };
     }
 
     if (color2) {
-        fn2Func = function(){
+        fn2Func = function () {
             that.color(color2);
         };
     }
@@ -734,17 +742,17 @@ Div.prototype.hoverColor = function(color1, color2) {
     return this;
 };
 
-Div.prototype.hoverTextColor = function(color1, color2) {
+Div.prototype.hoverTextColor = function (color1, color2) {
     var that = this;
     var fn1Func, fn2Func;
     if (color1) {
-        fn1Func = function(){
+        fn1Func = function () {
             that.fontColor(color1);
         };
     }
 
     if (color2) {
-        fn2Func = function(){
+        fn2Func = function () {
             that.fontColor(color2);
         };
     }
@@ -805,7 +813,7 @@ Div.prototype.stop = function () {
  * @todo span tag에 editable 속성을 주면 편집 공간(span)과 div의 크기가 다름.
  */
 Div.prototype.editable = function (value) {
-    if(value === 'disable' || value === false)
+    if (value === 'disable' || value === false)
         this.$text.attr('contentEditable', false);
     else {
         this.$text.attr('contentEditable', true);
@@ -815,14 +823,13 @@ Div.prototype.editable = function (value) {
 };
 
 
-
 /**
  * @desc    password
  * @since    2016-09-26
  * @author    Yoon JiSoo yjsgoon@naver.com
  */
-Div.prototype.textPassword = function(value) {
-    if(value === false)
+Div.prototype.textPassword = function (value) {
+    if (value === false)
         return this.css('-webkit-text-security', 'none');
     return this.css('-webkit-text-security', 'disc');
 };
@@ -854,6 +861,11 @@ Div.prototype.remove = function () {
     return this;
 };
 
+Div.prototype.button = function () {
+    this.$.button();
+    return this;
+};
+
 Div.prototype.html = function (tag) {
     if (tag === undefined)
         return this.$text.html();
@@ -862,11 +874,11 @@ Div.prototype.html = function (tag) {
 };
 
 // TODO text, html intercepting (Jisoo)
-Div.prototype.markdown = function(string) {
+Div.prototype.markdown = function (string) {
     var that = this;
     if (string === undefined)
         string = this.text();
-    AB.loadModule('showdown', function(){
+    AB.loadModule('showdown', function () {
         var sdModule = module.showdown.converter();
         var htmlText = sdModule.makeHtml(string);
         that.html(htmlText);
@@ -899,22 +911,23 @@ Div.prototype.iframe = function (src) {
     return this;
 };
 
-Div.prototype.verticalAlignMiddle = function() {
+Div.prototype.verticalAlignMiddle = function () {
     var i, ch = this.children();
     this.paddingTop(0);
     var minTop = 99999, maxBottom = 0;
-    for(i=0; i<ch.length; i++) {
-        if(minTop > ch[i].offset().top)
+    for (i = 0; i < ch.length; i++) {
+        if (minTop > ch[i].offset().top)
             minTop = ch[i].offset().top;
 
-        if(maxBottom < ch[i].offset().top + parseInt(ch[i].height()))
+        if (maxBottom < ch[i].offset().top + parseInt(ch[i].height()))
             maxBottom = ch[i].offset().top + parseInt(ch[i].height());
     }
-    minTop-=this.offset().top;
-    maxBottom-=this.offset().top;
-    var paddingTop = (parseInt(this.height())-maxBottom)/2;
+    minTop -= this.offset().top;
+    maxBottom -= this.offset().top;
+
+    var paddingTop = (parseInt(this.height()) - maxBottom) / 2;
     this.paddingTop(paddingTop);
-    this.height(this.heightPixel()-paddingTop);
+    this.height(this.heightPixel() - paddingTop);
 
     return this;
 };
@@ -935,7 +948,7 @@ Div.prototype.disqus = function (sector, title) {
     if (title === undefined || title === '')
         title = 'amba';
 
-    AB.loadModule('disqus', function(){
+    AB.loadModule('disqus', function () {
         var dqModule = module.disqus;
         that.$script = dqModule.load(sector, title);
         that.$script.appendTo(that.$);
@@ -952,6 +965,13 @@ Div.prototype.summernote = function (opt, src) {
     $('#summernote').summernote(opt, src);
 
 
+    var note = div().appendTo(this).size('100%', '100%');
+
+    require(['https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', 'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function () {
+        // $('<link>').attr('href', 'http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css').attr('rel', 'stylesheet');
+        // $('<link>').attr('href', 'http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css').attr('rel', 'stylesheet');
+        note.$.summernote(opt, src);
+    })
 };
 
 Div.prototype.image = function (src) {
@@ -988,38 +1008,122 @@ Div.prototype.image = function (src) {
     });
     return this;
 };
-
-Div.prototype.upload = function () {
+Div.prototype.uploadTest = function () {
     var that = this;
-    var i    = 0;
+    var i = 0;
     this.fileCount = 0;
 
     div().appendTo(this).size('auto', 'auto').text('Upload').fontSize(25).disableSelection().cursorPointer()
-        .click(function() {
-        var formData = new FormData();
-
-        for (i = 0; i < that.fileCount; i++)
-            formData.append('amba_file', $('input[multiple][name=amba_file]')[i].files[0]);
-
-        $.ajax({
-            url: '/fileupload/put',
-            data: formData,
-            processData: false,
-            contentType: false,
-            type: 'post',
-            success: function(data){
-                alert('Success\n' + JSON.stringify(data));
+        .click(function () {
+            var formData = new FormData();
+            for (i = 0; i < that.fileCount; i++) {
+                formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
             }
-        });
-    });
 
-    var t = div().appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
-        .click(function() {
+            $.ajax({
+                url: '/fileupload/put',
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: 'post',
+                success: function (data) {
+                    alert('Success\n' + JSON.stringify(data));
+                }
+            });
+        });
+
+    div().attr('id', 'utest').appendTo(this).size('auto', 'auto').float('right').text('+').fontSize(30).disableSelection().cursorPointer()
+        .click(function () {
             // opt: max count!!
-            $('<input>').attr('type', 'file').attr('name', 'amba_file').appendTo(that.$);
+            that.fileCount++;
+            // 이쁘게 바꾸기!! input tag를 숨기고 이미지를 누르면 파일 브라우저가 나오게!
+            $('<input>').attr('type', 'file').attr('name', 'amba_file').appendTo(that.$).button();
         });
 
-    t.$.button();
+    // test.$.button();
+
     return this;
 };
 
+Div.prototype.inputFileButton = function (fn) {
+    var that = this;
+
+    if (fn === undefined) {
+        this.click(function () {
+            $('<input>').attr('type', 'file').attr('name', 'amba_file').hide().appendTo(that.$).click(function (e) {
+                e.stopPropagation();
+            }).trigger('click');
+        })
+    }
+
+    this.click(function (e) {
+        if (fn) fn(that, e);
+    });
+
+    return this;
+};
+
+Div.prototype.uploadButton = function (fn) {
+    var that = this;
+
+    if (fn === undefined) {
+        this.click(function () {
+            var i;
+            var formData = new FormData();
+            for (i = 0; i < $('input[name=amba_file]').length; i++) {
+                formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
+            }
+
+            $.ajax({
+                url: '/fileupload/put',
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: 'post',
+                success: function (data) {
+                    alert('Success\n' + JSON.stringify(data));
+                },
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+
+                    // Upload progress
+                    xhr.upload.addEventListener('progress', function (evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            percentComplete = parseInt(percentComplete * 100);
+                            console.log(percentComplete);
+
+                            if (percentComplete === 100) {
+                                console.log('upload complete!!');
+                            }
+                        }
+                    }, false);
+
+                    // // Download progress
+                    // xhr.addEventListener("progress", function(evt){
+                    //     if (evt.lengthComputable) {
+                    //         var percentComplete = evt.loaded / evt.total;
+                    //         // Do something with download progress
+                    //         console.log(percentComplete);
+                    //     }
+                    // }, false);
+
+                    return xhr;
+                }
+            });
+        });
+    }
+
+    this.click(function (e) {
+        if (fn) fn(that, e);
+    });
+};
+
+
+Div.prototype.tinymce = function () {
+    $('<textarea></textarea>').text('Wellcome to AMBA').appendTo(this.$);
+
+    require(['//cdn.tinymce.com/4/tinymce.min.js'], function () {
+        tinymce.init({selector: 'textarea'});
+    })
+};
