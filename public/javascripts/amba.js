@@ -989,16 +989,13 @@ Div.prototype.image = function (src) {
     this.$downloadingImage = $('<img>');
     this.$downloadingImage.attr('src', src);
     var that = this;
-    this.$downloadingImage.load(function (image) {
-        //부모의 border 사이즈를 제외하고 출력된다.
-        //이미지의 사이즈,
-        var w = image.target.width;
-        var h = image.target.height;
+    this.$downloadingImage.load(function (e) {
+        var w = e.target.naturalWidth;
+        var h = e.target.naturalHeight;
 
         //부모 div의 사이즈
         var pw = parseInt(that.width(),10);
         var ph = parseInt(that.height(),10);
-
 
         if(w*ph<h*pw){
             that.$image.height('100%').attr('src', src);
