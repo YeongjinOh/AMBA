@@ -15,57 +15,13 @@ function Div() {
     this.$text = $('<span>');
     this.$image = $('<img>');
     this.$.data('div', this);
+    this.class('amba');
     this.param = {};
     this.displayInlineBlock();
     this.isAddedText = false;
     this.verticalAlign('top');
     this.boxSizingBorderBox();
 }
-
-
-/**
- * @author Lights
- * @desc ace에디터를 통해 가독성 높은 소스를 출력, div의 id값을 파라미터로 넘겨줘서 해당 div에 적용
- *
- * @returns {Div}
- */
-Div.prototype.aceEditor = function () {
-    var that = this;
-
-    // set ace module
-    require(["aceCdn"], function () {
-
-        // read ace module
-        require(['ace/ace'], function (ace) {
-
-            /** set amba aceditor **/
-
-            var editor = ace.edit(that.$.get(0));
-            editor.setTheme("ace/theme/tomorrow_night_eighties");
-
-            //js문법에 따라 하이라이팅을 준다
-            editor.getSession().setMode("ace/mode/javascript");
-            editor.getSession().on('change', function (e) {
-                // e.type, etc
-                //자동 저장 가능
-            });
-            editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
-            editor.$blockScrolling = Infinity;
-            that.aceValue = editor;
-
-            that.textInterceptor(function (txt) {
-                if (txt === undefined)
-                    return editor.getValue();
-                else
-                    editor.setValue(txt);
-                return that;
-            });
-        });
-    });
-
-    return this;
-};
-
 
 Div.prototype.attr = function (key, value) {
     if (value === undefined)
@@ -932,48 +888,6 @@ Div.prototype.verticalAlignMiddle = function () {
     return this;
 };
 
-Div.prototype.disqus = function (sector, title) {
-    var that = this;
-
-    if (this.$script) {
-        this.empty();
-        return this;
-    }
-
-    div().appendTo(this).attr('id', 'disqus_thread').size('100%', '100%');
-
-    sector = parseInt(sector);
-    if (!sector)
-        sector = 1;
-    if (title === undefined || title === '')
-        title = 'amba';
-
-    AB.loadModule('disqus', function () {
-        var dqModule = module.disqus;
-        that.$script = dqModule.load(sector, title);
-        that.$script.appendTo(that.$);
-    });
-
-    return this;
-};
-
-
-Div.prototype.summernote = function (opt, src) {
-
-
-    div().appendTo(this).attr('id', 'summernote').size('100%', '100%');
-    $('#summernote').summernote(opt, src);
-
-
-    var note = div().appendTo(this).size('100%', '100%');
-
-    require(['https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', 'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function () {
-        // $('<link>').attr('href', 'http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css').attr('rel', 'stylesheet');
-        // $('<link>').attr('href', 'http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css').attr('rel', 'stylesheet');
-        note.$.summernote(opt, src);
-    })
-};
-
 Div.prototype.image = function (src) {
     if (src === '') {
         if (this.$image)
@@ -1042,85 +956,134 @@ Div.prototype.uploadTest = function () {
     return this;
 };
 
-Div.prototype.inputFileButton = function (fn) {
+Div.prototype.fileSelectable = function (fn) {
     var that = this;
 
-    if (fn === undefined) {
-        this.click(function () {
-            $('<input>').attr('type', 'file').attr('name', 'amba_file').hide().appendTo(that.$).click(function (e) {
-                e.stopPropagation();
-            }).trigger('click');
-        })
-    }
-
-    this.click(function (e) {
-        if (fn) fn(that, e);
+    this.click(function () {
+        $('<input>').attr('type', 'file').attr('name', 'amba_file').hide().appendTo(that.$).click(function (e) {
+            e.stopPropagation();
+        }).trigger('click').change(function () {
+            if (typeof fn === 'function')
+                fn(that, $(this).get(0).files[0]);
+        });
     });
 
     return this;
 };
 
-Div.prototype.uploadButton = function (fn) {
+/**
+ * @author Lights
+ * @desc ace에디터를 통해 가독성 높은 소스를 출력, div의 id값을 파라미터로 넘겨줘서 해당 div에 적용
+ *
+ * @returns {Div}
+ */
+Div.prototype.aceEditor = function (opt) {
     var that = this;
 
-    if (fn === undefined) {
-        this.click(function () {
-            var i;
-            var formData = new FormData();
-            for (i = 0; i < $('input[name=amba_file]').length; i++) {
-                formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
-            }
+    // set ace module
+    require(["aceCdn"], function () {
 
-            $.ajax({
-                url: '/fileupload/put',
-                data: formData,
-                processData: false,
-                contentType: false,
-                type: 'post',
-                success: function (data) {
-                    alert('Success\n' + JSON.stringify(data));
-                },
-                xhr: function () {
-                    var xhr = new window.XMLHttpRequest();
+        // read ace module
+        require(['ace/ace'], function (ace) {
 
-                    // Upload progress
-                    xhr.upload.addEventListener('progress', function (evt) {
-                        if (evt.lengthComputable) {
-                            var percentComplete = evt.loaded / evt.total;
-                            percentComplete = parseInt(percentComplete * 100);
-                            console.log(percentComplete);
+            /** set amba aceditor **/
 
-                            if (percentComplete === 100) {
-                                console.log('upload complete!!');
-                            }
-                        }
-                    }, false);
+            var editor = ace.edit(that.$.get(0));
+            editor.setTheme("ace/theme/tomorrow_night_eighties");
 
-                    // // Download progress
-                    // xhr.addEventListener("progress", function(evt){
-                    //     if (evt.lengthComputable) {
-                    //         var percentComplete = evt.loaded / evt.total;
-                    //         // Do something with download progress
-                    //         console.log(percentComplete);
-                    //     }
-                    // }, false);
+            //js문법에 따라 하이라이팅을 준다
+            editor.getSession().setMode("ace/mode/javascript");
 
-                    return xhr;
-                }
+            // editor.setShowInvisibles(true);            // 탭이나 공백, 엔터 기호를 보여줍니다.
+            if (opt !== undefined)
+                editor.setOptions(opt);
+            editor.$blockScrolling = Infinity;
+            that.aceValue = editor;
+
+            that.textInterceptor(function (txt) {
+                if (txt === undefined)
+                    return editor.getValue();
+                else
+                    editor.setValue(txt);
+                return that;
             });
         });
-    }
-
-    this.click(function (e) {
-        if (fn) fn(that, e);
     });
+
+    return this;
 };
 
+Div.prototype.tinymce = function (opt) {
+    var that = this;
+    var child = div().id('ab_tm'+AB.random(99999)).size('100%','100%').appendTo(this);
 
-Div.prototype.tinymce = function () {
-    $('<textarea></textarea>').text('Wellcome to AMBA').appendTo(this.$);
+    if (opt === undefined) {
+        opt = {target: child.$.get(0)};
+    }
+    else {
+        opt.target = child.$.get(0);
+    }
 
     require(['//cdn.tinymce.com/4/tinymce.min.js'], function () {
-        tinymce.init({selector: 'textarea'});
-    })
+        tinymce.init(opt);
+
+        that.textInterceptor(function(txt) {
+            if (txt === undefined)
+                return tinymce.get(child.id()).getContent();
+            tinymce.get(child.id()).setContent(txt);
+            return that;
+        });
+    });
+
+    return this;
+};
+
+Div.prototype.summernote = function (opt, src) {
+    var that = this;
+    var child = div().size('100%', '100%').appendTo(this);
+    require(['https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', 'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function () {
+        child.$.summernote(opt, src);
+
+        // child.remove(); 를 하면 binding된 object가 사라져서 안된다.
+        child.detach();
+        that.textInterceptor(function(txt) {
+            if (txt === undefined)
+                return child.$.summernote('code');
+            child.$.summernote('code', txt);
+            return that;
+        });
+    });
+
+    return this;
+};
+
+Div.prototype.disqus = function (sector, title) {
+    var that = this;
+
+    if (this.$script) {
+        this.empty();
+        return this;
+    }
+
+    div().appendTo(this).attr('id', 'disqus_thread').size('100%', '100%');
+
+    sector = parseInt(sector);
+    if (!sector)
+        sector = 1;
+    if (title === undefined || title === '')
+        title = 'amba';
+
+    disqus_config = function () {
+        this.page.identifier = 'amba';
+        this.page.url = '//amba.com/unique-path-' + sector + '/';
+        this.page.title = title;
+    };
+    (function() {
+        var d = document, s = d.createElement('script');
+        s.src = '//amba.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+
+    return this;
 };

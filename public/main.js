@@ -24,6 +24,7 @@ requirejs.config({
         underscore:'../javascripts/underscore',
         aceCdn:'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace',
         amba: '../javascripts/amba',
+        ambaMod: '../javascripts/amba-mod',
         ambaUtils: '../javascripts/amba-util',
         primus: '../primus/primus'
     }

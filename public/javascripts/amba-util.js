@@ -53,27 +53,86 @@ AB.loadScript = function (url, callback, charset) {
 
 };
 
-AB.uploadList = {
-    upload: function(fileCount) {
-        var i;
-        var formData = new FormData();
-        for (i = 0; i < fileCount; i++) {
-            formData.append('amba_file', $('input[name=amba_file]')[i].files[0]);
-        }
-
-        $.ajax({
-            url: '/fileupload/put',
-            data: formData,
-            processData: false,
-            contentType: false,
-            type: 'POST',
-            success: function(data) {
-                alert('Success\n' + JSON.stringify(data));
-            }
-        });
+function Uploader(cid, files) {
+    if (arguments.length === 0) {
+        return this;
     }
+    else if (arguments.length === 1) {
+        files = arguments[0];
+    }
+
+    if (!Array.isArray(files) && files instanceof File) {
+        files = [files];
+    }
+
+    this.cid = cid;
+    this.files = files;
+
+    return this;
+}
+
+Uploader.prototype.progress = function(fn) {
+    this.fnProgress = fn;
+    return this;
 };
 
+Uploader.prototype.complete = function(fn) {
+    this.fnComplete = fn;
+    return this;
+};
+
+Uploader.prototype.action = function() {
+    var that = this;
+    var i;
+    var formData = new FormData();
+    for (i = 0; i < this.files.length; i++) {
+        formData.append('amba_file', this.files[i]);
+    }
+
+    $.ajax({
+        url: '/fileupload/put',
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'post',
+        success: function (data) {
+            if (that.fnComplete)
+                that.fnComplete(data);
+            // alert('Success\n' + JSON.stringify(data));
+        },
+        xhr: function () {
+            var xhr = new window.XMLHttpRequest();
+
+            if (that.fnProgress) {
+                // Upload progress
+                xhr.upload.addEventListener('progress', function (evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        percentComplete = parseInt(percentComplete * 100);
+                        that.fnProgress(percentComplete);
+                    }
+                }, false);
+            }
+
+            // // Download progress
+            // xhr.addEventListener("progress", function(evt){
+            //     if (evt.lengthComputable) {
+            //         var percentComplete = evt.loaded / evt.total;
+            //         // Do something with download progress
+            //         console.log(percentComplete);
+            //     }
+            // }, false);
+
+            return xhr;
+        }
+    });
+
+    return this;
+};
+
+AB.uploader = function(cid, files) {
+    return new Uploader(cid, files);
+};
 
 AB.getParameter = function (name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");

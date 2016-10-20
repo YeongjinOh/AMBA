@@ -3,21 +3,15 @@
  */
 
 (function () {
-    module.disqus =  {
-        load : function (sector, title) {
-            return $('<script></script>').attr('type', 'text/javascript').text("\n" +
-                "var disqus_config = function () {" + "\n" +
-                "   this.page.identifier = amba;" + "\n" +
-                "   this.page.url = '//amba.com/unique-path-" + sector + "/';" + "\n" +
-                "   this.page.title = '" + title + "';" + "\n" +
-                "};" + "\n" +
-                "(function() {" + "\n" +
-                "   var d = document, s = d.createElement('script');" + "\n" +
-                "   s.src = '//amba.disqus.com/embed.js';" + "\n" +
-                "   s.setAttribute('data-timestamp', +new Date());" + "\n" +
-                "   (d.head || d.body).appendChild(s);" + "\n" +
-                "})();"
-            );
-        }
-    }
+    disqus_config = function () {
+        this.page.identifier = 'amba';
+        this.page.url = '//amba.com/unique-path-1/';
+        this.page.title = 'amba';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');
+        s.src = '//amba.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
 })();
