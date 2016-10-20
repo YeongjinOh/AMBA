@@ -22,7 +22,6 @@
     </style>
 
 
-
     <!--<script src="/primus/primus.js"></script>-->
 
     <!--<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js'></script>-->
@@ -40,32 +39,34 @@
     <!--<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>-->
 
     <script>
-        require(['//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js', '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js',
-            'javascripts/underscore.js'], function () {
-            require(['/primus/primus.js', 'javascripts/amba.js', 'javascripts/amba-util.js'], function () {
+        // read configuration fist
+        require(['main'], function () {
+            require(['jquery', 'underscore'], function () {
+                require(['jqueryUi', 'primus', 'amba', 'ambaUtils'], function () {
 
-                $(document).ready(function () {
+                    $(document).ready(function () {
 
-                    var path = AB.getParameter('app');
-                    var cid = AB.getParameter('cid');
-                    if (!path && !cid) {
-                        div().append().text('Please make first application');
-                        return;
-                    } else if (path === "viewer" || cid) {
-                        // display loading bar until loading finish
-                        var loadingbar = div().image('../images/loadingbar-green.gif').append();
-                        var parentWidth = loadingbar.parentWidth(), parentHeight = loadingbar.parentHeight();
-                        var size = Math.max(50, Math.min(parentWidth, parentHeight)/8);
-                        var marginLeft = (parentWidth-size)/2, marginTop = (parentHeight-size)/2;
-                        loadingbar.size(size,size).marginLeft(marginLeft).marginTop(marginTop);
-                        require(['/module/viewer.js'], function (viewer) {
-                            viewer.run(cid, function () {
-                                loadingbar.remove();
+                        var path = AB.getParameter('app');
+                        var cid = AB.getParameter('cid');
+                        if (!path && !cid) {
+                            div().append().text('Please make first application');
+                            return;
+                        } else if (path === "viewer" || cid) {
+                            // display loading bar until loading finish
+                            var loadingbar = div().image('../images/loadingbar-green.gif').append();
+                            var parentWidth = loadingbar.parentWidth(), parentHeight = loadingbar.parentHeight();
+                            var size = Math.max(50, Math.min(parentWidth, parentHeight) / 8);
+                            var marginLeft = (parentWidth - size) / 2, marginTop = (parentHeight - size) / 2;
+                            loadingbar.size(size, size).marginLeft(marginLeft).marginTop(marginTop);
+                            require(['/module/viewer.js'], function (viewer) {
+                                viewer.run(cid, function () {
+                                    loadingbar.remove();
+                                });
                             });
-                        });
-                        return;
-                    }
-                    AB.loadScript('/app/' + path + '.js');
+                            return;
+                        }
+                        AB.loadScript('/app/' + path + '.js');
+                    });
                 });
             });
         });

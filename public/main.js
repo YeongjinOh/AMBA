@@ -19,11 +19,13 @@ requirejs.config({
 
     paths: {
         test : 'http://127.0.0.1:3000/cachestore/get?cid=ida&key=src1',
-        //amba : '../javascripts/amba'
-        //'amba' : 'amba'
-        // jquery: 'jquery'
         jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min',
-        aceCdn :'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace'
+        jqueryUi: '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min',
+        underscore:'../javascripts/underscore',
+        aceCdn:'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace',
+        amba: '../javascripts/amba',
+        ambaUtils: '../javascripts/amba-util',
+        primus: '../primus/primus'
     }
 
     //require.js가 로딩되기전에 config파일에서 먼저 로딩되야하는 모듈 목록을 배열로 나열
