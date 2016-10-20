@@ -22,7 +22,8 @@ requirejs.config({
         //amba : '../javascripts/amba'
         //'amba' : 'amba'
         // jquery: 'jquery'
-        jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js'
+        jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min',
+        aceCdn :'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace'
     }
 
     //require.js가 로딩되기전에 config파일에서 먼저 로딩되야하는 모듈 목록을 배열로 나열
