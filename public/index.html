@@ -52,8 +52,16 @@
                         div().append().text('Please make first application');
                         return;
                     } else if (path === "viewer" || cid) {
+                        // display loading bar until loading finish
+                        var loadingbar = div().image('../javascripts/loadingBar.gif').append();
+                        var parentWidth = loadingbar.parentWidth(), parentHeight = loadingbar.parentHeight();
+                        var size = Math.max(50, Math.min(parentWidth, parentHeight)/8);
+                        var marginLeft = (parentWidth-size)/2, marginTop = (parentHeight-size)/2;
+                        loadingbar.size(size,size).marginLeft(marginLeft).marginTop(marginTop);
                         require(['/module/viewer.js'], function (viewer) {
-                            viewer.run(cid);
+                            viewer.run(cid, function () {
+                                loadingbar.remove();
+                            });
                         });
                         return;
                     }

@@ -538,11 +538,11 @@ Div.prototype.color = function (c) {
 };
 
 Div.prototype.parentWidth = function () {
-    return this.parent().widthPixel();
+    return parseInt(this.$.parent().css('width'));
 };
 
 Div.prototype.parentHeight = function () {
-    return this.parent().heightPixel();
+    return parseInt(this.$.parent().css('height'));
 };
 
 /**
