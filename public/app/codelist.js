@@ -524,10 +524,9 @@
             },
             run: function () {
                 // save code and dependencies
-                var acode = '(function(){' + codeEditor.text() + '\n})();';
-                localStorage.setItem('acode', acode);
-                localStorage.setItem('adeps', JSON.stringify(code.deps));
-
+                var ctext = '(function(){' + codeEditor.text() + '\n})();';
+                var acode = {ctext:ctext, deps:code.deps, cid:code.cid};
+                localStorage.setItem('acode', JSON.stringify(acode));
                 // set viewer
                 viewer.empty().iframe('/?app=viewer');
                 viewer.$iframe.appendTo(viewer.$); // attach again
