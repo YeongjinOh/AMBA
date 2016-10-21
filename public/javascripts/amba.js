@@ -979,6 +979,13 @@ Div.prototype.fileSelectable = function (fn) {
  */
 Div.prototype.aceEditor = function (opt) {
     var that = this;
+    var tmpText = this.text();
+    that.textInterceptor(function(txt) {
+        if (txt === undefined)
+            return tmpText;
+        tmpText = txt;
+        return that;
+    });
 
     // set ace module
     require(["aceCdn"], function () {
@@ -999,7 +1006,7 @@ Div.prototype.aceEditor = function (opt) {
                 editor.setOptions(opt);
             editor.$blockScrolling = Infinity;
             that.aceValue = editor;
-
+            editor.setValue(tmpText);
             that.textInterceptor(function (txt) {
                 if (txt === undefined)
                     return editor.getValue();
@@ -1023,10 +1030,17 @@ Div.prototype.tinymce = function (opt) {
     else {
         opt.target = child.$.get(0);
     }
+    var tmpText = this.text();
+    that.textInterceptor(function(txt) {
+        if (txt === undefined)
+            return tmpText;
+        tmpText = txt;
+        return that;
+    });
 
     require(['//cdn.tinymce.com/4/tinymce.min.js'], function () {
         tinymce.init(opt);
-
+        tinymce.get(child.id()).setContent(tmpText);
         that.textInterceptor(function(txt) {
             if (txt === undefined)
                 return tinymce.get(child.id()).getContent();
@@ -1041,11 +1055,19 @@ Div.prototype.tinymce = function (opt) {
 Div.prototype.summernote = function (opt, src) {
     var that = this;
     var child = div().size('100%', '100%').appendTo(this);
+    var tmpText = this.text();
+    that.textInterceptor(function(txt) {
+        if (txt === undefined)
+            return tmpText;
+        tmpText = txt;
+        return that;
+    });
     require(['https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js', 'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.js'], function () {
         child.$.summernote(opt, src);
 
         // child.remove(); 를 하면 binding된 object가 사라져서 안된다.
         child.detach();
+        child.$.summernote('code', tmpText);
         that.textInterceptor(function(txt) {
             if (txt === undefined)
                 return child.$.summernote('code');
