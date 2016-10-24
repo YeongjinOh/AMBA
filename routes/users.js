@@ -5,11 +5,11 @@
 var express = require('express');
 var router = express.Router();
 var crypto = require('./amba_crypto');
-var db = require('../db_mysql');
+var db = require('../db');
 
 /* 사용자의 새로운 토큰을 생성한다. */
 router.post('/login', function (req, res, next) {
-    db.query("SELECT * FROM users WHERE email = $1;", [req.body.email])
+    db.query("SELECT * FROM users WHERE email = ?;", [req.body.email])
         .then(function (data) {
             var password = crypto.encrypt(req.body.password);
 
@@ -45,7 +45,6 @@ router.post('/login', function (req, res, next) {
 router.post('/regist', function(req, res, next) {
     var password = crypto.encrypt(req.body.password);
 
-    // db.query("INSERT INTO users(email, password, username, ipt_date, upt_date) VALUES('" + req.body.email + "', '" + password + "', '" + req.body.username +"', now(), now());")
     db.query("INSERT INTO users(email, password, username, ipt_date, upt_date) VALUES(?, ?, ?, now(), now());", [req.body.email, password, req.body.username])
         .then(function () {
             res.json({
