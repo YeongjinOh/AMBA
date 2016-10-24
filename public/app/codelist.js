@@ -727,7 +727,17 @@
     };
 
     var onFullscreen = function () {
-        currentCodeBlock.fullscreen();
+        var uptCode = buildCode(currentCode);
+        uptCode.title = titleEditor.text();
+        uptCode.upt_date = getCurrentDate();
+        uptCode.description = descEditor.text();
+        uptCode.ctext = codeEditor.text();
+        uptCode.deps = JSON.stringify(uptCode.deps);
+        currentCodeManager.updateCode(uptCode, function () {
+            // update code block
+            currentCodeBlock.syncWithEditor();
+            currentCodeBlock.fullscreen();
+        });
     };
 
     var onModule = function () {
