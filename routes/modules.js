@@ -35,7 +35,7 @@ var buildModule = function (obj) {
 router.get('', function (req, res) {
     // TODO authentication
     // var params = getParams(req.url);
-    db.any("SELECT A.username, B.title, B.description, B.upt_date " +
+    db.query("SELECT A.username, B.title, B.description, B.upt_date " +
         "FROM users A JOIN code_store B USING (uid) WHERE mstatus=1")
         .then(function (data) {
             res.json({

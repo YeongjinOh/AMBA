@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('./amba_crypto');
 var db = require('../db');
-var generalErrMsg = "일시적인 오류입니다."
+var generalErrMsg = "일시적인 오류입니다.";
 
 // get parameters from given url
 function getParams(url) {
@@ -37,7 +37,7 @@ function getCid(pid, title) {
 router.get('', function (req, res) {
     var params = getParams(req.url);
     var uid = getUid(params.token);
-    db.any("SELECT * FROM project WHERE uid=$1", [uid])
+    db.query("SELECT * FROM project WHERE uid=?", [uid])
         .then(function (data) {
             res.json({
                 resultCode: 0,
@@ -64,8 +64,8 @@ router.post('', function (req, res) {
     var project = JSON.parse(params.project) || {};
     project.uid = getUid(params.token);
     var query = "INSERT INTO project(uid, title, description, ipt_date, upt_date) " +
-        "VALUES (${uid}, ${title}, ${description}, now(), now()) RETURNING pid";
-    db.one(query, project)
+        "VALUES (?, ?, ?, now(), now()) RETURNING pid";
+    db.query(query, [project.uid, project.title, project.description])
         .then(function (data) {
             res.json({
                 resultCode: 0,
@@ -103,8 +103,8 @@ router.post('', function (req, res) {
 router.post('/update', function (req, res) {
     var params = req.body;
     var query = "UPDATE project SET (title, main_cid, description, upt_date) " +
-        "= (${title}, ${main_cid}, ${description}, now()) WHERE pid=${pid}";
-    db.none(query, params)
+        "= (?, ?, ?, now()) WHERE pid=?";
+    db.query(query, [params.title, params.main_cid, params.description])
         .then(function () {
             res.json({
                 resultCode: 0
@@ -136,7 +136,7 @@ router.post('/update', function (req, res) {
 router.post('/delete', function (req, res) {
     var params = req.body;
     params.uid = getUid(params.token);
-    db.none("DELETE FROM project WHERE pid = ${pid}", params)
+    db.query("DELETE FROM project WHERE pid = ?", [params.pid])
         .then(function () {
             res.json({
                 resultCode: 0
@@ -160,7 +160,7 @@ router.post('/delete', function (req, res) {
  */
 router.get('/codes', function (req, res) {
     var params = getParams(req.url);
-    db.any("SELECT cid, pid, title, mstatus, description, upt_date FROM code_store WHERE pid=${pid}", params)
+    db.query("SELECT cid, pid, title, mstatus, description, upt_date FROM code_store WHERE pid=?", [params.pid])
         .then(function (data) {
             res.json({
                 resultCode: 0,
@@ -183,7 +183,7 @@ router.get('/codes', function (req, res) {
  */
 router.get('/codes/code', function (req, res) {
     var params = getParams(req.url);
-    db.one("SELECT title, ctext, mstatus, deps, description, upt_date FROM code_store WHERE cid=${cid}", params)
+    db.query("SELECT title, ctext, mstatus, deps, description, upt_date FROM code_store WHERE cid=?", [params.cid])
         .then(function (data) {
             res.json({
                 resultCode: 0,
@@ -213,8 +213,8 @@ router.post('/codes', function (req, res) {
     code.uid = getUid(params.token);
     code.deps = '[]';
     var query = "INSERT INTO code_store(cid, uid, pid, title, ctext, deps, description, ipt_date, upt_date) " +
-        "VALUES (${cid}, ${uid}, ${pid}, ${title}, ${ctext}, ${deps}, ${description}, now(), now())";
-    db.none(query, code)
+        "VALUES (?, ?, ?, ?, ?, ?, ?, now(), now())";
+    db.query(query, [code.cid, code.uid, code.pid, code.title, code.ctext, code.deps, code.description])
         .then(function () {
             res.json({
                 resultCode: 0,
@@ -249,8 +249,8 @@ router.post('/codes/update', function (req, res) {
     params.newCid = newCid;
 
     var query = "UPDATE code_store SET (cid, title, ctext, mstatus, description, upt_date) " +
-        "= (${newCid}, ${title}, ${ctext}, ${mstatus}, ${description}, now()) WHERE cid=${cid}";
-    db.none(query, params)
+        "= (?, ?, ?, ?, ?, now()) WHERE cid=?";
+    db.query(query, [params.cid, params.title, params.ctext, params.mstatus, params.description, params.cid])
         .then(function () {
             res.json({
                 resultCode: 0,
@@ -283,7 +283,7 @@ router.post('/codes/mstatus/update', function (req, res) {
     var params = req.body;
 
     var updateMstatus = function () {
-        db.none("UPDATE code_store SET (mstatus, upt_date) = (${mstatus}, now()) WHERE cid=${cid}", params)
+        db.query("UPDATE code_store SET (mstatus, upt_date) = (?, now()) WHERE cid=?", [params.mstatus, params.cid])
             .then(function () {
                 res.json({
                     resultCode: 0
@@ -305,7 +305,7 @@ router.post('/codes/mstatus/update', function (req, res) {
         updateMstatus();
     } else {
         // on module, check duplicate title
-        db.any("SELECT * FROM code_store WHERE mstatus=1 AND title=${title}", params)
+        db.query("SELECT * FROM code_store WHERE mstatus=1 AND title=?", [params.title])
             .then(function (data) {
 
                 // on conflict
@@ -335,7 +335,7 @@ router.post('/codes/mstatus/update', function (req, res) {
  */
 router.post('/codes/deps/update', function (req, res) {
     var params = req.body;
-    db.none("UPDATE code_store SET (deps, upt_date) = (${deps}, now()) WHERE cid=${cid}", params)
+    db.query("UPDATE code_store SET (deps, upt_date) = (?, now()) WHERE cid=?", [params.deps, params.cid])
         .then(function () {
             res.json({
                 resultCode: 0
@@ -357,7 +357,7 @@ router.post('/codes/deps/update', function (req, res) {
  */
 router.post('/codes/delete', function (req, res) {
     var params = req.body;
-    db.none("DELETE FROM code_store WHERE cid = ${cid}", params)
+    db.query("DELETE FROM code_store WHERE cid = ?", [params.cid])
         .then(function () {
             res.json({
                 resultCode: 0
