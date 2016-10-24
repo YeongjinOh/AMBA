@@ -45,7 +45,7 @@ router.post('/login', function (req, res, next) {
 router.post('/regist', function(req, res, next) {
     var password = crypto.encrypt(req.body.password);
 
-    db.query("INSERT INTO users(email, password, username, ipt_date, upt_date) VALUES($1, $2, $3, now(), now());", [req.body.email, password, req.body.username])
+    db.query("INSERT INTO users(email, password, username, ipt_date, upt_date) VALUES(${req.body.email}, ${password}, ${req.body.username}, now(), now());")
         .then(function () {
             res.json({
                 resultCode: 0
