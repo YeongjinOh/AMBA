@@ -8,26 +8,56 @@ var db = require('../db');
 var dbpg = require('../db_postgre');
 
 router.get('/users', function(req, res, next) {
+    var users;
+    var i;
     dbpg.any("SELECT * FROM users;")
         .then(function(data) {
-            res.json({
-                info: data
-            })
+            users = data;
+            for(i=0; i<users.length; i++) {
+                db.query("INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?, ?);",
+                [data[i].uid, data[i].email, data[i].password, data[i].username, data[i].status, data[i].description, data[i].ipt_date, data[i].upt_date])
+                    .then(function() {
+                        res.json({
+                            resultCode: 0
+                        })
+                    })
+                    .catch(function() {
+                        res.json({
+                            resultCode: -1
+                        })
+                    })
+            }
         })
         .catch(function(err) {
-            console.log(err);
+            res.json({
+                resultCode: -1,
+                msg: err
+            })
         });
 });
 
 router.get('/project', function(req, res, next) {
-    db.query("SELECT value FROM data_store WHERE cid = ? AND akey = ?;", [req.query.cid, req.query.key])
-        .then(function (data) {
-            res.json({
-                resultCode: 0,
-                info: data
-            })
+    var project;
+    var i;
+    dbpg.any("SELECT * FROM project;")
+        .then(function(data) {
+            project = data;
+            for(i=0; i<project.length; i++) {
+                db.query("INSERT INTO project VALUES(?, ?, ?, ?, ?, ?, ?);",
+                    [data[i].pid, data[i].uid, data[i].title, data[i].main_cid, data[i].description, data[i].ipt_date, data[i].upt_date])
+                    .then(function() {
+                        res.json({
+                            resultCode: 0
+                        })
+                    })
+                    .catch(function() {
+                        res.json({
+                            resultCode: -1
+                        })
+                    })
+            }
         })
-        .catch(function (err) {
+        .catch(function(err) {
             res.json({
                 resultCode: -1,
                 msg: err
@@ -36,13 +66,27 @@ router.get('/project', function(req, res, next) {
 });
 
 router.get('/codestore', function(req, res, next) {
-    db.query("DELETE FROM data_store WHERE cid = ? AND akey = ?;", [req.query.cid, req.query.key])
-        .then(function () {
-            res.json({
-                resultCode: 0
-            })
+    var codestore;
+    var i;
+    dbpg.any("SELECT * FROM code_store;")
+        .then(function(data) {
+            codestore = data;
+            for(i=0; i<codestore.length; i++) {
+                db.query("INSERT INTO code_store VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                    [data[i].cid, data[i].uid, data[i].pid, data[i].title, data[i].ctext, data[i].mstatus, data[i].deps, data[i].description, data[i].ipt_date, data[i].upt_date])
+                    .then(function() {
+                        res.json({
+                            resultCode: 0
+                        })
+                    })
+                    .catch(function() {
+                        res.json({
+                            resultCode: -1
+                        })
+                    })
+            }
         })
-        .catch(function (err) {
+        .catch(function(err) {
             res.json({
                 resultCode: -1,
                 msg: err
@@ -51,30 +95,27 @@ router.get('/codestore', function(req, res, next) {
 });
 
 router.get('/datastore', function(req, res, next) {
-    db.query("SELECT akey, value FROM data_store WHERE cid = ?;", [req.query.cid])
-        .then(function (data) {
-            res.json({
-                resultCode: 0,
-                info: data
-            })
+    var datastore;
+    var i;
+    dbpg.any("SELECT * FROM data_store;")
+        .then(function(data) {
+            datastore = data;
+            for(i=0; i<datastore.length; i++) {
+                db.query("INSERT INTO data_store VALUES(?, ?, ?);",
+                    [data[i].cid, data[i].key, data[i].value])
+                    .then(function() {
+                        res.json({
+                            resultCode: 0
+                        })
+                    })
+                    .catch(function() {
+                        res.json({
+                            resultCode: -1
+                        })
+                    })
+            }
         })
-        .catch(function (err) {
-            res.json({
-                resultCode: -1,
-                msg: err
-            })
-        });
-});
-
-router.get('/keys', function(req, res, next) {
-    db.query("SELECT akey FROM data_store WHERE cid = ?;", [req.query.cid])
-        .then(function (data) {
-            res.json({
-                resultCode: 0,
-                info: data
-            })
-        })
-        .catch(function (err) {
+        .catch(function(err) {
             res.json({
                 resultCode: -1,
                 msg: err
