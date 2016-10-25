@@ -69,7 +69,7 @@ router.post('', function (req, res) {
         .then(function (data) {
             res.json({
                 resultCode: 0,
-                pid: data.pid
+                pid: data[0].pid
             })
         })
         .catch(function (error) {

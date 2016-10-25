@@ -40,7 +40,7 @@ router.get('', function (req, res) {
         .then(function (data) {
             res.json({
                 resultCode: 0,
-                modules: data.map(buildModule)
+                modules: data[0].map(buildModule)
             })
         })
         // TODO error handling

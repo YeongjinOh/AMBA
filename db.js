@@ -5,19 +5,11 @@
 var config = require('./config');
 var mysql = require('promise-mysql');
 var pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'iamhappy',
+    host: '220.149.236.19',
+    user: 'ambauser',
+    password: 'ambapass',
     database: 'amba',
     connectionLimit: 20
 });
 
 module.exports = pool;
-
-// var config = require('./config');
-// var pgp = require('pg-promise')();
-// pgp.pg.defaults.poolSize = 20;
-// pgp.pg.defaults.ssl = true;
-// var DB = pgp(config.db.DATABASE_URL);
-//
-// module.exports = DB;
