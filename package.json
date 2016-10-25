@@ -24,6 +24,7 @@
     "jwt-simple": "^0.5.0",
     "morgan": "~1.7.0",
     "multer": "^1.2.0",
+    "nodeadmin": "^0.1.2",
     "path": "^0.12.7",
     "pg": "4.5.6",
     "pg-promise": "^5.3.3",

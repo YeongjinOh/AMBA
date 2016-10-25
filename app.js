@@ -9,6 +9,8 @@ var app = express();
 // var redis = require('redis');
 // var cache = redis.createClient();
 
+var nodeadmin = require('nodeadmin');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -22,6 +24,7 @@ app.use(cookieParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(nodeadmin(app));
 
 //라우터보다 먼저 미들웨어 등록!!
 //app.use(function (req, res, next) {
