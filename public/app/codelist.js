@@ -209,9 +209,14 @@
                 .done(function (data) {
                     if (data.resultCode === 0) {
                         // copy properties
-                        for (var prop in data.code) {
-                            if (data.code.hasOwnProperty(prop)) {
-                                code[prop] = data.code[prop];
+                        // for (var prop in data.code) {
+                        //     if (data.code.hasOwnProperty(prop)) {
+                        //         code[prop] = data.code[prop];
+                        //     }
+                        // }
+                        for (var prop in data.code[0]) {
+                            if (data.code[0].hasOwnProperty(prop)) {
+                                code[prop] = data.code[0][prop];
                             }
                         }
                         if (typeof code['upt_date'] === 'string' && code['upt_date'].length > 10)
