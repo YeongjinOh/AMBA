@@ -7,7 +7,7 @@ var wrapCode = function (ctext) {
 }
 
 router.get('/module/:dep', function (req, res) {
-    db.query("SELECT ctext FROM code_store WHERE mstatus=1 AND title=?", [req.params.dep])
+    db.query("SELECT ctext FROM code_store WHERE mstatus=1 AND title=?;", [req.params.dep])
         .then(function (data) {
             var code = wrapCode(data[0].ctext);
             // scope의 충돌을 막기 위해 읽어온 코드를 function으로 한번 감싸서 수행해줍니다.
@@ -23,7 +23,7 @@ router.get('/module/:dep', function (req, res) {
 });
 
 router.get('/code/:cid', function (req, res) {
-    db.query("SELECT ctext, deps FROM code_store WHERE cid=?", [req.params.cid])
+    db.query("SELECT ctext, deps FROM code_store WHERE cid=?;", [req.params.cid])
         .then(function (data) {
             console.log(data[0]);
             // scope의 충돌을 막기 위해 읽어온 코드를 function으로 한번 감싸서 수행해줍니다.
