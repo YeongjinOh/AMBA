@@ -42,6 +42,7 @@ app.use('/cachestore', require('./routes/cachestore'));
 app.use('/jsloader', require('./routes/jsloader'));
 app.use('/fileupload', require('./routes/fileupload'));
 app.use('/migration', require('./routes/migration'));
+app.use('/blog', require('./routes/blog'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
