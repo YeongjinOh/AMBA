@@ -436,6 +436,10 @@ Div.prototype.fontNormal = function () {
     return this.cssText('font-weight', 'normal');
 };
 
+Div.prototype.fontBgColor = function (color) {
+    this.$text.css('background-color',color);
+    return this;
+};
 Div.prototype.border = function (value) {
     if (typeof value === 'number') {
         var style = this.borderStyle();
@@ -867,27 +871,6 @@ Div.prototype.iframe = function (src) {
     return this;
 };
 
-Div.prototype.verticalAlignMiddle = function () {
-    var i, ch = this.children();
-    this.paddingTop(0);
-    var minTop = 99999, maxBottom = 0;
-    for (i = 0; i < ch.length; i++) {
-        if (minTop > ch[i].offset().top)
-            minTop = ch[i].offset().top;
-
-        if (maxBottom < ch[i].offset().top + parseInt(ch[i].height()))
-            maxBottom = ch[i].offset().top + parseInt(ch[i].height());
-    }
-    minTop -= this.offset().top;
-    maxBottom -= this.offset().top;
-
-    var paddingTop = (parseInt(this.height()) - maxBottom) / 2;
-    this.paddingTop(paddingTop);
-    this.height(this.heightPixel() - paddingTop);
-
-    return this;
-};
-
 Div.prototype.image = function (src) {
     if (src === '') {
         if (this.$image)
@@ -1109,3 +1092,44 @@ Div.prototype.disqus = function (sector, title) {
 
     return this;
 };
+
+/*********************************************************/
+
+
+Div.prototype.verticalAlignMiddle = function () {
+    var i, ch = this.children();
+    this.paddingTop(0);
+    var minTop = 99999, maxBottom = 0;
+    for (i = 0; i < ch.length; i++) {
+        if (minTop > ch[i].offset().top)
+            minTop = ch[i].offset().top;
+
+        if (maxBottom < ch[i].offset().top + parseInt(ch[i].height()))
+            maxBottom = ch[i].offset().top + parseInt(ch[i].height());
+    }
+    minTop -= this.offset().top;
+    maxBottom -= this.offset().top;
+
+    var paddingTop = (parseInt(this.height()) - maxBottom + minTop) / 2;
+    return this.paddingTop(paddingTop);
+};
+
+Div.prototype.horizontalCenter = function () {
+    var i, ch = this.children();
+    this.paddingLeft(0).paddingRight(0);
+    var minLeft = 99999, maxRight = 0;
+    for (i = 0; i < ch.length; i++) {
+        if (minLeft > ch[i].offset().left)
+            minLeft = ch[i].offset().left;
+
+        if (maxRight < ch[i].offset().left + parseInt(ch[i].width()))
+            maxRight = ch[i].offset().left + parseInt(ch[i].width());
+    }
+    minLeft -= this.offset().left;
+    maxRight -= this.offset().left;
+
+    var paddingLeft = (parseInt(this.width()) - maxRight + minLeft) / 2;
+    return this.paddingLeft(paddingLeft);
+};
+
+
