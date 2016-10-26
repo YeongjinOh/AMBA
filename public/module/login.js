@@ -4,7 +4,7 @@
 
 // define([], function () {
 //     var Module = {};
-//     Module.appendTo = function(dv) {
+//     Module.appendTo = function(dv, callback) {
 //         var root = div().appendTo(dv).size(360, 440).color('#a8d7a9').borderRadius(10).boxShadow('5px 5px 5px black');
 //
 //         var form = div().appendTo(root).displayBlock().size(300, 340).position('relative').margin('auto').top('50%')
@@ -47,7 +47,7 @@
 
 (function() {
     var Module = {};
-    Module.appendTo = function(dv) {
+    Module.appendTo = function(dv, callback) {
         var root = div().append().size(360, 440).color('#a8d7a9').borderRadius(10).boxShadow('5px 5px 5px black')
 
         var form = div().appendTo(root).displayBlock().size(300, 340).position('relative').margin('auto').top('50%')
@@ -71,9 +71,9 @@
                 $.post("/users/login", {email: email.text(), password: password.text()})
                     .done(function (data) {
                         if (data.resultCode === 0) {
-                            // callback
+                            callback(true);
                         } else
-                            alert(data.msg);
+                            callback(fail);
                     });
             });
 
