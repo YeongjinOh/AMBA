@@ -64,12 +64,14 @@ router.post('', function (req, res) {
     var project = JSON.parse(params.project) || {};
     project.uid = getUid(params.token);
     var query = "INSERT INTO project(uid, title, description, ipt_date, upt_date) " +
-        "VALUES (?, ?, ?, now(), now()) RETURNING pid;";
+        "VALUES (?, ?, ?, now(), now());";
+        // "VALUES (?, ?, ?, now(), now()) RETURNING pid;";
     db.query(query, [project.uid, project.title, project.description])
         .then(function (data) {
+            console.log(data);
             res.json({
                 resultCode: 0,
-                pid: data[0].pid
+                pid: data.insertId
             })
         })
         .catch(function (error) {
@@ -102,9 +104,8 @@ router.post('', function (req, res) {
 // TODO use token
 router.post('/update', function (req, res) {
     var params = req.body;
-    var query = "UPDATE project SET (title, main_cid, description, upt_date) " +
-        "= (?, ?, ?, now()) WHERE pid=?;";
-    db.query(query, [params.title, params.main_cid, params.description])
+    var query = "UPDATE project SET title=?, main_cid=?, description=?, upt_date=now() WHERE pid=?;";
+    db.query(query, [params.title, params.main_cid, params.description, params.pid])
         .then(function () {
             res.json({
                 resultCode: 0
@@ -248,8 +249,7 @@ router.post('/codes/update', function (req, res) {
     var newCid = getCid(params.pid, params.title);
     params.newCid = newCid;
 
-    var query = "UPDATE code_store SET (cid, title, ctext, mstatus, description, upt_date) " +
-        "= (?, ?, ?, ?, ?, now()) WHERE cid=?;";
+    var query = "UPDATE code_store SET cid=?, title=?, ctext=?, mstatus=?, description=?, upt_date=now() WHERE cid=?;";
     db.query(query, [params.cid, params.title, params.ctext, params.mstatus, params.description, params.cid])
         .then(function () {
             res.json({
@@ -282,8 +282,11 @@ router.post('/codes/update', function (req, res) {
 router.post('/codes/mstatus/update', function (req, res) {
     var params = req.body;
 
+    console.log("mstatus: " + params.mstatus);
+    console.log("cid: " + params.cid);
+
     var updateMstatus = function () {
-        db.query("UPDATE code_store SET (mstatus, upt_date) = (?, now()) WHERE cid=?;", [params.mstatus, params.cid])
+        db.query("UPDATE code_store SET mstatus=?, upt_date=now() WHERE cid=?;", [params.mstatus, params.cid])
             .then(function () {
                 res.json({
                     resultCode: 0
@@ -335,7 +338,7 @@ router.post('/codes/mstatus/update', function (req, res) {
  */
 router.post('/codes/deps/update', function (req, res) {
     var params = req.body;
-    db.query("UPDATE code_store SET (deps, upt_date) = (?, now()) WHERE cid=?;", [params.deps, params.cid])
+    db.query("UPDATE code_store SET deps=?, upt_date=now() WHERE cid=?;", [params.deps, params.cid])
         .then(function () {
             res.json({
                 resultCode: 0
