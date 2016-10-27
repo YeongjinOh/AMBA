@@ -326,23 +326,26 @@
 
         // modules는 모듈명(key)와 모듈 객체(value)의 쌍으로 이루어진 JSON object
         var modules = {};
+        var blocks = {};
 
         // 현재 코드의 dependency를 임시 저장.
         var deps = [];
         var that = this;
 
-        this.init = function () {
+        this.init = function (callback) {
             that.getModules()
                 .done(function () {
                     for (var prop in modules) {
                         if (modules.hasOwnProperty(prop)) {
-                            newModuleBlock(modules[prop]);
+                            blocks[prop] = newModuleBlock(modules[prop]);
                         }
                     }
+                    if (typeof callback === 'function')
+                        callback();
                 });
         };
 
-        // 주어진 모듈이 없으면 추가하고 true를, 이미 있으면 제거하고 false를 리턴합니다.
+        // 주어진 모듈이 현재 코드의 디펜던시에 없으면 추가하고 true를, 이미 있으면 제거하고 false를 리턴합니다.
         this.toggleModule = function (title) {
             for (var i = 0; i < deps.length; i++) {
                 if (deps[i] === title) {
@@ -385,6 +388,19 @@
         this.getModules = function () {
             return $.get("/modules", {token: token})
                 .done(function (data) {
+
+                    // remove module blocks
+                    for (var prop in blocks) {
+                        if (blocks.hasOwnProperty(prop)) {
+                            blocks[prop].remove();
+                        }
+                    }
+
+                    // reset
+                    modules = {};
+                    blocks = {};
+
+                    // get modules
                     if (data.resultCode === 0) {
                         data.modules.forEach(function (module) {
                             modules[module.title] = buildModule(module);
@@ -492,7 +508,7 @@
             .click(function () {
                 viewerWrapper.fadeOut().detach();
             });
-        var viewerFullscreenButton = div().appendTo(viewerHeader).cssSameWith(viewerRemoveButton).size(11,11)
+        var viewerFullscreenButton = div().appendTo(viewerHeader).cssSameWith(viewerRemoveButton).size(11, 11)
             .image('../images/fullscreen.png').click(onFullscreen);
 
 
@@ -524,10 +540,9 @@
             },
             run: function () {
                 // save code and dependencies
-                var acode = '(function(){' + codeEditor.text() + '\n})();';
-                localStorage.setItem('acode', acode);
-                localStorage.setItem('adeps', JSON.stringify(code.deps));
-
+                var ctext = '(function(){' + codeEditor.text() + '\n})();';
+                var acode = {ctext: ctext, deps: code.deps, cid: code.cid};
+                localStorage.setItem('acode', JSON.stringify(acode));
                 // set viewer
                 viewer.empty().iframe('/?app=viewer');
                 viewer.$iframe.appendTo(viewer.$); // attach again
@@ -628,6 +643,8 @@
             block.description.fontColor('gray');
         };
         blockWrapper.hover(onHover, offHover).click(onClickModule);
+
+        return blockWrapper;
     };
 
     /** functions for code list and project list **/
@@ -693,11 +710,13 @@
     };
 
     var openModuleList = function () {
-        moduleManager.reset(currentCode);
-        moduleList.fadeIn(fadeDuration);
-        closeProjectList();
-        moduleHide = false;
-        offProjectEdit();
+        moduleManager.init(function () {
+            moduleManager.reset(currentCode);
+            moduleList.fadeIn(fadeDuration);
+            closeProjectList();
+            moduleHide = false;
+            offProjectEdit();
+        });
     };
 
     var closeModuleList = function () {
@@ -728,7 +747,17 @@
     };
 
     var onFullscreen = function () {
-        currentCodeBlock.fullscreen();
+        var uptCode = buildCode(currentCode);
+        uptCode.title = titleEditor.text();
+        uptCode.upt_date = getCurrentDate();
+        uptCode.description = descEditor.text();
+        uptCode.ctext = codeEditor.text();
+        uptCode.deps = JSON.stringify(uptCode.deps);
+        currentCodeManager.updateCode(uptCode, function () {
+            // update code block
+            currentCodeBlock.syncWithEditor();
+            currentCodeBlock.fullscreen();
+        });
     };
 
     var onModule = function () {
@@ -765,6 +794,7 @@
         currentCodeManager.updateCode(uptCode, function () {
             // update code block
             currentCodeBlock.syncWithEditor();
+            alert('저장되었습니다.');
         });
     };
 
@@ -888,7 +918,6 @@
         .fontColor('#1B5E20').textAlignCenter();
     var listViewer = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
         .borderOption('1px solid gray', 'top').overflowAuto().color('white');
-    ;
     var listWrapper = div().appendTo(listViewer).width('100%');
     var moduleDescWrapper = div().prependTo(listViewer).size('100%').minHeight(100).padding(10).displayNone()
         .color(basicBlueWeak).borderBottom('1px solid ' + basicBlue).cursorPointer().click(onModuleDescWrapper);
@@ -897,13 +926,13 @@
 
     // design codeWrapper
     var wrapperHeader = div().appendTo(codeWrapper).size('95%', 140).padding(10).borderOption('1px solid gray', 'bottom');
-    var leftWrapperHeader = div().width('60%').appendTo(wrapperHeader).float('left');
+    var leftWrapperHeader = div().width('65%').appendTo(wrapperHeader).float('left');
     var rightWrapperHeader = div().width('35%').appendTo(wrapperHeader).float('right');
-    var titleEditor = div().appendTo(leftWrapperHeader).size(600, 40).editable().fontSize(30).fontBold()
+    var titleEditor = div().appendTo(leftWrapperHeader).size('100%', 40).editable().fontSize(30).fontBold()
         .fontColor(basicColor).overflowAuto();
-    var descEditor = div().appendTo(leftWrapperHeader).size(600, 45).editable().marginTop(10).marginLeft(10)
-        .fontSize(20).fontBold().fontColor('gray').overflowAuto();
-    var depsTagsWrapper = div().appendTo(leftWrapperHeader).size(600, 30).overflowYHidden().overflowXScroll();
+    var descEditor = div().appendTo(leftWrapperHeader).size('100%', 45).editable().margin(5).marginLeft(10)
+        .fontSize(16).fontBold().fontColor('gray').overflowAuto();
+    var depsTagsWrapper = div().appendTo(leftWrapperHeader).size('100%', 30);
     var depsTags = div().appendTo(depsTagsWrapper);
     var codeEditor = div().appendTo(codeWrapper).aceEditor().zIndex(1).size('95%', '80%').marginTop(10).padding(20)
         .fontSize(20).overflowAuto();
@@ -928,5 +957,33 @@
     var moduleManager = new ModuleManager();
     projectManager.init();
     moduleManager.init();
+
+
+    /** set keydown events **/
+
+    $(window).bind('keydown', function(event) {
+        if (codeWrapper.display() !== 'none' && event.altKey) {
+
+            switch (event.which) {
+                case 70 :   // Alt + F
+                    codeEditor.aceValue.blur();
+                    onFullscreen();
+                    break;
+                case 77 :   // Alt + M
+                    codeEditor.aceValue.blur();
+                    onModule();
+                    break;
+                case 82 :   // Alt + R
+                    codeEditor.aceValue.blur();
+                    onRun();
+                    break;
+                case 83 :   // Alt + S
+                    codeEditor.aceValue.blur();
+                    onSave();
+                    break;
+            }
+        }
+    });
+
 
 })();

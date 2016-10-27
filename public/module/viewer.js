@@ -1,5 +1,5 @@
 define([], function () {
-    var executeCode = function (code, deps, callback) {
+    var executeCode = function (ctext, deps, callback) {
 
         // dependency들을 받아올 url을 설정합니다.
         var urls = deps.map(function (dep) {
@@ -17,11 +17,16 @@ define([], function () {
             // 현재 코드를 실행시키기 위한 script를 추가합니다.
             var head = document.getElementsByTagName('head')[0];
             var script = document.createElement('script');
-            script.text = code;
+            script.text = ctext;
             callback(); // remove loading bar;
             head.appendChild(script);
         });
     };
+
+    var curCid;
+    AB.getCid = function () {
+        return curCid;
+    }
 
     return {
         run: function (cid, callback) {
@@ -31,18 +36,18 @@ define([], function () {
                 // cid를 이용하여 코드와 dependency를 읽어 온 뒤 실행
                 $.get('/jsloader/code/'+cid)
                     .done(function (res) {
-                        var code = res.ctext;
+                        var ctext = res.ctext;
                         var deps = JSON.parse(res.deps);
-                        executeCode(code, deps, callback);
+                        executeCode(ctext, deps, callback);
                     });
 
+                curCid = decodeURIComponent(cid);
                 /** local Storage에 저장된 코드를 실행하는 경우 **/
             } else {
-                var deps = JSON.parse(localStorage.getItem('adeps'))
-                var code = localStorage.getItem('acode');
-                executeCode(code, deps, callback);
+                var acode = JSON.parse(localStorage.getItem('acode'))
                 localStorage.removeItem('acode');
-                localStorage.removeItem('adeps');
+                executeCode(acode.ctext, acode.deps, callback);
+                curCid = acode.cid;
             }
         }
     }
