@@ -49,7 +49,7 @@ router.get('/', function(req, res, next) {
             // 전체 페이지
             var maxPage = Math.floor(totalItem / itemNumInPage);
             var temp = 1;
-            if(totalItem/itemNumInPage ===0)
+            if(totalItem/itemNumInPage ===Math.floor(totalItem/itemNumInPage))
                 temp = 0;
 
             // Skip할 개수 계산. page는 1부터 시작
