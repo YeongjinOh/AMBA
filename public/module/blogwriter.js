@@ -7,6 +7,38 @@ define([], function(){
         return JSON.parse(info).username;
     }
 
+    var addZeroIfNeeded = function (num) {
+        num = parseInt(num);
+        return num < 10 ? '0' + num : num;
+    };
+
+    var getCurrentDate = function () {
+        var date = new Date();
+        var m_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var curr_date = addZeroIfNeeded(date.getDate());
+        var curr_month = date.getMonth();
+        var curr_year = date.getFullYear();
+        var curr_hour = date.getHours();
+        var curr_min = addZeroIfNeeded(date.getMinutes());
+        var curr_sec = addZeroIfNeeded(date.getSeconds());
+        return (curr_date + "-" + m_names[curr_month]
+        + "-" + curr_year);// + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
+    };
+
+    var getTime = function () {
+        var date = new Date();
+
+        var hour = date.getHours();
+        var min = addZeroIfNeeded(date.getMinutes());
+        if (hour < 13) {
+            return "오전 " + hour + ":" + min;
+        } else {
+            hour -= 12;
+            return "오후 " + hour + ":" + min;
+        }
+
+    };
+
     var Module = {};
     Module.appendTo = function(dv) {
         var writeFrame = div().size(600, 600).appendTo(dv).border(1);
@@ -19,24 +51,25 @@ define([], function(){
                 var data = {
                     title: titleDv.text(),
                     content: contentDv.text(),
-                    timestamp: Date.now(),
+                    timestamp: getCurrentDate(),//Date.now(),
                     aauth: localStorage.getItem('aauth'),
                     name: getName()
                 };
-                //var cid = AB.module.getCid ();
+                console.log('date : ' , data);
+                console.log(JSON.stringify(data));
+                //var cid = AB.module.getCid();
 
-                //$.post("/blog/put",
-                //    {
-                //        cid: inputCid.text(),
-                //        akey: inputKey.text(),
-                //        value: data
-                //
-                //    }, function (result) {
-                //        //outputView.empty();
-                //        outputView.text(JSON.stringify(result));
-                //    });
-                console.log('cid : ', cid);
-                console.log(data);
+                $.post("/blog",
+                    {
+                        cid: 'kks',//AB.module.getCid(),
+                        akey: data.title + data.timestamp,
+                        value: JSON.stringify(data)
+
+                    }, function (result) {
+                        console.log(result);
+                        //outputView.empty();
+                        //outputView.text(JSON.stringify(result));
+                    });
             });
         div().size('auto').appendTo(headerDv).text('Cancel').float('left').padding(4).boxShadow('2px 2px')
             .marginLeft(6).marginTop(2).border(1).borderRadius(6).click(function(dv){
