@@ -21,6 +21,7 @@ var Module = function (module) {
     this.title = module.title;
     this.description = module.description;
     this.upt_date = module.upt_date;
+    this.ctext = module.ctext;
 };
 
 var buildModule = function (obj) {
@@ -35,7 +36,7 @@ var buildModule = function (obj) {
 router.get('', function (req, res) {
     // TODO authentication
     // var params = getParams(req.url);
-    db.query("SELECT A.username, B.title, B.description, B.upt_date " +
+    db.query("SELECT A.username, B.title, B.description, B.upt_date, B.ctext " +
         "FROM users A JOIN code_store B USING (uid) WHERE mstatus=1;")
         .then(function (data) {
             res.json({

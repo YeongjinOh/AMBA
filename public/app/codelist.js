@@ -87,6 +87,7 @@
         this.title = module.title;
         this.description = module.description;
         this.upt_date = module.upt_date.slice(0, 10);
+        this.ctext = module.ctext;
         this.selected = false;
     };
 
@@ -607,6 +608,17 @@
         var blockWrapper = div().appendTo(moduleListWrapper).padding(10).size(moduleList.widthPixel(), 100).borderOption('1px solid', 'bottom')
             .borderOption('rgb(200,200,200)', 'color').color('#fafafa').cursorPointer();
 
+        var button = div().appendTo(blockWrapper).float('right').size(10,10).color('#1565C0').cursorPointer().borderRadius(3)
+            .click(function () {
+                currentCodeBlock = undefined;
+                currentCode = undefined;
+                titleEditor.text(block.title.text());
+                descEditor.text(block.description.text());
+                dateEditor.text(block.date.text());
+                codeEditor.text(module.ctext);
+                return false;
+        });
+
         var block = {
             title: div().appendTo(blockWrapper).size('55%', '20px').text(module.title).fontSize(18).fontColor('#333333').fontBold().disableSelection(),
             date: div().appendTo(blockWrapper).size('40%', '15px').text(module.upt_date).fontSize(12).fontColor('gray')
@@ -785,17 +797,21 @@
     };
 
     var onSave = function () {
-        var uptCode = buildCode(currentCode);
-        uptCode.title = titleEditor.text();
-        uptCode.upt_date = getCurrentDate();
-        uptCode.description = descEditor.text();
-        uptCode.ctext = codeEditor.text();
-        uptCode.deps = JSON.stringify(uptCode.deps);
-        currentCodeManager.updateCode(uptCode, function () {
-            // update code block
-            currentCodeBlock.syncWithEditor();
-            alert('저장되었습니다.');
-        });
+        if (currentCode === undefined) {
+            alert('모듈은 수정할 수 없습니다.');
+        } else {
+            var uptCode = buildCode(currentCode);
+            uptCode.title = titleEditor.text();
+            uptCode.upt_date = getCurrentDate();
+            uptCode.description = descEditor.text();
+            uptCode.ctext = codeEditor.text();
+            uptCode.deps = JSON.stringify(uptCode.deps);
+            currentCodeManager.updateCode(uptCode, function () {
+                // update code block
+                currentCodeBlock.syncWithEditor();
+                alert('저장되었습니다.');
+            });
+        }
     };
 
     var onProjectList = function () {
@@ -983,6 +999,11 @@
                     break;
             }
         }
+    });
+    $(document).unload(function() {
+        if (confirm("저장하시겠습니까?"))
+            onSave();
+        return "Bye now!";
     });
 
 
