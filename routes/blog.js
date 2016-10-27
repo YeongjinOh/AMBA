@@ -36,7 +36,7 @@ router.post('/', function(req, res, next) {
 router.get('/', function(req, res, next) {
 
     var currentPage = parseInt(req.query.page) || 1;
-    // 페이지 당 출력 개수
+    // 페이지 당 출력 개수, 클라이언트에서도 해줘야한다..
     var itemNumInPage = 3;
     var cid = req.query.cid;
     //var akey = req.query.akey;
@@ -44,10 +44,14 @@ router.get('/', function(req, res, next) {
     var arr1 = [cid];
     db.query(sql1, arr1)
         .then(function (results) {
-            // 전체 아이템 개수
+            // 전체 아이템 개수,
             var totalItem = parseInt(results.length);
             // 전체 페이지
             var maxPage = Math.floor(totalItem / itemNumInPage);
+            var temp = 1;
+            if(totalItem/itemNumInPage ===0)
+                temp = 0;
+
             // Skip할 개수 계산. page는 1부터 시작
             var skip = itemNumInPage * (currentPage-1);
             var sql2 = 'SELECT value FROM data_store WHERE cid = ? LIMIT ?, ?';
@@ -56,7 +60,7 @@ router.get('/', function(req, res, next) {
                 .then(function (results) {
                     res.json({
                         resultCode : 0,
-                        maxPage: maxPage + 1,
+                        maxPage: maxPage + temp,
                         value: results
                     });
                 })
