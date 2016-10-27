@@ -1093,9 +1093,6 @@ Div.prototype.disqus = function (sector, title) {
     return this;
 };
 
-/*********************************************************/
-
-
 Div.prototype.verticalAlignMiddle = function () {
     var i, ch = this.children();
     this.paddingTop(0);
@@ -1114,7 +1111,7 @@ Div.prototype.verticalAlignMiddle = function () {
     return this.paddingTop(paddingTop);
 };
 
-Div.prototype.horizontalCenter = function () {
+Div.prototype.horizontalAlignMiddle = function () {
     var i, ch = this.children();
     this.paddingLeft(0).paddingRight(0);
     var minLeft = 99999, maxRight = 0;

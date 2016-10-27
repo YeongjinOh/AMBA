@@ -250,7 +250,7 @@ router.post('/codes/update', function (req, res) {
     params.newCid = newCid;
 
     var query = "UPDATE code_store SET cid=?, title=?, ctext=?, mstatus=?, description=?, upt_date=now() WHERE cid=?;";
-    db.query(query, [params.cid, params.title, params.ctext, params.mstatus, params.description, params.cid])
+    db.query(query, [params.newCid, params.title, params.ctext, params.mstatus, params.description, params.cid])
         .then(function () {
             res.json({
                 resultCode: 0,
