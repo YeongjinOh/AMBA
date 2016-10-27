@@ -5,7 +5,7 @@
 var config = require('./config');
 var mysql = require('promise-mysql');
 var pool = mysql.createPool({
-    host: '220.149.236.19',
+    host: 'localhost',
     user: 'ambauser',
     password: 'ambapass',
     database: 'amba',
