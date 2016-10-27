@@ -37,7 +37,7 @@ router.get('/', function(req, res, next) {
 
     var currentPage = parseInt(req.query.page) || 1;
     // 페이지 당 출력 개수
-    var itemNumInPage = 3;
+    var itemNumInPage = 4;
     var cid = req.query.cid;
     //var akey = req.query.akey;
     var sql1 = 'SELECT value FROM data_store WHERE cid = ?';

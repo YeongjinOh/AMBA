@@ -5,10 +5,7 @@
 define([],function () {
     var Module = {};
 
-
     Module.appendTo = function (target) {
-
-
         function init(){
             var value =[];
             for(var i =0;i<5;i++){
@@ -40,9 +37,8 @@ define([],function () {
 
         }
 
-        var page = 3;
-        var maxPage =3;//exam
-        var that = this;
+        var page = 1;
+        var maxPage =0;//exam
 
         // postItem view
         var postView = function (div) {
@@ -68,6 +64,7 @@ define([],function () {
             .fontSize(30)
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7')
             .click(function () {
+                posting.reset();
                 page=1;
                 console.log(posting.getPost());
                 //posting.getPost();
@@ -86,26 +83,28 @@ define([],function () {
             .borderOption(1).borderOption('#EBE8E7', 'color');
 
 
-        var previousPage = div().size('auto','auto').floatRight()
-            .paddingRight(8)
-            .text('PREVIOUS PAGE').fontSize(15)
-            .click(function () {
-                page--;
-                that.posting.getPost();
-            })
-            .hoverTextColor('grey','black');
-
-        var currentPage = div().size('auto','auto').floatRight()
-            .paddingRight(8)
-            .fontBold()
-            .fontSize(15);
-
-        var nextPage = div().size('auto','auto').floatRight()
+        var nextPage = div().size('auto','auto').appendTo(pBottom).floatRight()
             .paddingRight(8)
             .text('NEXT PAGE').fontSize(15)
             .click(function () {
+                posting.reset();
                 page++;
-                that.posting.getPost();
+                posting.getPost();
+            })
+            .hoverTextColor('grey','black');
+
+        var currentPage = div().size('auto','auto').appendTo(pBottom).floatRight()
+            .paddingRight(8)
+            .fontBold()
+            .fontSize(15)
+
+        var previousPage = div().size('auto','auto').appendTo(pBottom).floatRight()
+            .paddingRight(8)
+            .text('PREVIOUS PAGE').fontSize(15)
+            .click(function () {
+                posting.reset();
+                page--;
+                posting.getPost();
             })
             .hoverTextColor('grey','black');
 
@@ -139,8 +138,6 @@ define([],function () {
             .padding('9px')
             .color('#EBE8E7');
 
-
-
         //스키마
         var Post = function (value) {
             this.aauth = value.aauth;//uid
@@ -158,6 +155,10 @@ define([],function () {
         var postManager = function () {
             var posting = [];
 
+            this.reset = function () {
+              return pList.empty();
+            };
+
             this.getPost = function () {
                 return $.get("/blog",
                     {//query
@@ -166,23 +167,43 @@ define([],function () {
                     }, function (results) {
                         posting = results.value.map(buildPost);
                         maxPage = results.maxPage;
-
+                        //pList.
                         for(var i=0;i<posting.length;i++){
                             newPost(posting[i]);
                         }
+
                         var cpText = 'PAGE ' + page +' OF '+maxPage;
+                        console.log('current page : ' + page + ', maxPage : '+ maxPage);
+
+
                         if(maxPage == 1){
-                            currentPage.appendTo(pBottom).text(cpText);
+                            nextPage.displayNone();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayNone();
                         }else if(page!=1&&page%maxPage!==0){
-                            nextPage.appendTo(pBottom);
-                            currentPage.appendTo(pBottom).text(cpText);
-                            previousPage.appendTo(pBottom);
+                            //nextPage.appendTo(pBottom);
+                            //currentPage.appendTo(pBottom).text(cpText);
+                            //previousPage.appendTo(pBottom);
+
+                            nextPage.displayBlock();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayBlock();
+
+
+
                         }else if(page%maxPage==0){
-                            currentPage.appendTo(pBottom).text(cpText);
-                            previousPage.appendTo(pBottom);
+                            //currentPage.appendTo(pBottom).text(cpText);
+                            //previousPage.appendTo(pBottom);
+                            nextPage.displayNone();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayBlock();
                         }else{
-                            nextPage.appendTo(pBottom);
-                            currentPage.appendTo(pBottom).text(cpText);
+                            nextPage.displayBlock();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayNone();
+
+                            //nextPage.appendTo(pBottom);
+                            //currentPage.appendTo(pBottom).text(cpText);
                         }
                     });
             };
@@ -217,8 +238,8 @@ define([],function () {
         };
 
         var posting = new postManager();
-        //posting.getPost();
-        init();
+        posting.getPost();
+        //init();
 
     };
     return Module;
