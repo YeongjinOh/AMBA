@@ -508,7 +508,7 @@
             .click(function () {
                 viewerWrapper.fadeOut().detach();
             });
-        var viewerFullscreenButton = div().appendTo(viewerHeader).cssSameWith(viewerRemoveButton).size(11,11)
+        var viewerFullscreenButton = div().appendTo(viewerHeader).cssSameWith(viewerRemoveButton).size(11, 11)
             .image('../images/fullscreen.png').click(onFullscreen);
 
 
@@ -541,7 +541,7 @@
             run: function () {
                 // save code and dependencies
                 var ctext = '(function(){' + codeEditor.text() + '\n})();';
-                var acode = {ctext:ctext, deps:code.deps, cid:code.cid};
+                var acode = {ctext: ctext, deps: code.deps, cid: code.cid};
                 localStorage.setItem('acode', JSON.stringify(acode));
                 // set viewer
                 viewer.empty().iframe('/?app=viewer');
@@ -794,6 +794,7 @@
         currentCodeManager.updateCode(uptCode, function () {
             // update code block
             currentCodeBlock.syncWithEditor();
+            alert('저장되었습니다.');
         });
     };
 
@@ -917,7 +918,6 @@
         .fontColor('#1B5E20').textAlignCenter();
     var listViewer = div().appendTo(codelist).size('100%', codelist.heightPixel() - listHeader.heightPixel())
         .borderOption('1px solid gray', 'top').overflowAuto().color('white');
-    ;
     var listWrapper = div().appendTo(listViewer).width('100%');
     var moduleDescWrapper = div().prependTo(listViewer).size('100%').minHeight(100).padding(10).displayNone()
         .color(basicBlueWeak).borderBottom('1px solid ' + basicBlue).cursorPointer().click(onModuleDescWrapper);
@@ -957,5 +957,33 @@
     var moduleManager = new ModuleManager();
     projectManager.init();
     moduleManager.init();
+
+
+    /** set keydown events **/
+
+    $(window).bind('keydown', function(event) {
+        if (codeWrapper.display() !== 'none' && event.altKey) {
+
+            switch (event.which) {
+                case 70 :   // Alt + F
+                    codeEditor.aceValue.blur();
+                    onFullscreen();
+                    break;
+                case 77 :   // Alt + M
+                    codeEditor.aceValue.blur();
+                    onModule();
+                    break;
+                case 82 :   // Alt + R
+                    codeEditor.aceValue.blur();
+                    onRun();
+                    break;
+                case 83 :   // Alt + S
+                    codeEditor.aceValue.blur();
+                    onSave();
+                    break;
+            }
+        }
+    });
+
 
 })();
