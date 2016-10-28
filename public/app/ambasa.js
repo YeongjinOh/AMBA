@@ -1,4 +1,4 @@
-(function () {
+require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function () {
 
     /** colors **/
     var borderGray = '1px solid #cccccc', slideListColor = '#eeeeee', slideEditorColor = '#dddddd';
@@ -46,22 +46,23 @@
     /** Slide Manager, Slide **/
 
     var Slide = function () {
+        var that = this;
 
         // style slide block
         var blockWrapperHeight = 130, blockHeight = blockWrapperHeight*0.85, slideViewerWidth = blockHeight*w/h;
         var blockWrapper = div().appendTo(slideList).size('100%',blockWrapperHeight).paddingTop(blockWrapperHeight/10);
         var block = div().appendTo(blockWrapper);
         var numberViewer = div().appendTo(block).size(10,blockHeight).margin(5).text('1');
-        var slideViewer = div().appendTo(block).size(slideViewerWidth,blockHeight).color('white').border(borderGray);
+        var slideViewer = div().appendTo(block).size(slideViewerWidth,blockHeight).color('white').border(borderGray)
+            .overflowAuto();
 
         // working space
         var workingSpace = div().displayNone().appendTo(slideEditor).size('100%','100%').overflowAuto();
-        getSlideBackground().appendTo(workingSpace);
+        var slideBackground = getSlideBackground().appendTo(workingSpace);
 
         // ABS Objects
         var objs = {};
 
-        var that = this;
         var active = function () {
             slideViewer.border('2px solid #BF360C');
             workingSpace.displayInlineBlock();
@@ -81,10 +82,18 @@
             workingSpace.remove();
             refresh();
         };
+        this.syncBlock = function () {
+            html2canvas(workingSpace.htmlElement(), {
+                onrendered: function(canvas) {
+                    slideViewer.image(canvas.toDataURL("image/png"));
+                }
+            });
+        };
+
         // ABS Object를 추가합니다.
         this.append = function (obj) {
             obj.div().appendTo(workingSpace);
-            objs[obj.id()] = obj;
+            objs[obj.div().id()] = obj;
         };
         blockWrapper.click(function () {
             if (curSlide)
@@ -161,6 +170,11 @@
         .click(function () {
             slideManager.del();
         });
+    var saveSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).width(30).border(1).borderRadius(3).text('save')
+        .click(function () {
+            if (curSlide)
+                curSlide.syncBlock();
+        });
 
     var objMenuBar = div().appendTo(menuBar).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
@@ -198,4 +212,4 @@
     var slideManager = new SlideManager();
     var curSlide, curObj;
 
-})();
+});

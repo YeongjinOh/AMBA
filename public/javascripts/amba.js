@@ -82,6 +82,10 @@ Div.prototype.children = function () {
     return result;
 };
 
+Div.prototype.htmlElement = function () {
+    return this.$.get(0);
+};
+
 /**
  * 함수를 받아 div에 적용하고, 다시 div를 리턴합니다.
  * @author Yeongjin OH
