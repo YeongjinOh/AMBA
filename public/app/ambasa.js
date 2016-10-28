@@ -18,6 +18,22 @@
         blank.append();
     };
 
+    /** set slide background **/
+
+        // calculate sbg width and height
+    var sbgMargin = slideEditorWidth/8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
+    var sbgMaxWidth = slideEditor.widthPixel()-2*sbgMargin, sbgMaxHeight = slideEditor.heightPixel()-2*sbgMargin;
+    if (h*sbgMaxWidth < w*sbgMaxHeight)
+        ratio = sbgMaxWidth/w;
+    else
+        ratio = sbgMaxHeight/h;
+    var sbgWidth = w * ratio, sbgHeight = h*ratio;
+    var sbgMarginLeft = (slideEditorWidth-sbgWidth)/2, sbgMarginTop = (slideEditorHeight-sbgHeight)/2;
+    var getSlideBackground = function () {
+        return div().appendTo(slideEditor).size(sbgWidth,sbgHeight).marginLeft(sbgMarginLeft).marginTop(sbgMarginTop)
+            .color('white').border(borderGray).boxShadow('0px 5px 20px #888888')
+    };
+
     /** id generator **/
     var idGenerator = (function () {
         var id = 0;
@@ -30,22 +46,29 @@
     /** Slide Manager, Slide **/
 
     var Slide = function () {
-        var objs = {};
 
-    };
-
-    var SlideBlock = function () {
+        // style slide block
         var blockWrapperHeight = 130, blockHeight = blockWrapperHeight*0.85, slideViewerWidth = blockHeight*w/h;
-        var blockWrapper = div().size('100%',blockWrapperHeight).paddingTop(blockWrapperHeight/10);
+        var blockWrapper = div().appendTo(slideList).size('100%',blockWrapperHeight).paddingTop(blockWrapperHeight/10);
         var block = div().appendTo(blockWrapper);
         var numberViewer = div().appendTo(block).size(10,blockHeight).margin(5).text('1');
         var slideViewer = div().appendTo(block).size(slideViewerWidth,blockHeight).color('white').border(borderGray);
+
+        // working space
+        var workingSpace = div().displayNone().appendTo(slideEditor).size('100%','100%').overflowAuto();
+        getSlideBackground().appendTo(workingSpace);
+
+        // ABS Objects
+        var objs = {};
+
         var that = this;
         var active = function () {
             slideViewer.border('2px solid #BF360C');
+            workingSpace.displayInlineBlock();
         };
         this.deactive = function () {
             slideViewer.border(borderGray);
+            workingSpace.displayNone();
         };
         this.setIdx = function (idx) {
             numberViewer.text(idx);
@@ -53,53 +76,54 @@
         this.getIdx = function () {
             return parseInt(numberViewer.text());
         };
-        this.appendTo = function (target) {
-            blockWrapper.appendTo(target);
-            return this;
-        };
         this.remove = function () {
             blockWrapper.remove();
+            workingSpace.remove();
             refresh();
         };
+        // ABS Object를 추가합니다.
+        this.append = function (obj) {
+            obj.div().appendTo(workingSpace);
+            objs[obj.id()] = obj;
+        };
         blockWrapper.click(function () {
-            if (curSlideBlock)
-                curSlideBlock.deactive();
-            curSlideBlock = that;
+            if (curSlide)
+                curSlide.deactive();
+            curSlide = that;
             active();
         });
     };
 
 
     var SlideManager = function () {
-        var slideBlocks = [];
+        var slides = [];
 
         this.new = function () {
-            // var slide = new Slide();
-            var slideBlock = new SlideBlock();
-            slideBlock.appendTo(slideList).setIdx(slideBlocks.push(slideBlock));
+            var slide = new Slide();
+            slide.setIdx(slides.push(slide));
         };
 
-        // curSlideBlock을 지운다.
+        // curSlide을 지운다.
         this.del = function () {
-            if (curSlideBlock) {
-                var idx = curSlideBlock.getIdx()-1;
-                var slideBlock = slideBlocks.splice(idx,1)[0];
-                slideBlock.remove();
-                for (var i=idx; i<slideBlocks.length; i++) {
-                    slideBlocks[i].setIdx(i+1);
+            if (curSlide) {
+                var idx = curSlide.getIdx()-1;
+                var slide = slides.splice(idx,1)[0];
+                slide.remove();
+                for (var i=idx; i<slides.length; i++) {
+                    slides[i].setIdx(i+1);
                 }
-                curSlideBlock = undefined;
+                curSlide = undefined;
             }
         };
     };
 
-    /** Object **/
+    /** ABS Object **/
 
-    var Object = function () {
+    var ABSObject = function () {
         var that = this;
         var id = idGenerator.get()
         var obj = div().size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).cursorMove().text(id).id(id)
-                .position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10);
+            .position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10);
         obj.$.children().removeClass('ui-icon'); // remove icon
         obj.mousedown(function () {
             if (curObj)
@@ -114,6 +138,10 @@
             return obj;
         };
         return this;
+    };
+
+    var absObject = function () {
+        return new ABSObject();
     };
 
     /** menu bar **/
@@ -145,44 +173,29 @@
         }
     };
     var rect = div().deco(decoObjMenu).click(function () {
-        if (curSlideBlock) {
-            var obj = new Object();
-            obj.div().appendTo(slideEditor);
+        if (curSlide) {
+            var obj = absObject();
+            curSlide.append(obj)
         }
     });
     var rectSmooth = div().deco(decoObjMenu).borderRadius(4).click(function () {
-        if (curSlideBlock) {
-            var obj = new Object();
-            obj.div().appendTo(slideEditor).borderRadius(10);
+        if (curSlide) {
+            var obj = absObject();
+            obj.div().borderRadius(10);
+            curSlide.append(obj);
         }
     });
     var circle = div().deco(decoObjMenu).borderRadius('100%').click(function () {
-        if (curSlideBlock) {
-            var obj = new Object();
-            obj.div().appendTo(slideEditor).borderRadius('100%');
+        if (curSlide) {
+            var obj = absObject();
+            obj.div().borderRadius('100%');
+            curSlide.append(obj);
         }
     });
-
-
-    /** set slide background **/
-
-        // calculate sbg width and height
-    var sbgMargin = slideEditorWidth/8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
-    var sbgMaxWidth = slideEditor.widthPixel()-2*sbgMargin, sbgMaxHeight = slideEditor.heightPixel()-2*sbgMargin;
-    if (h*sbgMaxWidth < w*sbgMaxHeight)
-        ratio = sbgMaxWidth/w;
-    else
-        ratio = sbgMaxHeight/h;
-    var sbgWidth = w * ratio, sbgHeight = h*ratio;
-    var sbgMarginLeft = (slideEditorWidth-sbgWidth)/2, sbgMarginTop = (slideEditorHeight-sbgHeight)/2;
-    var slideBackground = div().appendTo(slideEditor).size(sbgWidth,sbgHeight).marginLeft(sbgMarginLeft).marginTop(sbgMarginTop)
-        .color('white').border(borderGray).draggable().boxShadow('0px 5px 20px #888888')
-        .resizable({aspectRatio:true});
-
 
     /** Initialize **/
 
     var slideManager = new SlideManager();
-    var curSlideBlock, curObj;
+    var curSlide, curObj;
 
 })();
