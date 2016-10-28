@@ -143,6 +143,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             if (curObj)
                 curObj.deactive();
             curObj = that;
+            curDiv = curObj.div();
             curObj.active();
         });
         this.active = function () {
@@ -168,16 +169,24 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             curObj.deactive();
         if (curSlide)
             curSlide.syncBlock();
-        if (curObj)
+        if (curObj) {
             curObj.active();
+            var params = curDiv.params();
+            params.top = curDiv.offset().top;
+            params.left = curDiv.offset().left;
+            params.width = curDiv.widthPixel();
+            params.height = curDiv.heightPixel();
+            objStateBar.text(JSON.stringify(paramsg));
+        }
     };
 
     /** menu bar **/
 
-    var fileInfoHeader = div().appendTo(menuBar).size('100%',60);
+    var leftMenuBarWrapper = div().appendTo(menuBar).size('60%','100%');
+    var fileInfoHeader = div().appendTo(leftMenuBarWrapper).size('100%',60);
     var fileName = div().appendTo(fileInfoHeader).size(200,30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
 
-    var slideMenuBar = div().appendTo(menuBar).size('20%',40);
+    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('20%',40);
     var decoSlideMenuButton = function (div) {
         div.size(25,25).marginLeft(20).cursorPointer();
     };
@@ -190,7 +199,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             slideManager.del();
         });
 
-    var objMenuBar = div().appendTo(menuBar).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
+    var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
         var wrapper = div().appendTo(objMenuBar).size(28,28).hoverColor('#eeeeee','white').cursorPointer();
         dv.appendTo(wrapper).size(15,15).border(1);
@@ -224,7 +233,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         }
     });
 
-    var styleMenuBar = div().appendTo(menuBar).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
+    var styleMenuBar = div().appendTo(leftMenuBarWrapper).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoStyleMenu = function (dv) {
         var wrapper = div().appendTo(styleMenuBar).size(28,28).hoverColor('#eeeeee','white').cursorPointer();
         dv.appendTo(wrapper).size(15,15).border(1);
@@ -238,7 +247,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B','#FFC107', '#FF9800'];
     var getColorFn = function (c) {
         return function () {
-            curObj.div().color(c);
+            curDiv.color(c);
             trigger();
         }
     };
@@ -246,12 +255,15 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         div().deco(decoStyleMenu).color(colors[i]).click(getColorFn(colors[i]));
     }
 
+    var rightMenuBarWrapper = div().appendTo(menuBar).size('35%','100%').padding(20);
+    var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%','100%').border(borderGray).borderRadius(3)
+        .overflowAuto().fontColor('gray');
+
 
     /** Initialize **/
 
     var slideManager = new SlideManager();
-    var curSlide, curObj;
-    // var curDiv;
+    var curSlide, curObj, curDiv;
 
     slideEditor.mouseup(trigger);
 });
