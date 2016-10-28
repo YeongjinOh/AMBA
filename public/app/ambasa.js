@@ -18,38 +18,14 @@
         blank.append();
     };
 
-    /** menu bar **/
-
-    var fileInfoHeader = div().appendTo(menuBar).size('100%',60);
-    var toolBar = div().appendTo(menuBar).size('100%',40);
-    var fileName = div().appendTo(fileInfoHeader).size(200,30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
-    var decoButton = function (div) {
-        div.size(25,25).marginLeft(20).cursorPointer();
-    };
-    var newSlideButton = div().appendTo(toolBar).deco(decoButton).image('../images/newslide.png').marginLeft(30)
-        .click(function () {
-            slideManager.new();
-        });
-    var delSlideButton = div().appendTo(toolBar).deco(decoButton).image('../images/delslide.png')
-        .click(function () {
-            slideManager.del();
-        });
-
-
-    /** set slide background **/
-
-    // calculate sbg width and height
-    var sbgMargin = slideEditorWidth/8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
-    var sbgMaxWidth = slideEditor.widthPixel()-2*sbgMargin, sbgMaxHeight = slideEditor.heightPixel()-2*sbgMargin;
-    if (h*sbgMaxWidth < w*sbgMaxHeight)
-        ratio = sbgMaxWidth/w;
-    else
-        ratio = sbgMaxHeight/h;
-    var sbgWidth = w * ratio, sbgHeight = h*ratio;
-    var sbgMarginLeft = (slideEditorWidth-sbgWidth)/2, sbgMarginTop = (slideEditorHeight-sbgHeight)/2;
-    var slideBackground = div().appendTo(slideEditor).size(sbgWidth,sbgHeight).marginLeft(sbgMarginLeft).marginTop(sbgMarginTop)
-        .color('white').border(borderGray).draggable().boxShadow('0px 5px 20px #888888')
-        .resizable({aspectRatio:true});
+    /** id generator **/
+    var idGenerator = (function () {
+        var id = 0;
+        this.get = function () {
+            return 'ABS-' + id++;
+        };
+        return this;
+    })();
 
     /** Slide Manager, Slide **/
 
@@ -117,9 +93,96 @@
         };
     };
 
+    /** Object **/
+
+    var Object = function () {
+        var that = this;
+        var id = idGenerator.get()
+        var obj = div().size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).cursorMove().text(id).id(id)
+                .position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10);
+        obj.$.children().removeClass('ui-icon'); // remove icon
+        obj.mousedown(function () {
+            if (curObj)
+                curObj.deactive();
+            curObj = that;
+            obj.$.children().css('border','1px dotted gray');
+        });
+        this.deactive = function () {
+            obj.$.children().css('border','none');
+        };
+        this.div = function () {
+            return obj;
+        };
+        return this;
+    };
+
+    /** menu bar **/
+
+    var fileInfoHeader = div().appendTo(menuBar).size('100%',60);
+    var fileName = div().appendTo(fileInfoHeader).size(200,30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
+
+    var slideMenuBar = div().appendTo(menuBar).size('20%',40);
+    var decoSlideMenuButton = function (div) {
+        div.size(25,25).marginLeft(20).cursorPointer();
+    };
+    var newSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/newslide.png').marginLeft(30)
+        .click(function () {
+            slideManager.new();
+        });
+    var delSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/delslide.png')
+        .click(function () {
+            slideManager.del();
+        });
+
+    var objMenuBar = div().appendTo(menuBar).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
+    var decoObjMenu = function (dv) {
+        var wrapper = div().appendTo(objMenuBar).size(28,28).hoverColor('#eeeeee','white').cursorPointer();
+        dv.appendTo(wrapper).size(15,15).border(1);
+        wrapper.alignMiddle();
+        dv.click = function (fn) {
+            wrapper.click(fn);
+            return dv;
+        }
+    };
+    var rect = div().deco(decoObjMenu).click(function () {
+        if (curSlideBlock) {
+            var obj = new Object();
+            obj.div().appendTo(slideEditor);
+        }
+    });
+    var rectSmooth = div().deco(decoObjMenu).borderRadius(4).click(function () {
+        if (curSlideBlock) {
+            var obj = new Object();
+            obj.div().appendTo(slideEditor).borderRadius(10);
+        }
+    });
+    var circle = div().deco(decoObjMenu).borderRadius('100%').click(function () {
+        if (curSlideBlock) {
+            var obj = new Object();
+            obj.div().appendTo(slideEditor).borderRadius('100%');
+        }
+    });
+
+
+    /** set slide background **/
+
+        // calculate sbg width and height
+    var sbgMargin = slideEditorWidth/8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
+    var sbgMaxWidth = slideEditor.widthPixel()-2*sbgMargin, sbgMaxHeight = slideEditor.heightPixel()-2*sbgMargin;
+    if (h*sbgMaxWidth < w*sbgMaxHeight)
+        ratio = sbgMaxWidth/w;
+    else
+        ratio = sbgMaxHeight/h;
+    var sbgWidth = w * ratio, sbgHeight = h*ratio;
+    var sbgMarginLeft = (slideEditorWidth-sbgWidth)/2, sbgMarginTop = (slideEditorHeight-sbgHeight)/2;
+    var slideBackground = div().appendTo(slideEditor).size(sbgWidth,sbgHeight).marginLeft(sbgMarginLeft).marginTop(sbgMarginTop)
+        .color('white').border(borderGray).draggable().boxShadow('0px 5px 20px #888888')
+        .resizable({aspectRatio:true});
+
+
     /** Initialize **/
 
     var slideManager = new SlideManager();
-    var curSlideBlock;
+    var curSlideBlock, curObj;
 
 })();
