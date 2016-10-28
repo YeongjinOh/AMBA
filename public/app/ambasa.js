@@ -43,7 +43,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         return this;
     })();
 
-    /** Slide Manager, Slide **/
+    /** Slide, Slide Manager **/
 
     var Slide = function () {
         var that = this;
@@ -57,15 +57,16 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             .overflowAuto();
 
         // working space
-        var workingSpace = div().displayNone().appendTo(slideEditor).size('100%','100%').overflowAuto();
+        var workingSpace = div().appendTo(slideEditor).size('100%','100%').overflowAuto();
         var slideBackground = getSlideBackground().appendTo(workingSpace);
 
         // ABS Objects
         var objs = {};
 
-        var active = function () {
+        this.active = function () {
             slideViewer.border('2px solid #BF360C');
             workingSpace.displayInlineBlock();
+            trigger();
         };
         this.deactive = function () {
             slideViewer.border(borderGray);
@@ -99,7 +100,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             if (curSlide)
                 curSlide.deactive();
             curSlide = that;
-            active();
+            that.active();
         });
     };
 
@@ -110,6 +111,10 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         this.new = function () {
             var slide = new Slide();
             slide.setIdx(slides.push(slide));
+            if (curSlide)
+                curSlide.deactive();
+            curSlide = slide;
+            curSlide.active();
         };
 
         // curSlide을 지운다.
@@ -138,8 +143,11 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             if (curObj)
                 curObj.deactive();
             curObj = that;
-            obj.$.children().css('border','1px dotted gray');
+            curObj.active();
         });
+        this.active = function () {
+            obj.$.children().css('border','1px dotted gray');
+        };
         this.deactive = function () {
             obj.$.children().css('border','none');
         };
@@ -151,6 +159,17 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
 
     var absObject = function () {
         return new ABSObject();
+    };
+
+    /** utils **/
+
+    var trigger = function () {
+        if (curObj)
+            curObj.deactive();
+        if (curSlide)
+            curSlide.syncBlock();
+        if (curObj)
+            curObj.active();
     };
 
     /** menu bar **/
@@ -170,11 +189,6 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         .click(function () {
             slideManager.del();
         });
-    var saveSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).width(30).border(1).borderRadius(3).text('save')
-        .click(function () {
-            if (curSlide)
-                curSlide.syncBlock();
-        });
 
     var objMenuBar = div().appendTo(menuBar).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
@@ -190,6 +204,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         if (curSlide) {
             var obj = absObject();
             curSlide.append(obj)
+            trigger();
         }
     });
     var rectSmooth = div().deco(decoObjMenu).borderRadius(4).click(function () {
@@ -197,6 +212,7 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             var obj = absObject();
             obj.div().borderRadius(10);
             curSlide.append(obj);
+            trigger();
         }
     });
     var circle = div().deco(decoObjMenu).borderRadius('100%').click(function () {
@@ -204,12 +220,38 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             var obj = absObject();
             obj.div().borderRadius('100%');
             curSlide.append(obj);
+            trigger();
         }
     });
+
+    var styleMenuBar = div().appendTo(menuBar).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
+    var decoStyleMenu = function (dv) {
+        var wrapper = div().appendTo(styleMenuBar).size(28,28).hoverColor('#eeeeee','white').cursorPointer();
+        dv.appendTo(wrapper).size(15,15).border(1);
+        wrapper.alignMiddle();
+        dv.click = function (fn) {
+            wrapper.click(fn);
+            return dv;
+        }
+    };
+    var colors = ['#f44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688',
+        '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B','#FFC107', '#FF9800'];
+    var getColorFn = function (c) {
+        return function () {
+            curObj.div().color(c);
+            trigger();
+        }
+    };
+    for (var i=0; i<colors.length; i++) {
+        div().deco(decoStyleMenu).color(colors[i]).click(getColorFn(colors[i]));
+    }
+
 
     /** Initialize **/
 
     var slideManager = new SlideManager();
     var curSlide, curObj;
+    // var curDiv;
 
+    slideEditor.mouseup(trigger);
 });

@@ -613,6 +613,18 @@ Div.prototype.mousedown = function (fn) {
     return this;
 };
 
+Div.prototype.mouseup = function (fn) {
+    if (fn === undefined) {
+        return this.$.mouseup();
+    }
+
+    var that = this;
+    this.$.mouseup(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
 Div.prototype.draggable = function (opt) {
     this.$.draggable(opt);
     return this;
