@@ -1,5 +1,8 @@
 define ([], function() {
     var module = {};
+
+    module.value = {};
+
     module.initContextMenu = function (callback) {
         var idContainer = {id: ''};
 
@@ -23,10 +26,17 @@ define ([], function() {
         };
 
         // context menubar 생성
-        var contextMenuBar = div().append().id('abs-context-menu').size(100, 100).zIndex(1000).position('absolute')
-            .color('#cccccc').border('1px solid gray').borderRadius(2).overflowHidden().displayNone();
+        var contextMenuBar = div().append().id('abs-context-menu').size(100, 'auto').zIndex(1000).position('absolute')
+            .color('#cccccc').border('1px solid gray').borderRadius(2).displayNone(); // overflowHidden()
         var decoMenu = function (dv) {
-            dv.size('100%', 25).padding(3).cursorPointer().hoverColor('gray', '#cccccc');
+            dv.size('100%', 25).padding(3).cursorPointer().hoverColor('gray', '#cccccc').selectable(false);
+        };
+        var decoMenuSub = function (dv) {
+            dv.size('100%', 25).text('').editable().cursorText().color('white').borderRadius(2).border('2px solid gray');
+            div().appendTo(dv).size(20, '100%').float('right').text('OK').fontBold().fontSize(10).textAlignCenter()
+                .color('#cccccc').selectable(false).cursorPointer().hoverColor('gray', '#cccccc').click(function(dv) {
+                    dv.empty();
+            });
         };
         var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('red').click(function () {
             var curDiv = $('#' + idContainer.id).data('div');
@@ -50,9 +60,19 @@ define ([], function() {
             $("#abs-context-menu").hide(100);
             callback();
         });
+        var menu5 = div().appendTo(contextMenuBar).deco(decoMenu).text('color').click(function(dv) {
+            div().id('abs-sub-menu').appendTo(contextMenuBar).deco(decoMenuSub).position('absolute');
+        });
+        var menu6 = div().appendTo(contextMenuBar).deco(decoMenu).text('editable').click(function(dv) {
+
+        });
+
 
         // 다른 곳 클릭시 context-menu hide
         $(document).bind("mousedown", function (e) {
+            // if (!$(e.target).parents('#abs-sub-menu').length > 0) {
+            //     $("#abs-sub-menu").hide(100);
+            // }
             if (!$(e.target).parents("#abs-context-menu").length > 0) {
                 $("#abs-context-menu").hide(100);
             }

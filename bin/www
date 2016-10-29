@@ -19,7 +19,7 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
- var redis = require('redis');
+ // var redis = require('redis');
 
 
 var Primus = require('primus');
@@ -34,8 +34,8 @@ primus = new Primus(server,options);
 
 //현재 연결된 소켓들
 var count = 0;
-var sub = redis.createClient();
-var pub = redis.createClient();
+// var sub = redis.createClient();
+// var pub = redis.createClient();
 
 /**
  * client가 server에 처음 접속하면 join이벤트로 채널에 가입을 하고 new이벤트로 이름을 할당받는다.

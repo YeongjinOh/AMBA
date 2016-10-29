@@ -31,15 +31,21 @@ div().appendTo(form).displayBlock().size('80%', 30).margin('auto').marginTop(30)
     });
 
 div().appendTo(form).displayBlock().size('80%', 30).margin('auto').marginTop(30).color('white')
-    .borderRadius(5).boxShadow('5px 5px 5px black').text('Editable').textAlignCenter().fontBold().fontSize(20).cursorPointer().click(function(dv) {
-    if (dv.pred === undefined)
-        dv.pred = true;
-    else
-        dv.pred = !dv.pred;
+    .borderRadius(5).boxShadow('5px 5px 5px black').text('font-weight').textAlignCenter().fontBold().fontSize(20).cursorPointer().click(function(dv) {
+        if (dv.pred === undefined)
+            dv.pred = true;
+        else
+            dv.pred = !dv.pred;
 
-    $('#' + target).editable(dv.pred);
-    values.editable = dv.pred;
-});
+
+        if (dv.pred)
+            $('#' + target).fontBold();
+        else
+            $('#' + target).fontNormal();
+
+        values.fontBold = dv.pred;
+        values.fontNormal = dv.pred;
+    });
 
 div().appendTo(form).displayBlock().size('80%', 30).margin('auto').marginTop(30).color('white')
     .borderRadius(5).boxShadow('5px 5px 5px black').text('Editable').textAlignCenter().fontBold().fontSize(20).cursorPointer().click(function(dv) {
