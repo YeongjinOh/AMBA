@@ -6,8 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var app = express();
-// var redis = require('redis');
-// var cache = redis.createClient();
+ var redis = require('redis');
+ var cache = redis.createClient();
 
 var nodeadmin = require('nodeadmin');
 
@@ -27,10 +27,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(nodeadmin(app));
 
 //라우터보다 먼저 미들웨어 등록!!
-//app.use(function (req, res, next) {
-//  req.cache = cache;
-//  next();
-//});
+app.use(function (req, res, next) {
+  req.cache = cache;
+  next();
+});
 
 
 app.use('/', require('./routes/index'));

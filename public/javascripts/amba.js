@@ -39,6 +39,11 @@ Div.prototype.class = function (value) {
     return this.attr('class', value);
 };
 
+Div.prototype.addClass = function (value) {
+    this.$.addClass(value);
+    return this;
+};
+
 Div.prototype.append = function () {
     $('body').append(this.$);
     return this;
@@ -75,6 +80,10 @@ Div.prototype.children = function () {
             result.push(arr.eq(i).data('div'));
     }
     return result;
+};
+
+Div.prototype.htmlElement = function () {
+    return this.$.get(0);
 };
 
 /**
@@ -587,6 +596,30 @@ Div.prototype.click = function (fn) {
 
     var that = this;
     this.$.click(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
+Div.prototype.mousedown = function (fn) {
+    if (fn === undefined) {
+        return this.$.mousedown();
+    }
+
+    var that = this;
+    this.$.mousedown(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
+Div.prototype.mouseup = function (fn) {
+    if (fn === undefined) {
+        return this.$.mouseup();
+    }
+
+    var that = this;
+    this.$.mouseup(function (e) {
         if (fn) fn(that, e);
     });
     return this;
@@ -1130,3 +1163,24 @@ Div.prototype.horizontalAlignMiddle = function () {
 };
 
 
+Div.prototype.alignMiddle = function () {
+    return this.verticalAlignMiddle().horizontalAlignMiddle();
+};
+
+/**
+ * @desc offset을 이용하여 left position value를 받아옵니다.
+ * @author Yeongjin Oh
+ */
+Div.prototype.leftPos = function () {
+    if (this.offset() && this.offset().left)
+        return this.offset().left;
+    else
+        return 0;
+};
+
+Div.prototype.topPos = function () {
+    if (this.offset() && this.offset().top)
+        return this.offset().top;
+    else
+        return 0;
+};
