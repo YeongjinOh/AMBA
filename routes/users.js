@@ -60,4 +60,22 @@ router.post('/regist', function(req, res, next) {
         });
 });
 
+/*사용자 목록을 리턴*/
+router.get('/', function (req, res, next) {
+    db.query("SELECT username FROM users", [])
+        .then(function (results) {
+            console.log('users : ', results);
+            res.json({
+                resultCode: 0,
+                data : results
+            });
+        })
+        .catch(function (err) {
+            res.json({
+                resultCode: -1,
+                msg: '사용자 검색에 실패했습니다.'
+            });
+        });
+});
+
 module.exports = router;
