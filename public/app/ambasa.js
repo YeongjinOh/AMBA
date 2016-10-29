@@ -1,7 +1,41 @@
-require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function () {
+require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
 
     /** colors **/
     var borderGray = '1px solid #cccccc', slideListColor = '#eeeeee', slideEditorColor = '#dddddd';
+
+    /** utils **/
+
+    var trigger = function () {
+        if (curObj)
+            curObj.deactive();
+        if (curSlide)
+            curSlide.syncBlock(function () {
+                if (curObj) {
+                    curObj.active();
+                }
+            });
+        if (curDiv) {
+            var params = curDiv.params();
+            params.top = curDiv.offset().top;
+            params.left = curDiv.offset().left;
+            params.width = curDiv.widthPixel();
+            params.height = curDiv.heightPixel();
+            objStateBar.text(JSON.stringify(params));
+        }
+    };
+
+    var getUesrname = function () {
+        var username;
+        try {
+            username = JSON.parse(localStorage.getItem('ainfo')).username;
+        } catch (e) {
+            console.log(e);
+            username = 'unknown';
+        }
+        return username;
+    };
+    var username = getUesrname();
+
 
     /** basic setting for layout **/
 
@@ -33,6 +67,11 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         return div().appendTo(slideEditor).size(sbgWidth,sbgHeight).marginLeft(sbgMarginLeft).marginTop(sbgMarginTop)
             .color('white').border(borderGray).boxShadow('0px 5px 20px #888888')
     };
+
+
+    /** set context menu **/
+    ABSdeco.initContextMenu(trigger);
+
 
     /** id generator **/
     var idGenerator = (function () {
@@ -83,10 +122,11 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
             workingSpace.remove();
             refresh();
         };
-        this.syncBlock = function () {
+        this.syncBlock = function (callback) {
             html2canvas(workingSpace.htmlElement(), {
                 onrendered: function(canvas) {
                     slideViewer.image(canvas.toDataURL("image/png"));
+                    slideViewer.$image.load(callback);
                 }
             });
         };
@@ -135,9 +175,9 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
 
     var ABSObject = function () {
         var that = this;
-        var id = idGenerator.get()
+        var id = idGenerator.get();
         var obj = div().size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).cursorMove().text(id).id(id)
-            .position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10);
+            .position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10).setContextMenu(id);
         obj.$.children().removeClass('ui-icon'); // remove icon
         obj.mousedown(function () {
             if (curObj)
@@ -162,23 +202,6 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         return new ABSObject();
     };
 
-    /** utils **/
-
-    var trigger = function () {
-        if (curObj)
-            curObj.deactive();
-        if (curSlide)
-            curSlide.syncBlock();
-        if (curObj) {
-            curObj.active();
-            var params = curDiv.params();
-            params.top = curDiv.offset().top;
-            params.left = curDiv.offset().left;
-            params.width = curDiv.widthPixel();
-            params.height = curDiv.heightPixel();
-            objStateBar.text(JSON.stringify(paramsg));
-        }
-    };
 
     /** menu bar **/
 
@@ -255,9 +278,13 @@ require (['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.
         div().deco(decoStyleMenu).color(colors[i]).click(getColorFn(colors[i]));
     }
 
-    var rightMenuBarWrapper = div().appendTo(menuBar).size('35%','100%').padding(20);
-    var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%','100%').border(borderGray).borderRadius(3)
+    var rightMenuBarWrapper = div().appendTo(menuBar).size('40%','100%').padding(10);
+    var userBar = div().appendTo(rightMenuBarWrapper).size('100%','30%').border(borderGray).borderRadius(3)
+        .text(username).fontColor('gray').textAlignRight().paddingRight(10);
+    var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%','70%').border(borderGray).borderRadius(3)
         .overflowAuto().fontColor('gray');
+
+
 
 
     /** Initialize **/
