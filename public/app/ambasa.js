@@ -70,7 +70,49 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
 
     /** set context menu **/
+
+    // for ABS Object
     ABSdeco.initContextMenu(trigger);
+
+    Div.prototype.setSlideContextMenu = function (slide) {
+        this.$.bind("contextmenu", function (event) {
+            // 기존의 context-menu 제거
+            event.preventDefault();
+            // set curSlide
+            if (curSlide)
+                curSlide.deactive();
+            curSlide = slide;
+            curSlide.active();
+            // set ambasa context-menu
+            $("#abs-slide-context-menu").finish().toggle(100).css({
+                top: event.pageY + "px",
+                left: event.pageX + "px"
+            });
+        });
+        return this;
+    };
+
+    // for slide
+    var contextMenuBar = div().append().id('abs-slide-context-menu').width(80).zIndex(1000).position('absolute')
+        .color('#cccccc').border('1px solid gray').borderRadius(2).overflowHidden().displayNone();
+    var decoMenu = function (dv) {
+        dv.size('100%', 25).padding(3).paddingLeft(10).cursorPointer().hoverColor('#999999', '#cccccc');
+    };
+    var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
+        slideManager.del();
+        $("#abs-slide-context-menu").hide(100);
+    });
+
+    // 다른 곳 클릭시 context-menu hide
+    $(document).bind("mousedown", function (e) {
+        if (!$(e.target).parents("#abs-slide-context-menu").length > 0) {
+            $("#abs-slide-context-menu").hide(100);
+        }
+        if (curObj && !e.target.id.startsWith("ABS-")) {
+            curObj.deactive();
+            curObj = undefined
+        }
+    });
 
 
     /** id generator **/
@@ -89,7 +131,8 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         // style slide block
         var blockWrapperHeight = 130, blockHeight = blockWrapperHeight*0.85, slideViewerWidth = blockHeight*w/h;
-        var blockWrapper = div().appendTo(slideList).size('100%',blockWrapperHeight).paddingTop(blockWrapperHeight/10);
+        var blockWrapper = div().appendTo(slideList).size('100%',blockWrapperHeight).paddingTop(blockWrapperHeight/10)
+            .setSlideContextMenu(this);
         var block = div().appendTo(blockWrapper);
         var numberViewer = div().appendTo(block).size(10,blockHeight).margin(5).text('1');
         var slideViewer = div().appendTo(block).size(slideViewerWidth,blockHeight).color('white').border(borderGray)
@@ -176,8 +219,9 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var ABSObject = function () {
         var that = this;
         var id = idGenerator.get();
-        var obj = div().size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).cursorMove().text(id).id(id)
-            .position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10).setContextMenu(id);
+        var obj = div().id(id).class('abs-object').size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
+            .cursorMove().text(id).position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
+            .setContextMenu(id);
         obj.$.children().removeClass('ui-icon'); // remove icon
         obj.mousedown(function () {
             if (curObj)
