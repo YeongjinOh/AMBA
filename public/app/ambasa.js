@@ -5,21 +5,37 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     /** utils **/
 
+    Div.prototype.getABSstyle = function () {
+        var params = this.params();
+        params.top = this.offset().top;
+        params.left = this.offset().left;
+        params.width = this.widthPixel();
+        params.height = this.heightPixel();
+        return params;
+    };
+
+    var getParams = function (dv) {
+        return {
+            id:dv.id(),
+            style:dv.getABSstyle(),
+            text:dv.text()
+        };
+    };
+
     var trigger = function () {
-        if (curObj)
+        if (curObj) {
             curObj.deactive();
-        if (curSlide)
+        }
+        if (curSlide) {
             curSlide.syncBlock(function () {
                 if (curObj) {
                     curObj.active();
                 }
             });
-        if (curDiv) {
-            var params = curDiv.params();
-            params.top = curDiv.offset().top;
-            params.left = curDiv.offset().left;
-            params.width = curDiv.widthPixel();
-            params.height = curDiv.heightPixel();
+        }
+        if (curDiv && curObj) {
+            var params = getParams(curDiv);
+            curObj.setParams();
             objStateBar.text(JSON.stringify(params));
         }
     };
@@ -108,9 +124,26 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         if (!$(e.target).parents("#abs-slide-context-menu").length > 0) {
             $("#abs-slide-context-menu").hide(100);
         }
-        if (curObj && !e.target.id.startsWith("ABS-")) {
+        // TODO : context-menu click해도 curObj 살아있게.
+        var targets = $(e.target).parents().andSelf();
+
+        // target이 ABSObject인지 확인
+        var checkObject = false;
+        for (var i = 0; i<targets.length; i++) {
+            if (targets[i].id.startsWith("ABS-"))
+                checkObject = true;
+        }
+        // target이 option인지 확인
+        var checkOption = false;
+        for (i = 0; i<targets.length; i++) {
+            if (targets[i].classList.contains("abs-option"))
+                checkObject = true;
+        }
+        // target이 ABSobject나 option이 아니면 비활성화.
+        if (curObj && !checkObject && !checkOption) {
             curObj.deactive();
-            curObj = undefined
+            curObj = undefined;
+            curDiv = undefined;
         }
     });
 
@@ -121,8 +154,72 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         this.get = function () {
             return 'ABS-' + id++;
         };
+        this.set = function (_id) {
+            _id = parseInt(_id.slice(4,_id.length));
+            if (id <= _id)
+                id = _id + 1;
+        };
         return this;
     })();
+
+
+    /** ABS Object **/
+
+    var ABSObject = function (params) {
+        var that = this;
+        var dv = div().class('abs-object').size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
+            .cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
+
+        dv.$.children().removeClass('ui-icon'); // remove icon
+        dv.mousedown(function () {
+            that.focus();
+        });
+
+        var id;
+        if (params) {
+            id = params.id;
+            idGenerator.set(id);
+            for (var prop in params.style) {
+                dv.css(prop,params.style[prop]);
+            }
+            dv.text(params.text);
+        } else {
+            params = {};
+            id = idGenerator.get();
+            dv.text(id);
+        }
+        dv.id(id).setContextMenu(id);
+
+        this.focus = function () {
+            if (curObj)
+                curObj.deactive();
+            curObj = that;
+            curDiv = curObj.div();
+            curObj.active();
+        };
+
+        this.active = function () {
+            dv.$.children().css('border','1px dotted gray');
+        };
+        this.deactive = function () {
+            dv.$.children().css('border','none');
+        };
+        this.div = function () {
+            return dv;
+        };
+        this.export = function () {
+            return params;
+        };
+        this.setParams = function () {
+            params = getParams(dv);
+        };
+        return this;
+    };
+
+    var absObject = function (params) {
+        return new ABSObject(params);
+    };
+
 
     /** Slide, Slide Manager **/
 
@@ -144,6 +241,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         // ABS Objects
         var objs = {};
+
+        blockWrapper.click(function () {
+            if (curSlide)
+                curSlide.deactive();
+            curSlide = that;
+            that.active();
+        });
 
         this.active = function () {
             slideViewer.border('2px solid #BF360C');
@@ -179,12 +283,23 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             obj.div().appendTo(workingSpace);
             objs[obj.div().id()] = obj;
         };
-        blockWrapper.click(function () {
-            if (curSlide)
-                curSlide.deactive();
-            curSlide = that;
-            that.active();
-        });
+
+
+        this.export = function () {
+            var params = {};
+            for (id in objs) {
+                params[id] = objs[id].export();
+            }
+            return params;
+        };
+
+        this.load = function (params) {
+            for(id in params) {
+                var obj = absObject(params[id]);
+                this.append(obj);
+                trigger();
+            }
+        };
     };
 
 
@@ -212,38 +327,31 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 curSlide = undefined;
             }
         };
-    };
 
-    /** ABS Object **/
+        this.export = function () {
+            var params = [];
+            for (var i=0; i<slides.length; i++) {
+                params.push(slides[i].export());
+            }
+            return params;
+        };
 
-    var ABSObject = function () {
-        var that = this;
-        var id = idGenerator.get();
-        var obj = div().id(id).class('abs-object').size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .cursorMove().text(id).position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
-            .setContextMenu(id);
-        obj.$.children().removeClass('ui-icon'); // remove icon
-        obj.mousedown(function () {
-            if (curObj)
-                curObj.deactive();
-            curObj = that;
-            curDiv = curObj.div();
-            curObj.active();
-        });
-        this.active = function () {
-            obj.$.children().css('border','1px dotted gray');
+        this.clear = function () {
+            for (var i=0; i<slides.length; i++) {
+                slides[i].remove();
+                curSlide = undefined;
+                curObj = undefined;
+                curDiv = undefined;
+            }
+            slides = [];
         };
-        this.deactive = function () {
-            obj.$.children().css('border','none');
+        this.load = function (params) {
+            this.clear();
+            for (var i=0; i<params.length; i++) {
+                this.new();
+                slides[i].load(params[i]);
+            }
         };
-        this.div = function () {
-            return obj;
-        };
-        return this;
-    };
-
-    var absObject = function () {
-        return new ABSObject();
     };
 
 
@@ -253,7 +361,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var fileInfoHeader = div().appendTo(leftMenuBarWrapper).size('100%',60);
     var fileName = div().appendTo(fileInfoHeader).size(200,30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
 
-    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('20%',40);
+    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('30%',40);
     var decoSlideMenuButton = function (div) {
         div.size(25,25).marginLeft(20).cursorPointer();
     };
@@ -265,10 +373,31 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         .click(function () {
             slideManager.del();
         });
+    var saveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).width(35).paddingLeft(3)
+        .text('save').fontColor('#333333').border(borderGray).borderRadius(3)
+        .click(function () {
+            var fName = prompt('파일명을 입력해주세요.');
+            fileName.text(fName);
+            localStorage.setItem('abs-params-' + fName,JSON.stringify(slideManager.export()));
+        });
+    var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).width(35).paddingLeft(3)
+        .text('load').fontColor('#333333')
+        .border(borderGray).borderRadius(3)
+        .click(function () {
+            var fName = prompt('파일명을 입력해주세요.');
+            var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+            if (params == null) {
+                alert('해당 파일을 불러올 수 없습니다.');
+            }
+            else {
+                fileName.text(fName);
+                slideManager.load(params);
+            }
+        });
 
     var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
-        var wrapper = div().appendTo(objMenuBar).size(28,28).hoverColor('#eeeeee','white').cursorPointer();
+        var wrapper = div().appendTo(objMenuBar).class("abs-option").size(28,28).hoverColor('#eeeeee','white').cursorPointer();
         dv.appendTo(wrapper).size(15,15).border(1);
         wrapper.alignMiddle();
         dv.click = function (fn) {
@@ -279,13 +408,15 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var rect = div().deco(decoObjMenu).click(function () {
         if (curSlide) {
             var obj = absObject();
-            curSlide.append(obj)
+            obj.focus();
+            curSlide.append(obj);
             trigger();
         }
     });
     var rectSmooth = div().deco(decoObjMenu).borderRadius(4).click(function () {
         if (curSlide) {
             var obj = absObject();
+            obj.focus();
             obj.div().borderRadius(10);
             curSlide.append(obj);
             trigger();
@@ -294,6 +425,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var circle = div().deco(decoObjMenu).borderRadius('100%').click(function () {
         if (curSlide) {
             var obj = absObject();
+            obj.focus();
             obj.div().borderRadius('100%');
             curSlide.append(obj);
             trigger();
@@ -302,7 +434,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var styleMenuBar = div().appendTo(leftMenuBarWrapper).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoStyleMenu = function (dv) {
-        var wrapper = div().appendTo(styleMenuBar).size(28,28).hoverColor('#eeeeee','white').cursorPointer();
+        var wrapper = div().appendTo(styleMenuBar).class('abs-option').size(28,28).hoverColor('#eeeeee','white').cursorPointer();
         dv.appendTo(wrapper).size(15,15).border(1);
         wrapper.alignMiddle();
         dv.click = function (fn) {
@@ -314,8 +446,10 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B','#FFC107', '#FF9800'];
     var getColorFn = function (c) {
         return function () {
-            curDiv.color(c);
-            trigger();
+            if (curDiv) {
+                curDiv.color(c);
+                trigger();
+            }
         }
     };
     for (var i=0; i<colors.length; i++) {
