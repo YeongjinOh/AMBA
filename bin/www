@@ -34,8 +34,8 @@ primus = new Primus(server,options);
 
 //현재 연결된 소켓들
 var count = 0;
-var sub = redis.createClient();
-var pub = redis.createClient();
+// var sub = redis.createClient();
+// var pub = redis.createClient();
 
 
 primus.on('connection',function(spark){
