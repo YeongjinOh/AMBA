@@ -28,14 +28,11 @@ var options = {
 };
 primus = new Primus(server,options);
 
-
 //클라이언트에서 primus라이브러리를 사용하기 위한 용도
 //primus.save(__dirname +'/primus.js');
 
-//현재 연결된 소켓들
-var count = 0;
-// var sub = redis.createClient();
-// var pub = redis.createClient();
+ var sub = redis.createClient();
+ var pub = redis.createClient();
 
 
 primus.on('connection',function(spark){
