@@ -44,6 +44,7 @@
             hour -= 12;
             return "오후 " + hour + ":" + min;
         }
+
     };
     //requirejs를 codelistㅔ서 run했을때 사용하게끔 depse 들을 배열로 받아서 사용할수 있어야한다
 
@@ -152,8 +153,6 @@
                 receivedMsg.appendTo(chatListView);
             }
         });
-
-
     };
 
     define([],function () {

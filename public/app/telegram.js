@@ -94,20 +94,24 @@ requirejs(['OnlineManager'], function (online) {
     var sendBtn = div().appendTo(contentBottom2).size('100%','100%').color('yellow')
         .padding(2)
         .click(function () {
-            online.sendMessage({
-                roomid : 'test',
-                username : 'lightsoo',
-                msg : inputView.text()
-            });
-            inputView.text('');
-
-            //size의 width를 100%줘서 displayBlock()이 필요없다.
-            var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
-            var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight().marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
-                .borderOption(4).borderOption('#ffff4d', 'color').borderRadius('10%').whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
-            var myTime = div().appendTo(myMsg).size('auto', '15').floatRight().text(getTime()).marginRight(5);
-            myMsg.appendTo(chatListView);
-
+            var msg = inputView.text();
+            if(msg !== '') {
+                online.sendMessage({
+                    roomid: 'test',
+                    username: 'lightsoo',
+                    msg: msg
+                });
+                //size의 width를 100%줘서 displayBlock()이 필요없다.
+                var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
+                var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
+                    .marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
+                    .borderOption(4).borderOption('#ffff4d', 'color').borderRadius('10%')
+                whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
+                var myTime = div().appendTo(myMsg).size('auto', '15').floatRight()
+                    .text(getTime()).marginRight(5);
+                myMsg.appendTo(chatListView);
+                inputView.text('');
+            }
         });
 
     online.onRecieve(function (data) {
