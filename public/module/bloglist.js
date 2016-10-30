@@ -112,7 +112,7 @@ define([],function () {
         //상세페이지
         var vParent = div().appendTo(target).size('100%','100%').displayNone()
             .position('absolute').left(0).top(0)
-            .color('##196F3D').opacity(0.9);
+            //.color('##196F3D').opacity(0.9);
 
         var vParentHeader = div().size('100%','40').appendTo(vParent).displayBlock();
         div().appendTo(vParentHeader).size('40','100%').image('../images/btn_close.png').floatRight()
@@ -139,7 +139,7 @@ define([],function () {
             .color('#EBE8E7');
 
         //스키마
-        var Post = function (value) {
+        var postItem = function (value) {
             this.aauth = value.aauth;//uid
             this.title = value.title;
             this.content = value.content;
@@ -149,7 +149,7 @@ define([],function () {
 
         var buildPost = function (obj) {
             var temp = JSON.parse(obj.value);
-            return new Post(temp);
+            return new postItem(temp);
         };
 
         var postManager = function () {
@@ -159,8 +159,8 @@ define([],function () {
               return pList.empty();
             };
 
-            this.getPost = function () {
-                return $.get("/blog",
+            this.test = function () {
+                $.get("/blog",
                     {//query
                         cid: 'kks',
                         page : page
@@ -175,25 +175,16 @@ define([],function () {
                         var cpText = 'PAGE ' + page +' OF '+maxPage;
                         console.log('current page : ' + page + ', maxPage : '+ maxPage);
 
-
+                        //view bottom설정(페이징 기능)
                         if(maxPage == 1){
                             nextPage.displayNone();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayNone();
                         }else if(page!=1&&page%maxPage!==0){
-                            //nextPage.appendTo(pBottom);
-                            //currentPage.appendTo(pBottom).text(cpText);
-                            //previousPage.appendTo(pBottom);
-
                             nextPage.displayBlock();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayBlock();
-
-
-
                         }else if(page%maxPage==0){
-                            //currentPage.appendTo(pBottom).text(cpText);
-                            //previousPage.appendTo(pBottom);
                             nextPage.displayNone();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayBlock();
@@ -201,9 +192,45 @@ define([],function () {
                             nextPage.displayBlock();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayNone();
+                        }
+                    });
+                return this;
+            };
 
-                            //nextPage.appendTo(pBottom);
-                            //currentPage.appendTo(pBottom).text(cpText);
+            this.getPost = function () {
+                return $.get("/blog",
+                    {//query
+                        cid: 'kks',
+                        page : page
+                    }, function (results) {
+                        console.log(results);
+                        posting = results.value.map(buildPost);
+                        maxPage = results.maxPage;
+                        //pList.
+                        for(var i=0;i<posting.length;i++){
+                            newPost(posting[i]);
+                        }
+
+                        var cpText = 'PAGE ' + page +' OF '+maxPage;
+                        console.log('current page : ' + page + ', maxPage : '+ maxPage);
+
+                        //view bottom설정(페이징 기능)
+                        if(maxPage == 1){
+                            nextPage.displayNone();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayNone();
+                        }else if(page!=1&&page%maxPage!==0){
+                            nextPage.displayBlock();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayBlock();
+                        }else if(page%maxPage==0){
+                            nextPage.displayNone();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayBlock();
+                        }else{
+                            nextPage.displayBlock();
+                            currentPage.text(cpText).displayBlock();
+                            previousPage.displayNone();
                         }
                     });
             };
@@ -213,7 +240,7 @@ define([],function () {
         var newPost = function (postValue) {
             var posting = div().appendTo(pList).deco(postView);
 
-            var postItem = {
+            var setPostItem = {
                 title : div().appendTo(posting).paddingLeft(10).floatLeft()
                     .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
                     .text(postValue.title).fontSize(22).fontColor('#333333').fontBold(),
@@ -238,7 +265,8 @@ define([],function () {
         };
 
         var posting = new postManager();
-        posting.getPost();
+        //posting.getPost();
+        posting.test();
         //init();
 
     };
