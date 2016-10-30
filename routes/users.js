@@ -64,7 +64,7 @@ router.post('/regist', function(req, res, next) {
 router.get('/', function (req, res, next) {
     db.query("SELECT username FROM users", [])
         .then(function (results) {
-            console.log('users : ', results);
+            //console.log('users : ', results);
             res.json({
                 resultCode: 0,
                 data : results

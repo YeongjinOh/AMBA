@@ -112,7 +112,7 @@ define([],function () {
         //상세페이지
         var vParent = div().appendTo(target).size('100%','100%').displayNone()
             .position('absolute').left(0).top(0)
-            .color('##196F3D').opacity(0.9);
+            //.color('##196F3D').opacity(0.9);
 
         var vParentHeader = div().size('100%','40').appendTo(vParent).displayBlock();
         div().appendTo(vParentHeader).size('40','100%').image('../images/btn_close.png').floatRight()
