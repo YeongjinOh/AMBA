@@ -11,7 +11,8 @@ div().appendTo(root).size('auto', 'auto').text('Upload File').fontSize(25).disab
     }).action();
 });
 
-div().appendTo(root).size('auto', 'auto').text('Load File').fontSize(25).disableSelection().button().fileSelectable(function(dv, file) {
+div().appendTo(root).size('auto', 'auto').text('Load File').fontSize(25)
+    .disableSelection().button().fileSelectable(function(dv, file) {
     files.push(file);
 });
 
