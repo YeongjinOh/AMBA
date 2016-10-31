@@ -34,7 +34,7 @@ define ([], function() {
         function paperNum (seq, target, fn) {
             if ($(document).find('.third')[0])
                 absRemove($(document).find('.third')[0].id);
-            if (target.children()[0]) {
+            if ($(document).find('#abs-papernum')[0]) {
                 absRemove('abs-papernum');
                 return false;
             }
@@ -52,9 +52,9 @@ define ([], function() {
             var value = div().appendTo(root).size('65%', '100%').color('white').text('').editable().cursorText();
             div().id('papernum-ok').appendTo(root).size('35%', '100%').color('#cccccc').text('OK').fontBold().fontSize(11)
                 .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
-                var edge = parseInt(value.text()) || undefined;
-                if (edge) {
-                    fn(edge);
+                var v = parseInt(value.text()) || undefined;
+                if (v) {
+                    fn(v);
                 }
 
                 absRemove('abs-papernum');
@@ -66,8 +66,8 @@ define ([], function() {
         function paperText (seq, target, fn) {
             if ($(document).find('.third')[0])
                 absRemove($(document).find('.third')[0].id);
-            if (target.children()[0]) {
-                absRemove('abs-papetext');
+            if ($(document).find('#abs-papertext')[0]) {
+                absRemove('abs-papertext');
                 return false;
             }
 
@@ -90,6 +90,28 @@ define ([], function() {
         function board (seq, target, list, fn) {
             if ($(document).find('.third')[0])
                 absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#abs-board')[0]) {
+                absRemove('abs-board');
+                return false;
+            }
+
+            var root = div().class('third').id('abs-board').appendTo(target).position('absolute').size(100, 'auto').top(seq * 25).left(100)
+                .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+            for(i=0; i<list.length; i++) {
+                var cell = div().appendTo(root).size('100%', 50).color('white').hoverColor('#cccccc', 'white').click(function (dv) {
+                    fn(dv.children()[0].borderStyle());
+                });
+                div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderStyle(list[i]);
+            }
+        }
+
+        function semi_board (seq, target, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
             if (target.children()[0]) {
                 absRemove('abs-board');
                 return false;
@@ -105,14 +127,14 @@ define ([], function() {
                 var cell = div().appendTo(root).size('100%', 50).color('white').hoverColor('#cccccc', 'white').click(function (dv) {
                     fn(dv.children()[0].borderStyle());
                 });
-                div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderWidth(1).borderStyle(list[i]);
+                div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderStyle(list[i]);
             }
         }
 
         function pallet (seq, target, fn) {
             if ($(document).find('.third')[0])
                 absRemove($(document).find('.third')[0].id);
-            if (target.children()[0]) {
+            if ($(document).find('#pallet')[0]) {
                 absRemove('pallet');
                 return false;
             }
@@ -215,7 +237,7 @@ define ([], function() {
                 for(i=0; i<font_weight.length; i++) {
                     div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontWeight(font_weight[i]).hoverColor('#cccccc', 'white').click(function (dv) {
                         var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.fontWeight(font_weight[i]);
+                        curDiv.fontWeight(dv.fontWeight());
                     });
                 }
 
@@ -235,7 +257,7 @@ define ([], function() {
 
                 var font_family = ['normal', 'serif', 'sans-serif', 'Arial', 'Charcoal', 'Impact'];
 
-                var root = div().class('third').id('abs-fontfamily').appendTo(dv).position('absolute').size(100, 'auto').top(50).left(100)
+                var root = div().class('third').id('abs-fontfamily').appendTo(dv).position('absolute').size(100, 'auto').top(75).left(100)
                     .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
                         e.stopPropagation();
                         e.preventDefault();
@@ -277,11 +299,25 @@ define ([], function() {
             var bgMenuBar = div().appendTo(dv).class('second').id('abs-bg-menu').size(100, 'auto').zIndex(1000).position('absolute')
                 .top(25).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
 
+            div().appendTo(bgMenuBar).deco(decoMenu).text('box').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperNum(0, dv, function(v) {
+                    pallet(0, dv, function(c) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.boxShadow(v+'px '+ v +'px '+ v + 'px '+ c);
+                    });
+                });
+
+                callback();
+            });
+
             div().appendTo(bgMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
 
-                pallet(0, dv, function(c) {
+                pallet(1, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.color(c);
                 });
