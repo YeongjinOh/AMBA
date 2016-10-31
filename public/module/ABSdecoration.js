@@ -16,7 +16,6 @@ define ([], function() {
 
                 // 현재 div의 id 전달
                 idContainer.id = id;
-                console.log(id);
                 // set ambasa context-menu
                 $("#abs-context-menu").finish().toggle(100).css({
                     top: event.pageY + "px",
@@ -198,9 +197,8 @@ define ([], function() {
                 paperText(0, dv, function(txt) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.text(txt);
+                    callback();
                 });
-
-                callback();
             });
 
             div().appendTo(fontMenuBar).deco(decoMenu).text('size').click(function(dv, e) {
@@ -210,9 +208,8 @@ define ([], function() {
                 paperNum(1, dv, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.fontSize(v);
+                    callback();
                 });
-
-                callback();
             });
 
             div().appendTo(fontMenuBar).deco(decoMenu).text('weight').click(function(dv, e) {
@@ -238,10 +235,9 @@ define ([], function() {
                     div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontWeight(font_weight[i]).hoverColor('#cccccc', 'white').click(function (dv) {
                         var curDiv = $('#' + idContainer.id).data('div');
                         curDiv.fontWeight(dv.fontWeight());
+                        callback();
                     });
                 }
-
-                callback();
             });
 
             div().appendTo(fontMenuBar).deco(decoMenu).text('family').click(function(dv, e) {
@@ -267,10 +263,9 @@ define ([], function() {
                     div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontFamily(font_family[i]).hoverColor('#cccccc', 'white').click(function (dv) {
                         var curDiv = $('#' + idContainer.id).data('div');
                         curDiv.fontFamily(dv.fontFamily());
+                        callback();
                     });
                 }
-
-                callback();
             });
 
             div().appendTo(fontMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
@@ -280,12 +275,9 @@ define ([], function() {
                 pallet(4, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.fontColor(c);
+                    callback();
                 });
-
-                callback();
             });
-
-            callback();
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('background').click(function(dv) {
@@ -307,10 +299,9 @@ define ([], function() {
                     pallet(0, dv, function(c) {
                         var curDiv = $('#' + idContainer.id).data('div');
                         curDiv.boxShadow(v+'px '+ v +'px '+ v + 'px '+ c);
+                        callback();
                     });
                 });
-
-                callback();
             });
 
             div().appendTo(bgMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
@@ -320,9 +311,8 @@ define ([], function() {
                 pallet(1, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.color(c);
+                    callback();
                 });
-
-                callback();
             });
         });
 
@@ -344,9 +334,8 @@ define ([], function() {
                 paperNum(0, dv, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderWidth(v);
+                    callback();
                 });
-
-                callback();
             });
 
             div().appendTo(edgeMenuBar).deco(decoMenu).text('style').click(function(dv, e) {
@@ -358,9 +347,8 @@ define ([], function() {
                 board(1, dv, edge_style, function(s) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderStyle(s);
+                    callback();
                 });
-
-                callback();
             });
 
             div().appendTo(edgeMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
@@ -370,12 +358,9 @@ define ([], function() {
                 pallet(2, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderColor(c);
+                    callback();
                 });
-
-                callback();
             });
-
-            callback();
         });
 
         // 다른 곳 클릭시 context-menu hide

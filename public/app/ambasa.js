@@ -22,9 +22,16 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
     };
 
+    var checkTextProp = function (prop) {
+        return prop.startsWith('font') || (prop.startsWith('text-') && !prop.startsWith('text-align'))
+            || prop === 'color';
+    };
     var styleParams = function (dv, params) {
         for (var prop in params.style) {
-            dv.css(prop,params.style[prop]);
+            if (checkTextProp(prop))
+                dv.cssText(prop, params.style[prop]);
+            else
+                dv.css(prop,params.style[prop]);
         }
         dv.text(params.text);
     };
@@ -50,6 +57,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             var prevParams = curObj.getParams();
             curSlide.addUndo(prevParams);
             curObj.setParams();
+            objStateBar.text(JSON.stringify(curObj.getParams()));
         }
     };
 
@@ -149,7 +157,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         // target이 option인지 확인
         var checkOption = false;
         for (i = 0; i<targets.length; i++) {
-            if (targets[i].classList.contains("abs-option"))
+            if (targets[i].classList.contains("abs-option") || targets[i].id == 'abs-context-menu')
                 checkObject = true;
         }
         // target이 ABSobject나 option이 아니면 비활성화.
@@ -180,12 +188,14 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var ABSObject = function (params) {
         var that = this;
-        var dv = div().class('abs-object').size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
+        var dv = div().class('abs-object').size(100,100).border('1px solid black').draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
             .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
+            // default setting for undoing
+            .fontWeight('normal').fontColor('black').fontFamily('initial').boxShadow('none');
 
         dv.$.children().removeClass('ui-icon'); // remove icon
-        dv.mousedown(function(){
-            that.focus()
+        dv.mousedown(function(e){
+            that.focus();
         }).mouseup(trigger);
 
         var id;
