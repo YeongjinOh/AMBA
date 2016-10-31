@@ -3,7 +3,6 @@
  */
 requirejs(['OnlineManager'], function (online) {
 
-
     var addZeroIfNeeded = function (num) {
         num = parseInt(num);
         return num < 10 ? '0' + num : num;
@@ -28,10 +27,10 @@ requirejs(['OnlineManager'], function (online) {
         var hour = date.getHours();
         var min = addZeroIfNeeded(date.getMinutes());
         if (hour < 13) {
-            return "오전 " + hour + ":" + min;
+            return hour + ":" + min + "am";
         } else {
             hour -= 12;
-            return "오후 " + hour + ":" + min;
+            return hour + ":" + min + "pm";
         }
     };
 
@@ -39,48 +38,45 @@ requirejs(['OnlineManager'], function (online) {
     online.join('test');
     //online.close();
 
-    var parent = div().append().size('810', '550')
-        //.borderOption(1).borderOption('#EBE8E7', 'color');
+    var parent = div().append().size('810', '550');
 
-    //var teleHeader = div().appendTo(parent).size('auto','40').color('green').displayBlock();
-    //var headerTitle = div().appendTo(teleHeader).size('auto',40)
-    //    .borderRight('solid 2px').borderRightColor('#EBE8E7')
-    //    .paddingLeft(2).paddingRight(2)
-    //    .text('AMBATA').fontColor('white').fontSize(26);
-    //var headerFreinds = div().appendTo(teleHeader).size('auto',40)
-    //    .borderRight('solid 2px').borderRightColor('#EBE8E7')
-    //    .paddingLeft(2).paddingRight(2)
-    //    .text('친구목록').fontColor('white').fontSize(26);
-    //var headerRooms = div().appendTo(teleHeader).size('auto',40)
-    //    .borderRight('solid 2px').borderRightColor('#EBE8E7')
-    //    .paddingLeft(2).paddingRight(2)
-    //    .text('채팅방 목록').fontColor('white').fontSize(26);
-
-
-
-    //방목록 or 친구목록을 보여준다.
     var sideView = div().appendTo(parent).size(300,550);
 
-    var listView = div().appendTo(sideView).size(300, 480).overflow('scroll')
+    var listView = div().appendTo(sideView).size(300, 480)//.overflow('scroll')
         .borderOption(1).borderOption('#EBE8E7', 'color').displayBlock();
+
+    var freindList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayBlock();
+    var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
+
 
     var sideBottom =div().appendTo(sideView).size(300,70).color('#EBE8E7')
         .margin('auto');
 
     var sideFreinds = div().appendTo(sideBottom).size(150,70).image('../images/profile.png')
         .borderRight('solid 2px').borderRightColor('#EBE8E7')
-        .paddingLeft(2).paddingRight(2);
+        .paddingLeft(2).paddingRight(2).cursorPointer()
+        .hoverColor('grey','transparent')
+        .click(function () {
+            freindList.displayBlock();
+            roomList.displayNone();
+        });
 
     var sideRooms = div().appendTo(sideBottom).size(150,70).image('../images/chat.png')
         .borderRight('solid 2px').borderRightColor('#EBE8E7')
-        .paddingLeft(2).paddingRight(2);
-
-    //채팅 내용
+        .paddingLeft(2).paddingRight(2)
+        .hoverColor('grey','transparent').cursorPointer()
+        .click(function () {
+            roomList.displayBlock();
+            freindList.displayNone();
+        });
+    //?? ??
     var contentView = div().appendTo(parent).size(508,550);
     var chatListView = div().appendTo(contentView).size(504,480).overflow('scroll')
         .padding(3)
         .borderOption(1).borderOption('#EBE8E7', 'color')
-        .color('blue');
+        .color('white')
+    //.color('#90CAF9')
+    //.color('blue');
 
     var contentBottom1 = div().appendTo(contentView).size(434,70).color('#EBE8E7')
         .borderLeft('solid 2px').borderLeftColor('black')
@@ -98,15 +94,18 @@ requirejs(['OnlineManager'], function (online) {
             if(msg !== '') {
                 online.sendMessage({
                     roomid: 'test',
-                    username: 'lightsoo',
+                    username: ainfo.username,
                     msg: msg
                 });
-                //size의 width를 100%줘서 displayBlock()이 필요없다.
+                //size? width? 100%?? displayBlock()? ????.
                 var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
                 var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
-                    .marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
-                    .borderOption(4).borderOption('#ffff4d', 'color').borderRadius('10%')
-                whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
+                    // .marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
+                    // .borderOption(4).borderOption('#ffff4d', 'color').borderRadius('10%')
+                    .marginRight(10).color('white').fontSize(25).maxWidth(300)
+                    .borderOption(4).borderOption('#EBE8E7', 'color').borderRadius('10%')
+
+                    .whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
                 var myTime = div().appendTo(myMsg).size('auto', '15').floatRight()
                     .text(getTime()).marginRight(5);
                 myMsg.appendTo(chatListView);
@@ -117,7 +116,7 @@ requirejs(['OnlineManager'], function (online) {
     online.onRecieve(function (data) {
         var action = data.action;
         var message = data.message;
-        //처음 접속했을때, 이름을 할당받는다.
+        //?? ?????, ??? ?????.
         if ('new' === action) {
             console.log(message.msg);
         }
@@ -126,27 +125,25 @@ requirejs(['OnlineManager'], function (online) {
             console.log(message);
             var username = message.username;
             var msg = message.msg;
-            //size의 width를 100%줘서 displayBlock()이 필요없다.
+            //size? width? 100%?? displayBlock()? ????.
             var receivedMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
-            //parent의 height를 'auto'로 설정했을때 min값을 설정해서 profile이 출력되게 하였다
-            var profile = div().appendTo(receivedMsg).size('60', '60').color('blue').borderRadius('50%').floatLeft();
+
+            var profile = div().appendTo(receivedMsg).size('68', '68').color('blue').borderRadius('50%').floatLeft();
             var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
 
-            //tesxtAlign을 통해서 문자 왼쪽 정렬
+            //tesxtAlign? ??? ?? ?? ??
             var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
                 .fontSize(20).textAlign('left');
             var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(msg).maxWidth(300)
-                .borderOption(4).borderOption('white', 'color').borderRadius('10%')
+                // .borderOption(4).borderOption('white', 'color').borderRadius('10%')
+                .borderOption(4).borderOption('#EBE8E7', 'color').borderRadius('10%')
+
                 .whiteSpace('pre-line').fontSize(25).textAlign('left').floatLeft().wordBreak('break-all');
 
             var recievdTime = div().appendTo(receivedMsg).size('auto', '15').floatLeft().text(getTime()).marginLeft(5);
             receivedMsg.appendTo(chatListView);
         }
     });
-
-
-
-
 
     //for listView
     //using div.deco()
@@ -156,7 +153,7 @@ requirejs(['OnlineManager'], function (online) {
     };
 
     var setFriend = function (friendData) {
-        var friend = div().appendTo(listView).deco(friendView);
+        var friend = div().appendTo(freindList).deco(friendView);
         var profileWrapper = div().appendTo(friend).size(50, 50).padding(3);
         var profile = div().appendTo(profileWrapper).size('100%','100%').color('green');
         var name = div().appendTo(friend)
@@ -171,9 +168,9 @@ requirejs(['OnlineManager'], function (online) {
 
     //data
     var friendData = function (obj) {
-       return {
+        return {
             username : obj.username
-       }
+        }
     };
 
     var NetworkManager = function () {
@@ -186,7 +183,7 @@ requirejs(['OnlineManager'], function (online) {
                     for(var i=0;i<friends.length;i++){
                         setFriend(friends[i]);
                     }
-            });
+                });
             return this;
         };
         this.getRooms = function () {
@@ -204,5 +201,6 @@ requirejs(['OnlineManager'], function (online) {
 
     var networkManager = new NetworkManager();
     networkManager.getFreinds();
+
 
 });
