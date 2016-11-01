@@ -51,7 +51,7 @@ define ([], function() {
             var value = div().appendTo(root).size('65%', '100%').color('white').text('').editable().cursorText();
             div().id('papernum-ok').appendTo(root).size('35%', '100%').color('#cccccc').text('OK').fontBold().fontSize(11)
                 .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
-                var v = parseInt(value.text()) || undefined;
+                var v = parseFloat(value.text()) || undefined;
                 if (v) {
                     fn(v);
                 }
@@ -90,28 +90,6 @@ define ([], function() {
             if ($(document).find('.third')[0])
                 absRemove($(document).find('.third')[0].id);
             if ($(document).find('#abs-board')[0]) {
-                absRemove('abs-board');
-                return false;
-            }
-
-            var root = div().class('third').id('abs-board').appendTo(target).position('absolute').size(100, 'auto').top(seq * 25).left(100)
-                .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                });
-
-            for(i=0; i<list.length; i++) {
-                var cell = div().appendTo(root).size('100%', 50).color('white').hoverColor('#cccccc', 'white').click(function (dv) {
-                    fn(dv.children()[0].borderStyle());
-                });
-                div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderStyle(list[i]);
-            }
-        }
-
-        function semi_board (seq, target, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if (target.children()[0]) {
                 absRemove('abs-board');
                 return false;
             }
@@ -212,6 +190,7 @@ define ([], function() {
                 });
             });
 
+            /* need refactoring */
             div().appendTo(fontMenuBar).deco(decoMenu).text('weight').click(function(dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -351,11 +330,22 @@ define ([], function() {
                 });
             });
 
+            div().appendTo(edgeMenuBar).deco(decoMenu).text('radius').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperNum(2, dv, function(v) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.borderRadius(v);
+                    callback();
+                });
+            });
+
             div().appendTo(edgeMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
 
-                pallet(2, dv, function(c) {
+                pallet(3, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderColor(c);
                     callback();
