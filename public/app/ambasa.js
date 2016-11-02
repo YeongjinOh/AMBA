@@ -212,7 +212,8 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
             .borderWidth('1px').borderStyle('solid').borderColor('black');
 
-        dv.$.children().removeClass('ui-icon'); // remove icon
+        // remove icon and resize ui-resizable-se
+        $(dv.$.children().removeClass('ui-icon')[5]).css('width','9px').css('height','9px').css('right','-5px').css('bottom','-5px');
         dv.mousedown(function(e){
             that.focus();
         }).mouseup(trigger);
@@ -224,7 +225,6 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             redoStyle(dv, params);
         } else {
             id = idGenerator.get();
-            dv.text(id);
             params = {id:id,style:{'display':'none'}};
         }
         dv.id(id).setContextMenu(id);
@@ -238,12 +238,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
 
         this.active = function () {
-            dv.$.children().css('border','1px dotted gray');
+            dv.$.children('.ui-resizable-handle:lt(4)').css('border','1px dotted gray');
+            dv.$.children('.ui-resizable-handle:gt(3)').css('border','1px solid black').css('background-color','white');
             objStatus.text('id : ' + id);
         };
 
         this.deactive = function () {
-            dv.$.children().css('border','none');
+            dv.$.children().css('border','none').css('background-color','initial');
             objStatus.text('');
         };
 
