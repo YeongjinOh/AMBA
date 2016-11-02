@@ -136,9 +136,15 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             key:fName,
             value:JSON.stringify(slideManager.export())
         };
-        $.get("http://220.149.236.19:3000/hashstore/put", param)
+        $.get("/hashstore/put", param)
             .done(function (data) {
-                console.log(data);
+                if (data.resultCode == 0) {
+                    alert('저장하였습니다.');
+                }
+                else {
+                    console.log(data.msg);
+                    alert('실패하였습니다.');
+                }
             });
     };
 
@@ -146,14 +152,24 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         var fName = prompt('파일명을 입력해주세요.');
         if (fName == null)
             return;
-        var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-        if (params == null) {
-            alert('해당 파일을 불러올 수 없습니다.');
-        }
-        else {
-            fileName.text(fName);
-            slideManager.load(params);
-        }
+
+        var param = {
+            cid:'ambasa',
+            token:token,
+            key:fName,
+        };
+        // var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+        $.get("/hashstore/get", param)
+            .done(function (data) {
+                if (data.info.length > 0) {
+                    var params = JSON.parse(data.info[0].value);
+                    fileName.text(fName);
+                    slideManager.load(params);
+                } else {
+                        alert('해당 파일을 불러올 수 없습니다.');
+                }
+                console.log(data);
+            });
     };
 
     var onDelete = function () {
