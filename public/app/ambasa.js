@@ -1,4 +1,4 @@
-require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
+require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
 
     /** colors **/
     var borderGray = '1px solid #cccccc', borderGrayStrong = '1px solid #999999',
@@ -7,7 +7,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     /** utils **/
 
     Div.prototype.getABSstyle = function () {
-        var params = $.extend({},this.params());
+        var params = $.extend({}, this.params());
         params.top = this.offset().top;
         params.left = this.offset().left;
         params.width = this.widthPixel();
@@ -17,9 +17,9 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var getParams = function (dv) {
         return {
-            id:dv.id(),
-            style:dv.getABSstyle(),
-            text:dv.text()
+            id: dv.id(),
+            style: dv.getABSstyle(),
+            text: dv.text()
         };
     };
 
@@ -34,7 +34,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 if (checkTextProp(prop))
                     dv.cssText(prop, params.style[prop]);
                 else
-                    dv.css(prop,params.style[prop]);
+                    dv.css(prop, params.style[prop]);
             } else {
                 if (checkTextProp(prop))
                     dv.cssText(prop, 'initial');
@@ -49,7 +49,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             if (checkTextProp(prop))
                 dv.cssText(prop, params.style[prop]);
             else
-                dv.css(prop,params.style[prop]);
+                dv.css(prop, params.style[prop]);
         }
         dv.text(params.text);
     };
@@ -92,19 +92,32 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var username = getUesrname();
 
 
+    /** events **/
+
+    var onZoom = function () {
+        if (!isFullscreen) {
+            if (curSlide) {
+                curSlide.full();
+                isFullscreen = true;
+            }
+        } else {
+            console.log(isFullscreen)
+        }
+    };
+
     /** basic setting for layout **/
 
-    // var w = window.outerWidth, h = window.outerHeight;
+        // var w = window.outerWidth, h = window.outerHeight;
     var w = 1280, h = 800;
     var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
-        slideListWidth = 220, slideListHeight = h-menuBarHeight-statusBarHeight,
-        slideEditorWidth = w-slideListWidth, slideEditorHeight = slideListHeight;
-    var parent = div().append().size(w,h);
+        slideListWidth = 220, slideListHeight = h - menuBarHeight - statusBarHeight,
+        slideEditorWidth = w - slideListWidth, slideEditorHeight = slideListHeight;
+    var parent = div().append().size(w, h);
     var menuBar = div().appendTo(parent).size(menuBarWidth, menuBarHeight).borderBottom(borderGray);
     var slideList = div().appendTo(parent).size(slideListWidth, slideListHeight).borderRight(borderGray).color(slideListColor).overflowAuto();
     var slideEditor = div().appendTo(parent).size(slideEditorWidth, slideEditorHeight).color(slideEditorColor).overflowAuto();
-    var statusBar = div().appendTo(parent).size(statusBarWidth,statusBarHeight).color(statusBarColor).borderTop(borderGrayStrong).padding(5);
-    var blank = div();
+    var statusBar = div().appendTo(parent).size(statusBarWidth, statusBarHeight).color(statusBarColor).borderTop(borderGrayStrong).padding(4);
+    var blank = div().displayNone();
     var refresh = function () {
         blank.append();
     };
@@ -112,19 +125,32 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     /** set slide background **/
 
         // calculate sbg width and height
-    var sbgMargin = slideEditorWidth/8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
-    var sbgMaxWidth = slideEditor.widthPixel()-2*sbgMargin, sbgMaxHeight = slideEditor.heightPixel()-2*sbgMargin;
-    if (h*sbgMaxWidth < w*sbgMaxHeight)
-        ratio = sbgMaxWidth/w;
+    var sbgMargin = slideEditorWidth / 8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
+    var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
+    if (h * sbgMaxWidth < w * sbgMaxHeight)
+        ratio = w / sbgMaxWidth;
     else
-        ratio = sbgMaxHeight/h;
-    var sbgWidth = w * ratio, sbgHeight = h*ratio;
-    var sbgMarginLeft = (slideEditorWidth-sbgWidth)/2, sbgMarginTop = (slideEditorHeight-sbgHeight)/2;
+        ratio = h / sbgMaxHeight;
+    var sbgWidth = w / ratio, sbgHeight = h / ratio;
+    var sbgMarginLeft = (slideEditorWidth - sbgWidth) / 2, sbgMarginTop = (slideEditorHeight - sbgHeight) / 2;
     var getSlideBackground = function () {
-        return div().appendTo(slideEditor).size(sbgWidth,sbgHeight).marginLeft(sbgMarginLeft).marginTop(sbgMarginTop)
+        return div().appendTo(slideEditor).size(sbgWidth, sbgHeight).position('absolute')
             .color('white').border(borderGray).boxShadow('0px 5px 20px #888888')
     };
+    slideEditor.paddingLeft(sbgMarginLeft).paddingTop(sbgMarginTop);
 
+    /** set fullscreen viewer **/
+
+    var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
+    var fullscreenViewer = div().append().size(ww,wh).displayNone().color('black');
+    if (wh * sbgWidth > ww * sbgHeight) {
+        zoomRatio = ww / sbgWidth;
+        fullscreenViewer.paddingTop((wh-sbgHeight*zoomRatio)/2);
+    }
+    else {
+        zoomRatio = wh / sbgHeight;
+        fullscreenViewer.paddingLeft((ww-sbgWidth*zoomRatio)/2);
+    }
 
     /** set context menu **/
 
@@ -157,7 +183,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     };
     var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
         slideManager.del();
-        $("#abs-slide-contextㅎ-menu").hide(100);
+        $("#abs-slide-context-menu").hide(100);
     });
 
     // 다른 곳 클릭시 context-menu hide
@@ -170,13 +196,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         // target이 ABSObject인지 확인
         var checkObject = false;
-        for (var i = 0; i<targets.length; i++) {
+        for (var i = 0; i < targets.length; i++) {
             if (targets[i].id.startsWith("ABS-"))
                 checkObject = true;
         }
         // target이 option인지 확인
         var checkOption = false;
-        for (i = 0; i<targets.length; i++) {
+        for (i = 0; i < targets.length; i++) {
             if (targets[i].classList.contains("abs-option") || targets[i].id == 'abs-context-menu')
                 checkObject = true;
         }
@@ -196,7 +222,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             return 'ABS-' + id++;
         };
         this.set = function (_id) {
-            _id = parseInt(_id.slice(4,_id.length));
+            _id = parseInt(_id.slice(4, _id.length));
             if (id <= _id)
                 id = _id + 1;
         };
@@ -208,13 +234,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var ABSObject = function (params) {
         var that = this;
-        var dv = div().class('abs-object').size(100,100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
+        var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
+            .color('initial').cursorMove().position('relative').left(-sbgMarginLeft+10).top(-sbgMarginTop+10)
             .borderWidth('1px').borderStyle('solid').borderColor('black');
 
         // remove icon and resize ui-resizable-se
-        $(dv.$.children().removeClass('ui-icon')[5]).css('width','9px').css('height','9px').css('right','-5px').css('bottom','-5px');
-        dv.mousedown(function(e){
+        $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
+        dv.mousedown(function (e) {
             that.focus();
         }).mouseup(trigger);
 
@@ -225,7 +251,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             redoStyle(dv, params);
         } else {
             id = idGenerator.get();
-            params = {id:id,style:{'display':'none'}};
+            params = {id: id, style: {'display': 'none'}};
         }
         dv.id(id).setContextMenu(id);
 
@@ -238,13 +264,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
 
         this.active = function () {
-            dv.$.children('.ui-resizable-handle:lt(4)').css('border','1px dotted gray');
-            dv.$.children('.ui-resizable-handle:gt(3)').css('border','1px solid black').css('background-color','white');
+            dv.$.children('.ui-resizable-handle:lt(4)').css('border', '1px dotted gray');
+            dv.$.children('.ui-resizable-handle:gt(3)').css('border', '1px solid black').css('background-color', 'white');
             objStatus.text('id : ' + id);
         };
 
         this.deactive = function () {
-            dv.$.children().css('border','none').css('background-color','initial');
+            dv.$.children().css('border', 'none').css('background-color', 'initial');
             objStatus.text('');
         };
 
@@ -276,20 +302,18 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var Slide = function () {
         var that = this;
-        var undolist = [], redolist =[];
+        var undolist = [], redolist = [];
 
         // style slide block
-        var blockWrapperHeight = 130, blockHeight = blockWrapperHeight*0.85, slideViewerWidth = blockHeight*w/h;
-        var blockWrapper = div().appendTo(slideList).size('100%',blockWrapperHeight).paddingTop(blockWrapperHeight/10)
+        var blockWrapperHeight = 130, blockHeight = blockWrapperHeight * 0.85, slideViewerWidth = blockHeight * w / h;
+        var blockWrapper = div().appendTo(slideList).size('100%', blockWrapperHeight).paddingTop(blockWrapperHeight / 10)
             .setSlideContextMenu(this);
         var block = div().appendTo(blockWrapper);
-        var numberViewer = div().appendTo(block).size(10,blockHeight).margin(5).text('1');
-        var slideViewer = div().appendTo(block).size(slideViewerWidth,blockHeight).color('white').border(borderGray)
-            .overflowAuto();
+        var numberViewer = div().appendTo(block).size(10, blockHeight).margin(5).text('1');
+        var slideViewerWrapper = div().size(slideViewerWidth+4, blockHeight+4).appendTo(block);
+        var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
 
-        // working space
-        var workingSpace = div().appendTo(slideEditor).size('100%','100%').overflowAuto();
-        var slideBackground = getSlideBackground().appendTo(workingSpace);
+        var slideBackground = getSlideBackground().appendTo(slideEditor);
 
         // ABS Objects
         var objs = {};
@@ -310,14 +334,29 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
 
         this.active = function () {
-            slideViewer.border('2px solid #BF360C');
-            workingSpace.displayInlineBlock();
+            slideViewerWrapper.border('2px solid #BF360C').padding(0);
+            slideBackground.displayInlineBlock();
             pageCur.text(numberViewer.text());
+            curBackground = slideBackground;
         };
 
         this.deactive = function () {
-            slideViewer.border(borderGray);
-            workingSpace.displayNone();
+            slideViewerWrapper.border(borderGray).padding(1);
+            slideBackground.displayNone();
+        };
+
+        this.full = function () {
+            parent.displayNone();
+            fullscreenViewer.displayInlineBlock();
+            curBackground.appendTo(fullscreenViewer).overflowHidden();
+            curBackground.css('zoom', (100*zoomRatio)+'%');
+        };
+
+        this.unfull = function () {
+            parent.displayInlineBlock();
+            fullscreenViewer.displayNone();
+            curBackground.appendTo(slideEditor).overflow('initial');
+            curBackground.css('zoom', 'initial');
         };
 
         this.setIdx = function (idx) {
@@ -330,13 +369,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         this.remove = function () {
             blockWrapper.remove();
-            workingSpace.remove();
+            slideBackground.remove();
             refresh();
         };
 
         this.syncBlock = function (callback) {
-            html2canvas(workingSpace.htmlElement(), {
-                onrendered: function(canvas) {
+            html2canvas(slideBackground.htmlElement(), {
+                onrendered: function (canvas) {
                     slideViewer.image(canvas.toDataURL("image/png"));
                     slideViewer.$image.load(callback);
                 }
@@ -345,7 +384,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         // ABS Object를 추가합니다.
         this.append = function (obj) {
-            obj.div().appendTo(workingSpace);
+            obj.div().appendTo(slideBackground);
             objs[obj.div().id()] = obj;
         };
 
@@ -358,7 +397,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
 
         this.load = function (params) {
-            for(id in params) {
+            for (id in params) {
                 var obj = absObject(params[id]);
                 this.append(obj);
                 syncBlock();
@@ -372,12 +411,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         this.undo = function () {
             if (undolist.length > 0) {
                 var param = undolist.pop();
-                var dv = $('#'+param.id).data('div');
+                var dv = $('#' + param.id).data('div');
                 redolist.push(getParams(dv));
                 undoStyle(dv, param);
                 if (curSlide) {
                     var obj = curSlide.get(param.id);
                     obj.setParams();
+                    obj.active();
                 }
                 syncBlock();
             }
@@ -386,7 +426,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         this.redo = function () {
             if (redolist.length > 0) {
                 var param = redolist.pop();
-                var dv = $('#'+param.id).data('div');
+                var dv = $('#' + param.id).data('div');
                 undolist.push(getParams(dv));
                 redoStyle(dv, param);
                 if (curSlide) {
@@ -417,11 +457,11 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         // curSlide을 지운다.
         this.del = function () {
             if (curSlide) {
-                var idx = curSlide.getIdx()-1;
-                var slide = slides.splice(idx,1)[0];
+                var idx = curSlide.getIdx() - 1;
+                var slide = slides.splice(idx, 1)[0];
                 slide.remove();
-                for (var i=idx; i<slides.length; i++) {
-                    slides[i].setIdx(i+1);
+                for (var i = idx; i < slides.length; i++) {
+                    slides[i].setIdx(i + 1);
                 }
                 curSlide = undefined;
                 pageCur.text(0);
@@ -431,14 +471,14 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         this.export = function () {
             var params = [];
-            for (var i=0; i<slides.length; i++) {
+            for (var i = 0; i < slides.length; i++) {
                 params.push(slides[i].export());
             }
             return params;
         };
 
         this.clear = function () {
-            for (var i=0; i<slides.length; i++) {
+            for (var i = 0; i < slides.length; i++) {
                 slides[i].remove();
                 curSlide = undefined;
                 curObj = undefined;
@@ -450,7 +490,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
         this.load = function (params) {
             this.clear();
-            for (var i=0; i<params.length; i++) {
+            for (var i = 0; i < params.length; i++) {
                 this.new();
                 slides[i].load(params[i]);
             }
@@ -460,13 +500,13 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     /** menu bar **/
 
-    var leftMenuBarWrapper = div().appendTo(menuBar).size('70%','100%');
-    var fileInfoHeader = div().appendTo(leftMenuBarWrapper).size('100%',60);
-    var fileName = div().appendTo(fileInfoHeader).size(200,30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
+    var leftMenuBarWrapper = div().appendTo(menuBar).size('70%', '100%');
+    var fileInfoHeader = div().appendTo(leftMenuBarWrapper).size('100%', 60);
+    var fileName = div().appendTo(fileInfoHeader).size(200, 30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
 
-    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%',40);
+    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%', 40);
     var decoSlideMenuButton = function (div) {
-        div.size(25,25).marginLeft(20).cursorPointer();
+        div.size(25, 25).marginLeft(20).cursorPointer();
     };
     var newSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/newslide.png').marginLeft(30)
         .click(function () {
@@ -482,7 +522,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             if (fName == null)
                 return;
             fileName.text(fName);
-            localStorage.setItem('abs-params-' + fName,JSON.stringify(slideManager.export()));
+            localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
         });
     var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/load.png')
         .click(function () {
@@ -511,8 +551,8 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
-        var wrapper = div().appendTo(objMenuBar).class("abs-option").size(28,28).hoverColor('#eeeeee','white').cursorPointer();
-        dv.appendTo(wrapper).size(15,15).border(1);
+        var wrapper = div().appendTo(objMenuBar).class("abs-option").size(28, 28).hoverColor('#eeeeee', 'white').cursorPointer();
+        dv.appendTo(wrapper).size(15, 15).border(1);
         wrapper.alignMiddle();
         dv.click = function (fn) {
             wrapper.click(fn);
@@ -548,8 +588,8 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var styleMenuBar = div().appendTo(leftMenuBarWrapper).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoStyleMenu = function (dv) {
-        var wrapper = div().appendTo(styleMenuBar).class('abs-option').size(28,28).hoverColor('#eeeeee','white').cursorPointer();
-        dv.appendTo(wrapper).size(15,15).border(1);
+        var wrapper = div().appendTo(styleMenuBar).class('abs-option').size(28, 28).hoverColor('#eeeeee', 'white').cursorPointer();
+        dv.appendTo(wrapper).size(15, 15).border(1);
         wrapper.alignMiddle();
         dv.click = function (fn) {
             wrapper.click(fn);
@@ -557,7 +597,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         }
     };
     var colors = ['#f44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688',
-        '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B','#FFC107', '#FF9800'];
+        '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800'];
     var getColorFn = function (c) {
         return function () {
             if (curDiv) {
@@ -566,14 +606,14 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             }
         }
     };
-    for (var i=0; i<colors.length; i++) {
+    for (var i = 0; i < colors.length; i++) {
         div().deco(decoStyleMenu).color(colors[i]).click(getColorFn(colors[i]));
     }
 
-    var rightMenuBarWrapper = div().appendTo(menuBar).size('30%','100%').padding(10);
-    var userBar = div().appendTo(rightMenuBarWrapper).size('100%','30%').border(borderGray).borderRadius(3)
+    var rightMenuBarWrapper = div().appendTo(menuBar).size('30%', '100%').padding(10);
+    var userBar = div().appendTo(rightMenuBarWrapper).size('100%', '30%').border(borderGray).borderRadius(3)
         .text(username).fontColor('gray').textAlignRight().paddingRight(10);
-    var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%','70%').border(borderGray).borderRadius(3)
+    var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
         .overflowAuto().fontColor('gray');
 
     /** status bar **/
@@ -584,9 +624,31 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     div().appendTo(slideStatus).text(' of ').fontColor('#555555').marginLeft(5);
     var pageTotal = div().appendTo(slideStatus).text('1').fontColor('#555555').marginLeft(5);
     var objStatus = div().appendTo(statusBar).float('right').marginRight(20).fontColor('#555555');
+    var showButton = div().appendTo(statusBar).size(20, 20).marginLeft(w - 300).cursorPointer().image('../images/abs-fullscreen.png').click(onZoom);
+
+    /** key binding **/
+
+    $(window).keydown(function (event) {
+
+        // esc
+        if (event.which === 27) {
+            if (isFullscreen && curSlide) {
+                event.preventDefault();
+                curSlide.unfull();
+                isFullscreen = false;
+            }
+        }
+
+        // F5
+        if (event.which == 116) {
+            onZoom();
+        }
+    });
+
     /** Initialize **/
 
     var slideManager = new SlideManager();
-    var curSlide, curObj, curDiv;
+    var curSlide, curBackground, curObj, curDiv;
+    var isFullscreen = false;
     slideManager.new();
 });
