@@ -1,5 +1,27 @@
 require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
 
+    /** set user authentication **/
+
+    var authFactory = function () {
+        var ainfo = JSON.parse(localStorage.getItem('ainfo'));
+        var aauth = localStorage.getItem('aauth');
+        return {
+            getUsername: function () {
+                return (ainfo && ainfo.username);
+            },
+            getToken: function () {
+                return aauth;
+            }
+        };
+    }();
+    var username = authFactory.getUsername();
+    var token = authFactory.getToken();
+    if (!username || !token) {
+        $(location).attr('href', '/?app=signin');
+        alert('로그인 페이지로 이동합니다.')
+        return;
+    }
+
     /** colors **/
     var borderGray = '1px solid #cccccc', borderGrayStrong = '1px solid #999999',
         slideListColor = '#eeeeee', slideEditorColor = '#dddddd', statusBarColor = '#cccccc';
@@ -81,19 +103,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             fn();
     };
 
-    var getUesrname = function () {
-        var username;
-        try {
-            username = JSON.parse(localStorage.getItem('ainfo')).username;
-        } catch (e) {
-            console.log(e);
-            username = 'unknown';
-        }
-        return username;
-    };
-    var username = getUesrname();
-
-
     /** events **/
 
     var onZoom = function () {
@@ -120,7 +129,17 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         if (fName == null)
             return;
         fileName.text(fName);
-        localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+        // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+        var param = {
+            cid:'ambasa',
+            hashkey:token,
+            key:fName,
+            value:JSON.stringify(slideManager.export())
+        };
+        $.get("http://220.149.236.19:3000/hashstore/put", param)
+            .done(function (data) {
+                console.log(data);
+            });
     };
 
     var onLoad = function () {
