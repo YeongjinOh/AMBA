@@ -132,7 +132,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
         var param = {
             cid:'ambasa',
-            hashkey:token,
+            token:token,
             key:fName,
             value:JSON.stringify(slideManager.export())
         };
