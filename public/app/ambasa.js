@@ -1,7 +1,8 @@
 require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
 
     /** colors **/
-    var borderGray = '1px solid #cccccc', slideListColor = '#eeeeee', slideEditorColor = '#dddddd';
+    var borderGray = '1px solid #cccccc', borderGrayStrong = '1px solid #999999',
+        slideListColor = '#eeeeee', slideEditorColor = '#dddddd', statusBarColor = '#cccccc';
 
     /** utils **/
 
@@ -95,12 +96,14 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     // var w = window.outerWidth, h = window.outerHeight;
     var w = 1280, h = 800;
-    var menuBarWidth = w, menuBarHeight = 100, slideListWidth = 220, slideListHeight = h-menuBarHeight,
+    var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
+        slideListWidth = 220, slideListHeight = h-menuBarHeight-statusBarHeight,
         slideEditorWidth = w-slideListWidth, slideEditorHeight = slideListHeight;
     var parent = div().append().size(w,h);
     var menuBar = div().appendTo(parent).size(menuBarWidth, menuBarHeight).borderBottom(borderGray);
     var slideList = div().appendTo(parent).size(slideListWidth, slideListHeight).borderRight(borderGray).color(slideListColor).overflowAuto();
     var slideEditor = div().appendTo(parent).size(slideEditorWidth, slideEditorHeight).color(slideEditorColor).overflowAuto();
+    var statusBar = div().appendTo(parent).size(statusBarWidth,statusBarHeight).color(statusBarColor).borderTop(borderGrayStrong).padding(5);
     var blank = div();
     var refresh = function () {
         blank.append();
@@ -205,8 +208,9 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var ABSObject = function (params) {
         var that = this;
-        var dv = div().class('abs-object').size(100,100).border('1px solid black').draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10);
+        var dv = div().class('abs-object').size(100,100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
+            .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
+            .borderWidth('1px').borderStyle('solid').borderColor('black');
 
         dv.$.children().removeClass('ui-icon'); // remove icon
         dv.mousedown(function(e){
@@ -235,10 +239,12 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
         this.active = function () {
             dv.$.children().css('border','1px dotted gray');
+            objStatus.text('id : ' + id);
         };
 
         this.deactive = function () {
             dv.$.children().css('border','none');
+            objStatus.text('');
         };
 
         this.div = function () {
@@ -305,6 +311,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         this.active = function () {
             slideViewer.border('2px solid #BF360C');
             workingSpace.displayInlineBlock();
+            pageCur.text(numberViewer.text());
         };
 
         this.deactive = function () {
@@ -403,6 +410,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             slide.setIdx(slides.push(slide));
             slide.focus();
             syncBlock();
+            pageTotal.text(slides.length);
         };
 
         // curSlide을 지운다.
@@ -415,6 +423,8 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                     slides[i].setIdx(i+1);
                 }
                 curSlide = undefined;
+                pageCur.text(0);
+                pageTotal.text(slides.length);
             }
         };
 
@@ -434,6 +444,8 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 curDiv = undefined;
             }
             slides = [];
+            pageCur.text(0);
+            pageTotal.text(slides.length);
         };
         this.load = function (params) {
             this.clear();
@@ -563,9 +575,17 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%','70%').border(borderGray).borderRadius(3)
         .overflowAuto().fontColor('gray');
 
+    /** status bar **/
 
+    var slideStatus = div().appendTo(statusBar).marginLeft(15);
+    div().appendTo(slideStatus).text('Slide ').fontColor('#555555').marginLeft(5);
+    var pageCur = div().appendTo(slideStatus).text('1').fontColor('#555555').marginLeft(5);
+    div().appendTo(slideStatus).text(' of ').fontColor('#555555').marginLeft(5);
+    var pageTotal = div().appendTo(slideStatus).text('1').fontColor('#555555').marginLeft(5);
+    var objStatus = div().appendTo(statusBar).float('right').marginRight(20).fontColor('#555555');
     /** Initialize **/
 
     var slideManager = new SlideManager();
     var curSlide, curObj, curDiv;
+    slideManager.new();
 });
