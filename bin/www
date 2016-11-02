@@ -74,7 +74,8 @@ primus.on('connection',function(spark){
 
       var reply = JSON.stringify({
         username : username,
-        msg: msg
+        msg: msg,
+        roomid : roomid
       });
       pub.publish(roomid, reply);
     }
@@ -83,10 +84,9 @@ primus.on('connection',function(spark){
   //pub.publish()를 호출하면 여기로 넘어간다
   sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
     console.log("sub channel " + channel + " : " + message);
+    var temp = JSON.parse(message);
+    if(channel == temp.roomid){
 
-
-    //if(channel == 'test'){
-      var temp = JSON.parse(message);
       console.log("temp : ",temp);
       var msg = temp.msg;
       var username = temp.username;
@@ -96,12 +96,13 @@ primus.on('connection',function(spark){
         spark.write({
           action : 'broadcast_msg',
           message : {
+            roomid : channel,
             username : username,
             msg : msg
           }
         });
       }
-    //}
+    }
   });
 
 
