@@ -35,7 +35,8 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                     dv.cssText(prop, params.style[prop]);
                 else
                     dv.css(prop, params.style[prop]);
-            } else {
+            }
+            else {
                 if (checkTextProp(prop))
                     dv.cssText(prop, 'initial');
                 else
@@ -102,8 +103,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 curSlide.full();
                 isFullscreen = true;
             }
-        } else {
-            console.log(isFullscreen)
         }
     };
 
@@ -142,7 +141,8 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var onDelete = function () {
         if (curObj) {
             curObj.remove();
-        } else if (curSlide) {
+        }
+        else if (curSlide) {
             slideManager.del()
         }
     };
@@ -197,14 +197,14 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     /** set fullscreen viewer **/
 
     var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
-    var fullscreenViewer = div().append().size(ww,wh).displayNone().color('black');
+    var fullscreenViewer = div().append().size(ww, wh).displayNone().color('black');
     if (wh * sbgWidth > ww * sbgHeight) {
         zoomRatio = ww / sbgWidth;
-        fullscreenViewer.paddingTop((wh-sbgHeight*zoomRatio)/2);
+        fullscreenViewer.paddingTop((wh - sbgHeight * zoomRatio) / 2);
     }
     else {
         zoomRatio = wh / sbgHeight;
-        fullscreenViewer.paddingLeft((ww-sbgWidth*zoomRatio)/2);
+        fullscreenViewer.paddingLeft((ww - sbgWidth * zoomRatio) / 2);
     }
 
     /** set context menu **/
@@ -290,7 +290,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var ABSObject = function (params) {
         var that = this;
         var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('absolute').left(-sbgMarginLeft+10).top(-sbgMarginTop+10)
+            .color('initial').cursorMove().position('absolute').left(-sbgMarginLeft + 10).top(-sbgMarginTop + 10)
             .borderWidth('1px').borderStyle('solid').borderColor('black');
 
         // remove icon and resize ui-resizable-se
@@ -310,7 +310,8 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             id = params.id;
             idGenerator.set(id);
             redoStyle(dv, params);
-        } else {
+        }
+        else {
             id = idGenerator.get();
             params = {id: id, style: {'display': 'none'}};
         }
@@ -380,7 +381,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             .setSlideContextMenu(this);
         var block = div().appendTo(blockWrapper);
         var numberViewer = div().appendTo(block).size(10, blockHeight).margin(5).text('1');
-        var slideViewerWrapper = div().size(slideViewerWidth+4, blockHeight+4).appendTo(block);
+        var slideViewerWrapper = div().size(slideViewerWidth + 4, blockHeight + 4).appendTo(block);
         var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
 
         var slideBackground = getSlideBackground().appendTo(slideEditor);
@@ -419,7 +420,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             parent.displayNone();
             fullscreenViewer.displayInlineBlock();
             curBackground.appendTo(fullscreenViewer).overflowHidden();
-            curBackground.css('zoom', (100*zoomRatio)+'%');
+            curBackground.css('zoom', (100 * zoomRatio) + '%');
         };
 
         this.unfull = function () {
@@ -537,6 +538,30 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 curSlide = undefined;
                 pageCur.text(0);
                 pageTotal.text(slides.length);
+            }
+        };
+        this.next = function () {
+            var next = curSlide.getIdx();
+            if (next < slides.length) {
+                curSlide.deactive();
+                if (isFullscreen)
+                    curSlide.unfull();
+                curSlide = slides[next];
+                curSlide.focus()
+                if (isFullscreen)
+                    curSlide.full();
+            }
+        };
+        this.prev = function () {
+            var prev = curSlide.getIdx() - 2;
+            if (prev >= 0) {
+                curSlide.deactive();
+                if (isFullscreen)
+                    curSlide.unfull();
+                curSlide = slides[prev];
+                curSlide.focus();
+                if (isFullscreen)
+                    curSlide.full();
             }
         };
 
@@ -687,6 +712,21 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         else if (event.which === 116) {
             event.preventDefault();
             onZoom();
+        }
+        // Enter
+        else if (event.which === 13 && !curObj) {
+            event.preventDefault();
+            slideManager.new();
+        }
+        // up
+        else if (event.which === 38 && !curObj && curSlide) {
+            event.preventDefault();
+            slideManager.prev();
+        }
+        // down
+        else if (event.which === 40 && !curObj && curSlide) {
+            event.preventDefault();
+            slideManager.next();
         }
         else if (event.ctrlKey) {
             // Ctrl + Shift + Z
