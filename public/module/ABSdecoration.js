@@ -1,4 +1,5 @@
 define ([], function() {
+    var i, j;
     var module = {};
 
     module.value = {};
@@ -15,7 +16,6 @@ define ([], function() {
 
                 // 현재 div의 id 전달
                 idContainer.id = id;
-                console.log(id);
                 // set ambasa context-menu
                 $("#abs-context-menu").finish().toggle(100).css({
                     top: event.pageY + "px",
@@ -25,20 +25,97 @@ define ([], function() {
             return this;
         };
 
-        // context menubar 생성
-        var contextMenuBar = div().append().id('abs-context-menu').size(100, 'auto').zIndex(1000).position('absolute')
-            .color('#cccccc').border('1px solid gray').borderRadius(2).displayNone(); // overflowHidden()
-        var decoMenu = function (dv) {
-            dv.size('100%', 25).padding(3).cursorPointer().hoverColor('gray', '#cccccc').selectable(false);
-        };
-        var decoMenuSub = function (dv) {
-            dv.size('100%', 25).text('').editable().cursorText().color('white').borderRadius(2).border('2px solid gray');
-            div().appendTo(dv).size(20, '100%').float('right').text('OK').fontBold().fontSize(10).textAlignCenter()
-                .color('#cccccc').selectable(false).cursorPointer().hoverColor('gray', '#cccccc').click(function() {
-                    // $('#abs-sub-menu').empty();
+        function absRemove(id) {
+            $('#'+id).hide(200);
+            setTimeout(function() {$('#'+id).remove();}, 200);
+        }
+
+        function paperNum (seq, target, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#abs-papernum')[0]) {
+                absRemove('abs-papernum');
+                return false;
+            }
+
+            var root = div().class('third').id('abs-papernum').appendTo(target).position('absolute').size(60, 25).top(seq * 25).left(100)
+                .color('white').borderRadius(2).border('2px solid gray').keypress(function(dv, e) {
+                    if (e.which == 13) {
+                        $('#papernum-ok').trigger('click');
+                    }
+                }).click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+            var value = div().appendTo(root).size('65%', '100%').color('white').text('').editable().cursorText();
+            div().id('papernum-ok').appendTo(root).size('35%', '100%').color('#cccccc').text('OK').fontBold().fontSize(11)
+                .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
+                var v = parseFloat(value.text()) || undefined;
+                if (v) {
+                    fn(v);
+                }
+
+                absRemove('abs-papernum');
             });
-        };
-        var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('color').click(function () {
+
+            value.$text.focus();
+        }
+
+        function paperText (seq, target, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#abs-papertext')[0]) {
+                absRemove('abs-papertext');
+                return false;
+            }
+
+            var root = div().class('third').id('abs-papertext').appendTo(target).position('absolute').size(150, 'auto').minHeight(25).top(seq * 25).left(100)
+                .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+            var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText();
+            div().id('papertext-ok').appendTo(root).size('20%', '100%').minHeight(25).color('#cccccc').text('OK').fontBold().fontSize(11)
+                .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
+                    fn(value.text());
+                    absRemove('abs-papertext');
+                });
+
+            value.$text.focus();
+        }
+
+        function board (seq, target, list, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#abs-board')[0]) {
+                absRemove('abs-board');
+                return false;
+            }
+
+            var root = div().class('third').id('abs-board').appendTo(target).position('absolute').size(100, 'auto').top(seq * 25).left(100)
+                .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+            for(i=0; i<list.length; i++) {
+                var cell = div().appendTo(root).size('100%', 50).color('white').hoverColor('#cccccc', 'white').click(function (dv) {
+                    fn(dv.children()[0].borderStyle());
+                });
+                div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderStyle(list[i]);
+            }
+        }
+
+        function pallet (seq, target, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#pallet')[0]) {
+                absRemove('pallet');
+                return false;
+            }
+
             var pallet_color = [
                 ['#660000', '#800000', '#990000', '#b30000', '#cc0000', '#e60000', '#ff0000', '#ff1a1a',
                     '#ff3333', '#ff4d4d', '#ff6666', '#ff8080', '#ff9999', '#ffb3b3', '#ffcccc', '#ffe6e6'],
@@ -57,57 +134,232 @@ define ([], function() {
                 ['#000000', '#262626', '#404040', '#4d4d4d', '#595959', '#666666', '#737373', '#808080',
                     '#8c8c8c', '#999999', '#a6a6a6', '#b3b3b3', '#bfbfbf', '#d9d9d9', '#f2f2f2', '#ffffff']];
 
-            var pallet = div().id('pallet').appendTo(contextMenuBar).size(325, 'auto').color('white').cursorPointer().borderRadius(2).border('2px solid gray');
-            for(var i=0; i<pallet_color.length; i++) {
-                for(var j=0; j<pallet_color[i].length; j++) {
-                    var cell = div().appendTo(pallet).size(20, 20).color('white').hoverColor('gray', 'white').click(function(dv) {
-                        var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.color(dv.children()[0].color());
+            var root = div().class('third').id('pallet').appendTo(target).position('absolute').size(325, 'auto').color('white')
+                .top(seq * 25).left(100).cursorPointer().borderRadius(2).border('2px solid gray');
 
-                        $(document).bind('mousedown', function(e) {
-                            if (!$(e.target).parents("#pallet").length > 0) {
-                                $('#pallet').hide(100).remove();
-                            }
-                        });
+            for (i = 0; i < pallet_color.length; i++) {
+                for (j = 0; j < pallet_color[i].length; j++) {
+                    var cell = div().appendTo(root).size(20, 20).color('white').hoverColor('gray', 'white').click(function (dv, e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        fn(dv.children()[0].color());
                     });
                     div().appendTo(cell).displayBlock().size(16, 16).margin('auto').marginTop(2).color(pallet_color[i][j]);
                 }
             }
+        }
 
-            callback();
-        });
-        var menu2 = div().appendTo(contextMenuBar).deco(decoMenu).text('edge').click(function () {
-            // if(!$('#abs-sub-menu')) {
-            //     console.log('asdf');
-            //     return false;
-            // }
-            //
-            // var subMenuBar = div().id('abs-sub-menu').appendTo(contextMenuBar).position('absolute').size('100%', 25).text('').editable().cursorText().color('white').borderRadius(2).border('2px solid gray');
-            //
-            // div().appendTo(subMenuBar).size(20, '100%').float('right').text('OK').fontBold().fontSize(10).textAlignCenter()
-            //     .color('#cccccc').selectable(false).cursorPointer().hoverColor('gray', '#cccccc').click(function() {
-            //     $(document).bind('mousedown', function(e) {
-            //         if (!$(e.target).parents("#abs-sub-menu").length > 0) {
-            //             $('#abs-sub-menu').hide(100).remove();
-            //         }
-            //     });
-            // });
+        // context menubar 생성
+        var contextMenuBar = div().append().id('abs-context-menu').size(100, 'auto').zIndex(1000).position('absolute')
+            .color('#cccccc').border('1px solid gray').borderRadius(2).displayNone(); // overflowHidden()
+        var decoMenu = function (dv) {
+            dv.size('100%', 25).padding(3).cursorPointer().hoverColor('gray', '#cccccc').selectable(false);
+        };
 
-            callback();
-        });
-        var menu3 = div().appendTo(contextMenuBar).deco(decoMenu).text('menu3').click(function () {
-            alert('TODO');
-            $("#abs-context-menu").hide(100);
-            callback();
+        div().appendTo(contextMenuBar).deco(decoMenu).text('font').click(function (dv) {
+            if ($(document).find('.second')[0])
+                absRemove($(document).find('.second')[0].id);
+            if (dv.children()[0]) {
+                absRemove('abs-font-menu');
+                return false;
+            }
+
+            var fontMenuBar = div().appendTo(dv).class('second').id('abs-font-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                .top(0).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+            div().appendTo(fontMenuBar).deco(decoMenu).text('text').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperText(0, dv, function(txt) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.text(txt);
+                    callback();
+                });
+            });
+
+            div().appendTo(fontMenuBar).deco(decoMenu).text('size').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperNum(1, dv, function(v) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.fontSize(v);
+                    callback();
+                });
+            });
+
+            /* need refactoring */
+            div().appendTo(fontMenuBar).deco(decoMenu).text('weight').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                if ($(document).find('.third')[0])
+                    absRemove($(document).find('.third')[0].id);
+                if (dv.children()[0]) {
+                    absRemove('abs-fontweight');
+                    return false;
+                }
+
+                var font_weight = ['normal', 'bold'];
+
+                var root = div().class('third').id('abs-fontweight').appendTo(dv).position('absolute').size(100, 'auto').top(50).left(100)
+                    .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    });
+
+                for(i=0; i<font_weight.length; i++) {
+                    div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontWeight(font_weight[i]).hoverColor('#cccccc', 'white').click(function (dv) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.fontWeight(dv.fontWeight());
+                        callback();
+                    });
+                }
+            });
+
+            div().appendTo(fontMenuBar).deco(decoMenu).text('family').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                if ($(document).find('.third')[0])
+                    absRemove($(document).find('.third')[0].id);
+                if (dv.children()[0]) {
+                    absRemove('abs-fontfamily');
+                    return false;
+                }
+
+                var font_family = ['normal', 'serif', 'sans-serif', 'Arial', 'Charcoal', 'Impact'];
+
+                var root = div().class('third').id('abs-fontfamily').appendTo(dv).position('absolute').size(100, 'auto').top(75).left(100)
+                    .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    });
+
+                for(i=0; i<font_family.length; i++) {
+                    div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontFamily(font_family[i]).hoverColor('#cccccc', 'white').click(function (dv) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.fontFamily(dv.fontFamily());
+                        callback();
+                    });
+                }
+            });
+
+            div().appendTo(fontMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                pallet(4, dv, function(c) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.fontColor(c);
+                    callback();
+                });
+            });
         });
 
+        div().appendTo(contextMenuBar).deco(decoMenu).text('background').click(function(dv) {
+            if ($(document).find('.second')[0])
+                absRemove($(document).find('.second')[0].id);
+            if (dv.children()[0]) {
+                absRemove('abs-bg-menu');
+                return false;
+            }
+
+            var bgMenuBar = div().appendTo(dv).class('second').id('abs-bg-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                .top(25).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+            div().appendTo(bgMenuBar).deco(decoMenu).text('box').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperNum(0, dv, function(v) {
+                    pallet(0, dv, function(c) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.boxShadow(v+'px '+ v +'px '+ v + 'px '+ c);
+                        callback();
+                    });
+                });
+            });
+
+            div().appendTo(bgMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                pallet(1, dv, function(c) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.color(c);
+                    callback();
+                });
+            });
+        });
+
+        div().appendTo(contextMenuBar).deco(decoMenu).text('edge').click(function(dv) {
+            if ($(document).find('.second')[0])
+                absRemove($(document).find('.second')[0].id);
+            if (dv.children()[0]) {
+                absRemove('abs-edge-menu');
+                return false;
+            }
+
+            var edgeMenuBar = div().appendTo(dv).class('second').id('abs-edge-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                .top(50).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+            div().appendTo(edgeMenuBar).deco(decoMenu).text('width').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperNum(0, dv, function(v) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.borderWidth(v);
+                    callback();
+                });
+            });
+
+            div().appendTo(edgeMenuBar).deco(decoMenu).text('style').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                var edge_style = ['none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
+
+                board(1, dv, edge_style, function(s) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.borderStyle(s);
+                    callback();
+                });
+            });
+
+            div().appendTo(edgeMenuBar).deco(decoMenu).text('radius').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperNum(2, dv, function(v) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.borderRadius(v);
+                    callback();
+                });
+            });
+
+            div().appendTo(edgeMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                pallet(3, dv, function(c) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.borderColor(c);
+                    callback();
+                });
+            });
+        });
 
         // 다른 곳 클릭시 context-menu hide
         $(document).bind("mousedown", function (e) {
             if (!$(e.target).parents("#abs-context-menu").length > 0) {
-                $("#abs-context-menu").hide(100);
+                $("#abs-context-menu").hide(200);
             }
         });
     };
+
     return module;
 });

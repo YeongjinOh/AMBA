@@ -243,7 +243,7 @@ var addAllCssMethods = function () {
         "border-right-style": [],
         "border-right-width": [],
         "border-spacing": [],
-        "border-style": [],
+        "border-style": ['none', 'hidden', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'],
         "border-top": [],
         "border-top-color": [],
         "border-top-left-radius": [],
@@ -431,6 +431,10 @@ Div.prototype.text = function (txt) {
 
 Div.prototype.fontColor = function (color) {
     return this.cssText('color', color);
+};
+
+Div.prototype.fontFamily = function (family) {
+    return this.cssText('font-family', family);
 };
 
 /**
@@ -801,6 +805,23 @@ Div.prototype.keydown = function (fn) {
     this.$.keydown(function (e) {
         if (fn) fn(that, e);
     });
+    return this;
+};
+
+Div.prototype.keypress = function (fn) {
+    if (fn === undefined) {
+        return this.$.keypress();
+    }
+
+    var that = this;
+    this.$.keypress(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
+Div.prototype.focus = function() {
+    this.$.focus();
     return this;
 };
 

@@ -22,9 +22,33 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
     };
 
-    var styleParams = function (dv, params) {
+    var checkTextProp = function (prop) {
+        return prop.startsWith('font') || (prop.startsWith('text-') && !prop.startsWith('text-align'))
+            || prop === 'color';
+    };
+    var undoStyle = function (dv, params) {
+        var curParams = dv.getABSstyle();
+        for (var prop in curParams) {
+            if (params.style[prop]) {
+                if (checkTextProp(prop))
+                    dv.cssText(prop, params.style[prop]);
+                else
+                    dv.css(prop,params.style[prop]);
+            } else {
+                if (checkTextProp(prop))
+                    dv.cssText(prop, 'initial');
+                else
+                    dv.css(prop, 'initial');
+            }
+        }
+        dv.text(params.text);
+    };
+    var redoStyle = function (dv, params) {
         for (var prop in params.style) {
-            dv.css(prop,params.style[prop]);
+            if (checkTextProp(prop))
+                dv.cssText(prop, params.style[prop]);
+            else
+                dv.css(prop,params.style[prop]);
         }
         dv.text(params.text);
     };
@@ -50,6 +74,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             var prevParams = curObj.getParams();
             curSlide.addUndo(prevParams);
             curObj.setParams();
+            objStateBar.text(JSON.stringify(curObj.getParams()));
         }
     };
 
@@ -129,7 +154,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     };
     var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
         slideManager.del();
-        $("#abs-slide-context-menu").hide(100);
+        $("#abs-slide-contextㅎ-menu").hide(100);
     });
 
     // 다른 곳 클릭시 context-menu hide
@@ -149,7 +174,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         // target이 option인지 확인
         var checkOption = false;
         for (i = 0; i<targets.length; i++) {
-            if (targets[i].classList.contains("abs-option"))
+            if (targets[i].classList.contains("abs-option") || targets[i].id == 'abs-context-menu')
                 checkObject = true;
         }
         // target이 ABSobject나 option이 아니면 비활성화.
@@ -180,19 +205,19 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var ABSObject = function (params) {
         var that = this;
-        var dv = div().class('abs-object').size(100,100).border(1).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10)
+        var dv = div().class('abs-object').size(100,100).border('1px solid black').draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
+            .color('initial').cursorMove().position('absolute').left(slideEditor.leftPos() + 10).top(slideEditor.topPos() + 10);
 
         dv.$.children().removeClass('ui-icon'); // remove icon
-        dv.mousedown(function(){
-            that.focus()
+        dv.mousedown(function(e){
+            that.focus();
         }).mouseup(trigger);
 
         var id;
         if (params) {
             id = params.id;
             idGenerator.set(id);
-            styleParams(dv, params);
+            redoStyle(dv, params);
         } else {
             id = idGenerator.get();
             dv.text(id);
@@ -341,7 +366,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 var param = undolist.pop();
                 var dv = $('#'+param.id).data('div');
                 redolist.push(getParams(dv));
-                styleParams(dv, param);
+                undoStyle(dv, param);
                 if (curSlide) {
                     var obj = curSlide.get(param.id);
                     obj.setParams();
@@ -355,7 +380,7 @@ require (['ABSdecoration','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 var param = redolist.pop();
                 var dv = $('#'+param.id).data('div');
                 undolist.push(getParams(dv));
-                styleParams(dv, param);
+                redoStyle(dv, param);
                 if (curSlide) {
                     var obj = curSlide.get(param.id);
                     obj.setParams();
