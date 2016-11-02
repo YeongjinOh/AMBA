@@ -14,6 +14,8 @@ function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>');
     this.$image = $('<img>');
+    this.$video = $('<video>');
+    this.$audio = $('<audio>');
     this.$.data('div', this);
     this.class('amba');
     this.param = {};
@@ -406,7 +408,7 @@ addAllCssMethods();
 
 Div.prototype.textInterceptor = function (fn) {
     this.fnText = fn;
-}
+};
 
 Div.prototype.text = function (txt) {
     if (this.fnText) {
@@ -521,6 +523,15 @@ Div.prototype.heightPixel = function () {
 Div.prototype.widthPixel = function () {
 
     return parseInt(this.$.css('width'));
+};
+
+Div.prototype.backgroundSize = function(w, h) {
+    if (w === undefined)
+        return this.css('background-size');
+    else if (h === undefined)
+        return this.css('background-size', w + ' ' + w);
+
+    return this.css('background-size', w + ' ' + h);
 };
 
 /**
@@ -970,6 +981,47 @@ Div.prototype.image = function (src) {
     });
     return this;
 };
+
+Div.prototype.video = function (src) {
+    if (src === '') {
+        if (this.$video)
+            this.$video.remove();
+        return this;
+    }
+
+    if(src===undefined && this.$video)
+        return this.$video.attr('src');
+
+    var pw = this.width();
+    var ph = this.height();
+
+    this.$video.attr('poster', '/javascripts/loadingBar.gif').attr('src', src).attr('width', pw)
+        .attr('height', ph).attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
+
+    return this;
+};
+
+Div.prototype.audio = function (src) {
+    if (src === '') {
+        if (this.$audio)
+            this.$audio.remove();
+        return this;
+    }
+
+    if(src===undefined && this.$audio)
+        return this.$audio.attr('src');
+
+    var pw = this.width();
+    var ph = this.height();
+
+    this.$audio.attr('poster', '/javascripts/loadingBar.gif').attr('src', src).attr('width', pw)
+        .attr('height', ph).attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
+
+    return this;
+};
+
+
+
 Div.prototype.uploadTest = function () {
     var that = this;
     var i = 0;

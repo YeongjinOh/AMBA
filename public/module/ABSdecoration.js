@@ -422,7 +422,8 @@ define ([], function() {
 
                     paperTextAuto(0, dv, function(txt) {
                         var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.image('/images/' + txt + '.png');
+                        curDiv.backgroundSize('100%', '100%');
+                        curDiv.backgroundImage("url('/images/" + txt + ".png')");
                         callback();
                     });
                 });
@@ -433,14 +434,35 @@ define ([], function() {
 
                     paperTextAuto(1, dv, function(txt) {
                         var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.image(txt);
+                        curDiv.backgroundSize('100%', '100%');
+                        curDiv.backgroundImage("url(" + txt + ")");
                         callback();
                     });
                 });
             });
 
-            div().appendTo(mediaMenuBar).deco(decoMenu).text('video').click(function(dv, e) {
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('audio').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
 
+                paperTextAuto(1, dv, function(txt) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    // curDiv.video(txt);
+                    curDiv.video('http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
+                    callback();
+                });
+            });
+
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('video').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperTextAuto(2, dv, function(txt) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    // curDiv.video(txt);
+                    curDiv.video('http://media.w3.org/2010/05/bunny/movie.ogv');
+                    callback();
+                });
             });
         });
 
@@ -456,8 +478,16 @@ define ([], function() {
                 .top(100).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
 
             div().appendTo(eventMenuBar).deco(decoMenu).text('click').click(function(dv, e) {
-
+                var curDiv = $('#' + idContainer.id).data('div');
+                curDiv.aceEditor();
+                callback();
             });
+
+            // var btn = div().append().size('100', '100').borderOption(2).borderOption('black', 'color').displayBlock()
+            //     .click(function () {
+            //         var temp = ace.text();
+            //         view1.text(temp);
+            //     });
         });
 
         // 다른 곳 클릭시 context-menu hide
