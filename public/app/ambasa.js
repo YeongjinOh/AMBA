@@ -8,8 +8,8 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     Div.prototype.getABSstyle = function () {
         var params = $.extend({}, this.params());
-        params.top = this.offset().top;
-        params.left = this.offset().left;
+        params.top = this.css('top');
+        params.left = this.css('left');
         params.width = this.widthPixel();
         params.height = this.heightPixel();
         return params;
@@ -66,7 +66,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             });
         }
     };
-    var trigger = function () {
+    var trigger = function (fn) {
         if (curSlide) {
             syncBlock();
             curSlide.resetRedo();
@@ -77,6 +77,8 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             curObj.setParams();
             objStateBar.text(JSON.stringify(curObj.getParams()));
         }
+        if (typeof fn === 'function')
+            fn();
     };
 
     var getUesrname = function () {
@@ -103,6 +105,60 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         } else {
             console.log(isFullscreen)
         }
+    };
+
+    var onUndo = function () {
+        if (curSlide)
+            curSlide.undo();
+    };
+
+    var onRedo = function () {
+        if (curSlide)
+            curSlide.redo();
+    };
+
+    var onSave = function () {
+        var fName = prompt('파일명을 입력해주세요.');
+        if (fName == null)
+            return;
+        fileName.text(fName);
+        localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+    };
+
+    var onLoad = function () {
+        var fName = prompt('파일명을 입력해주세요.');
+        if (fName == null)
+            return;
+        var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+        if (params == null) {
+            alert('해당 파일을 불러올 수 없습니다.');
+        }
+        else {
+            fileName.text(fName);
+            slideManager.load(params);
+        }
+    };
+
+    var onDelete = function () {
+        if (curObj) {
+            curObj.remove();
+        } else if (curSlide) {
+            slideManager.del()
+        }
+    };
+
+    var onCopy = function () {
+        if (curObj) {
+            copyParam = curObj.getParams();
+        }
+    };
+
+    var onPaste = function () {
+        copyParam.id = idGenerator.get();
+        var obj = absObject(copyParam);
+        obj.focus();
+        curSlide.append(obj);
+        trigger();
     };
 
     /** basic setting for layout **/
@@ -134,8 +190,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var sbgWidth = w / ratio, sbgHeight = h / ratio;
     var sbgMarginLeft = (slideEditorWidth - sbgWidth) / 2, sbgMarginTop = (slideEditorHeight - sbgHeight) / 2;
     var getSlideBackground = function () {
-        return div().appendTo(slideEditor).size(sbgWidth, sbgHeight).position('absolute')
-            .color('white').border(borderGray).boxShadow('0px 5px 20px #888888')
+        return div().appendTo(slideEditor).size(sbgWidth, sbgHeight).position('absolute').color('white').boxShadow('0px 5px 20px #888888');
     };
     slideEditor.paddingLeft(sbgMarginLeft).paddingTop(sbgMarginTop);
 
@@ -235,14 +290,20 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var ABSObject = function (params) {
         var that = this;
         var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('relative').left(-sbgMarginLeft+10).top(-sbgMarginTop+10)
+            .color('initial').cursorMove().position('absolute').left(-sbgMarginLeft+10).top(-sbgMarginTop+10)
             .borderWidth('1px').borderStyle('solid').borderColor('black');
 
         // remove icon and resize ui-resizable-se
         $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
         dv.mousedown(function (e) {
             that.focus();
-        }).mouseup(trigger);
+        }).mouseup(function () {
+            var style1 = getParams(dv).style, style2 = params.style;
+            // trigger only when changed
+            if (style1.top !== style2.top || style1.left !== style2.left
+                || style1.width !== style2.width || style1.height !== style2.height)
+                trigger();
+        });
 
         var id;
         if (params) {
@@ -272,6 +333,15 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         this.deactive = function () {
             dv.$.children().css('border', 'none').css('background-color', 'initial');
             objStatus.text('');
+        };
+
+        this.remove = function () {
+            dv.displayNone();
+            that.deactive();
+            trigger(function () {
+                curObj = undefined;
+                curDiv = undefined;
+            });
         };
 
         this.div = function () {
@@ -417,7 +487,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 if (curSlide) {
                     var obj = curSlide.get(param.id);
                     obj.setParams();
-                    obj.active();
+                    obj.focus();
                 }
                 syncBlock();
             }
@@ -432,6 +502,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 if (curSlide) {
                     var obj = curSlide.get(param.id);
                     obj.setParams();
+                    obj.focus();
                 }
                 syncBlock();
             }
@@ -516,39 +587,10 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         .click(function () {
             slideManager.del();
         });
-    var saveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/save.png')
-        .click(function () {
-            var fName = prompt('파일명을 입력해주세요.');
-            if (fName == null)
-                return;
-            fileName.text(fName);
-            localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
-        });
-    var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/load.png')
-        .click(function () {
-            var fName = prompt('파일명을 입력해주세요.');
-            if (fName == null)
-                return;
-            var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-            if (params == null) {
-                alert('해당 파일을 불러올 수 없습니다.');
-            }
-            else {
-                fileName.text(fName);
-                slideManager.load(params);
-            }
-        });
-    var undoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/undo.png')
-        .click(function () {
-            if (curSlide)
-                curSlide.undo();
-        });
-    var redoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/redo.png')
-        .click(function () {
-            if (curSlide)
-                curSlide.redo();
-        });
-
+    var saveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/save.png').click(onSave);
+    var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/load.png').click(onLoad);
+    var undoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/undo.png').click(onUndo);
+    var redoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/redo.png').click(onRedo);
     var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
         var wrapper = div().appendTo(objMenuBar).class("abs-option").size(28, 28).hoverColor('#eeeeee', 'white').cursorPointer();
@@ -629,7 +671,10 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     /** key binding **/
 
     $(window).keydown(function (event) {
-
+        // delete
+        if (event.which === 8) {
+            onDelete();
+        }
         // esc
         if (event.which === 27) {
             if (isFullscreen && curSlide) {
@@ -638,10 +683,42 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 isFullscreen = false;
             }
         }
-
         // F5
-        if (event.which == 116) {
+        else if (event.which === 116) {
+            event.preventDefault();
             onZoom();
+        }
+        else if (event.ctrlKey) {
+            // Ctrl + Shift + Z
+            if (event.shiftKey && event.which === 90) {
+                event.preventDefault();
+                onRedo();
+            }
+            // Ctrl + Z
+            else if (event.which === 90) {
+                event.preventDefault();
+                onUndo();
+            }
+            // Ctrl + S
+            else if (event.which === 83) {
+                event.preventDefault();
+                onSave();
+            }
+            // Ctrl + O
+            else if (event.which === 79) {
+                event.preventDefault();
+                onLoad();
+            }
+            // Ctrl + C
+            else if (event.which === 67) {
+                event.preventDefault();
+                onCopy();
+            }
+            // Ctrl + V
+            else if (event.which === 86) {
+                event.preventDefault();
+                onPaste();
+            }
         }
     });
 
@@ -650,5 +727,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var slideManager = new SlideManager();
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
+    var copyParam;
     slideManager.new();
 });
