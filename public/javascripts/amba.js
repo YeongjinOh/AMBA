@@ -605,6 +605,20 @@ Div.prototype.click = function (fn) {
     return this;
 };
 
+Div.prototype.dblclick = function (fn) {
+    if (fn === undefined) {
+        return this.$.dblclick();
+    }
+
+    var that = this;
+    this.$.dblclick(function (e) {
+        if (fn) fn(that, e);
+    });
+    return this;
+};
+
+
+
 Div.prototype.mousedown = function (fn) {
     if (fn === undefined) {
         return this.$.mousedown();

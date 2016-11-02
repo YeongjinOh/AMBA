@@ -62,7 +62,7 @@ router.post('/regist', function(req, res, next) {
 
 /*사용자 목록을 리턴*/
 router.get('/', function (req, res, next) {
-    db.query("SELECT username FROM users", [])
+    db.query("SELECT email, username FROM users", [])
         .then(function (results) {
             //console.log('users : ', results);
             res.json({
