@@ -179,6 +179,27 @@ define ([], function() {
             }
         }
 
+        function eventEdit(seq, target, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#abs-event-editor')[0]) {
+                absRemove('abs-event-editor');
+                return false;
+            }
+
+            var root = div().class('third').id('abs-event-editor').appendTo(target).position('absolute').size(325, 'auto').minHeight(300)
+                .top((seq-1) * 25).left(100).borderRadius(2).border('2px solid gray').click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+            div().appendTo(root).displayBlock().text('update').size('100%', 30).button().click(function() {
+                fn(editor.text());
+            });
+            var editor = div().appendTo(root).displayBlock().size('100%', 'auto').minHeight(270).aceEditor();
+        }
+
+
         // context menubar 생성
         var contextMenuBar = div().append().id('abs-context-menu').size(100, 'auto').zIndex(1000).position('absolute')
             .color('#cccccc').border('1px solid gray').borderRadius(2).displayNone(); // overflowHidden()
@@ -448,7 +469,7 @@ define ([], function() {
                 paperTextAuto(1, dv, function(txt) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     // curDiv.video(txt);
-                    curDiv.video('http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
+                    curDiv.video(idContainer.id, 'http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
                     callback();
                 });
             });
@@ -460,7 +481,7 @@ define ([], function() {
                 paperTextAuto(2, dv, function(txt) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     // curDiv.video(txt);
-                    curDiv.video('http://media.w3.org/2010/05/bunny/movie.ogv');
+                    curDiv.video(idContainer.id, 'http://media.w3.org/2010/05/bunny/movie.ogv');
                     callback();
                 });
             });
@@ -478,16 +499,15 @@ define ([], function() {
                 .top(100).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
 
             div().appendTo(eventMenuBar).deco(decoMenu).text('click').click(function(dv, e) {
-                var curDiv = $('#' + idContainer.id).data('div');
-                curDiv.aceEditor();
-                callback();
-            });
+                e.stopPropagation();
+                e.preventDefault();
 
-            // var btn = div().append().size('100', '100').borderOption(2).borderOption('black', 'color').displayBlock()
-            //     .click(function () {
-            //         var temp = ace.text();
-            //         view1.text(temp);
-            //     });
+                eventEdit(0, dv, function(code) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    eval('$("#' + idContainer.id + '").data("div").click(' + code + ');');
+                    callback();
+                });
+            });
         });
 
         // 다른 곳 클릭시 context-menu hide
