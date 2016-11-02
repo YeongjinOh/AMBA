@@ -1,5 +1,8 @@
 require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
 
+    /** set global module **/
+    window.ambasa = {};
+
     /** set user authentication **/
 
     var authFactory = function () {
@@ -136,24 +139,40 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             key:fName,
             value:JSON.stringify(slideManager.export())
         };
-        $.get("http://220.149.236.19:3000/hashstore/put", param)
+        $.get("/hashstore/put", param)
             .done(function (data) {
-                console.log(data);
+                if (data.resultCode == 0) {
+                    alert('저장하였습니다.');
+                }
+                else {
+                    console.log(data.msg);
+                    alert('실패하였습니다.');
+                }
             });
     };
 
-    var onLoad = function () {
-        var fName = prompt('파일명을 입력해주세요.');
-        if (fName == null)
-            return;
-        var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-        if (params == null) {
-            alert('해당 파일을 불러올 수 없습니다.');
+    var onLoad = function (fName) {
+        if (typeof fName !== 'string') {
+            var fName = prompt('파일명을 입력해주세요.');
+            if (fName == null)
+                return;
         }
-        else {
-            fileName.text(fName);
-            slideManager.load(params);
-        }
+        var param = {
+            cid:'ambasa',
+            token:token,
+            key:fName,
+        };
+        // var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+        $.get("/hashstore/get", param)
+            .done(function (data) {
+                if (data.info.length > 0) {
+                    var params = JSON.parse(data.info[0].value);
+                    fileName.text(fName);
+                    slideManager.load(params);
+                } else {
+                        alert('해당 파일을 불러올 수 없습니다.');
+                }
+            });
     };
 
     var onDelete = function () {
@@ -801,4 +820,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     insertMember(username);
     insertMember('kks');
     insertMember('yjs');
+
+    window.ambasa.load = onLoad;
 });

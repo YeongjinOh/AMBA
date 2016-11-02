@@ -50,6 +50,19 @@
                             });
                             return;
                         }
+
+                        // ?app=path
+                        if (path.startsWith('ABS')) {
+                            var fName = window.location.hash;
+                            fName = fName.slice(1,fName.length);
+                            AB.loadScript('/app/ambasa.js', function () {
+                                setTimeout(function () {
+                                    window.ambasa.load(fName);
+                                },100);
+                            });
+                            return;
+                        }
+                        console.log(path);
                         AB.loadScript('/app/' + path + '.js');
                     });
                 });

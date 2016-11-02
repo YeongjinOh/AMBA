@@ -982,7 +982,7 @@ Div.prototype.image = function (src) {
     return this;
 };
 
-Div.prototype.video = function (src) {
+Div.prototype.video = function (id, src) {
     if (src === '') {
         if (this.$video)
             this.$video.remove();
@@ -995,13 +995,20 @@ Div.prototype.video = function (src) {
     var pw = this.width();
     var ph = this.height();
 
-    this.$video.attr('poster', '/javascripts/loadingBar.gif').attr('src', src).attr('width', pw)
+    this.$video.attr('src', src).attr('width', pw)
         .attr('height', ph).attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
+
+    var that = this;
+    $('#'+id).resize(function() {
+        pw = that.width();
+        ph = that.height();
+        that.$video.attr('width', pw).attr('height', ph);
+    });
 
     return this;
 };
 
-Div.prototype.audio = function (src) {
+Div.prototype.audio = function (id, src) {
     if (src === '') {
         if (this.$audio)
             this.$audio.remove();
@@ -1014,8 +1021,15 @@ Div.prototype.audio = function (src) {
     var pw = this.width();
     var ph = this.height();
 
-    this.$audio.attr('poster', '/javascripts/loadingBar.gif').attr('src', src).attr('width', pw)
-        .attr('height', ph).attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
+    this.$audio.attr('src', src).attr('width', pw).attr('height', ph)
+        .attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
+
+    var that = this;
+    $('#'+id).resize(function() {
+        pw = that.width();
+        ph = that.height();
+        that.$audio.attr('width', pw).attr('height', ph);
+    });
 
     return this;
 };
