@@ -39,7 +39,7 @@ router.get('/get', function(req, res, next) {
 });
 
 router.get('/delete', function(req, res, next) {
-    db.query("DELETE FROM hash_store WHERE cid = ? AND hash = ? AND akey = ?;", [req.query.cid, req.query.hashkey, req.query.key])
+    db.query("DELETE FROM hash_store WHERE cid = ? AND hashkey = ? AND akey = ?;", [req.query.cid, req.query.hashkey, req.query.key])
         .then(function () {
             res.json({
                 resultCode: 0

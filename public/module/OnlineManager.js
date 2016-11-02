@@ -21,7 +21,6 @@ define(['primus'], function (Primus) {
 
     //entrance the room,방번호를 받을때, 자동생성해서 만들거나 유저에게 받아서 접속한다.
     Module.join = function (rid, fn) {
-
         if(rid===undefined){
             primus.write({
                 action: 'join',

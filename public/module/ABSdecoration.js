@@ -79,12 +79,41 @@ define ([], function() {
             var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText();
             div().id('papertext-ok').appendTo(root).size('20%', '100%').minHeight(25).color('#cccccc').text('OK').fontBold().fontSize(11)
                 .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
-                    fn(value.text());
-                    absRemove('abs-papertext');
-                });
+                fn(value.text());
+                absRemove('abs-papertext');
+            });
 
             value.$text.focus();
         }
+
+        function paperTextAuto (seq, target, fn) {
+            if ($(document).find('.third')[0])
+                absRemove($(document).find('.third')[0].id);
+            if ($(document).find('#abs-papertext')[0]) {
+                absRemove('abs-papertext');
+                return false;
+            }
+
+            var root = div().class('third').id('abs-papertext').appendTo(target).position('absolute').size(150, 'auto').minHeight(25).top(seq * 25).left(100)
+                .color('white').borderRadius(2).border('2px solid gray').keypress(function(dv, e) {
+                    if (e.which == 13) {
+                        $('#papertext-ok').trigger('click');
+                    }
+                }).click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+            var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText();
+            div().id('papertext-ok').appendTo(root).size('20%', '100%').minHeight(25).color('#cccccc').text('OK').fontBold().fontSize(11)
+                .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
+                fn(value.text());
+                absRemove('abs-papertext');
+            });
+
+            value.$text.focus();
+        }
+
 
         function board (seq, target, list, fn) {
             if ($(document).find('.third')[0])
@@ -172,7 +201,8 @@ define ([], function() {
                 e.stopPropagation();
                 e.preventDefault();
 
-                paperText(0, dv, function(txt) {
+                // paperText(0, dv, function(txt) {
+                paperTextAuto(0, dv, function(txt) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.text(txt);
                     callback();
@@ -270,7 +300,7 @@ define ([], function() {
             var bgMenuBar = div().appendTo(dv).class('second').id('abs-bg-menu').size(100, 'auto').zIndex(1000).position('absolute')
                 .top(25).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
 
-            div().appendTo(bgMenuBar).deco(decoMenu).text('box').click(function(dv, e) {
+            div().appendTo(bgMenuBar).deco(decoMenu).text('shadow').click(function(dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
 
@@ -351,6 +381,113 @@ define ([], function() {
                     callback();
                 });
             });
+        });
+
+        div().appendTo(contextMenuBar).deco(decoMenu).text('media').click(function(dv) {
+            if ($(document).find('.second')[0])
+                absRemove($(document).find('.second')[0].id);
+            if (dv.children()[0]) {
+                absRemove('abs-media-menu');
+                return false;
+            }
+
+            var mediaMenuBar = div().appendTo(dv).class('second').id('abs-media-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                .top(75).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('image').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                if ($(document).find('.third')[0])
+                    absRemove($(document).find('.third')[0].id);
+                if (dv.children()[0]) {
+                    absRemove('abs-image-menu');
+                    return false;
+                }
+
+
+                /* Image Upload 이야기 좀 더 해보기 */
+                var imageMenuBar = div().appendTo(dv).class('second').id('abs-image-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                    .top(0).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+                div().appendTo(imageMenuBar).deco(decoMenu).text('local').click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    // dv.fileSelectable(function(dv, file) {
+                    //     var curDiv = $('#' + idContainer.id).data('div');
+                    //     curDiv.image(file);
+                    //     callback();
+                    // });
+
+                    paperTextAuto(0, dv, function(txt) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.backgroundSize('100%', '100%');
+                        curDiv.backgroundImage("url('/images/" + txt + ".png')");
+                        callback();
+                    });
+                });
+
+                div().appendTo(imageMenuBar).deco(decoMenu).text('url').click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    paperTextAuto(1, dv, function(txt) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.backgroundSize('100%', '100%');
+                        curDiv.backgroundImage("url(" + txt + ")");
+                        callback();
+                    });
+                });
+            });
+
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('audio').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperTextAuto(1, dv, function(txt) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    // curDiv.video(txt);
+                    curDiv.video('http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
+                    callback();
+                });
+            });
+
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('video').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperTextAuto(2, dv, function(txt) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    // curDiv.video(txt);
+                    curDiv.video('http://media.w3.org/2010/05/bunny/movie.ogv');
+                    callback();
+                });
+            });
+        });
+
+        div().appendTo(contextMenuBar).deco(decoMenu).text('event').click(function(dv) {
+            if ($(document).find('.second')[0])
+                absRemove($(document).find('.second')[0].id);
+            if (dv.children()[0]) {
+                absRemove('abs-event-menu');
+                return false;
+            }
+
+            var eventMenuBar = div().appendTo(dv).class('second').id('abs-event-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                .top(100).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+            div().appendTo(eventMenuBar).deco(decoMenu).text('click').click(function(dv, e) {
+                var curDiv = $('#' + idContainer.id).data('div');
+                curDiv.aceEditor();
+                callback();
+            });
+
+            // var btn = div().append().size('100', '100').borderOption(2).borderOption('black', 'color').displayBlock()
+            //     .click(function () {
+            //         var temp = ace.text();
+            //         view1.text(temp);
+            //     });
         });
 
         // 다른 곳 클릭시 context-menu hide

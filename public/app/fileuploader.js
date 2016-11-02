@@ -13,6 +13,7 @@ div().appendTo(root).size('auto', 'auto').text('Upload File').fontSize(25).disab
 
 div().appendTo(root).size('auto', 'auto').text('Load File').fontSize(25)
     .disableSelection().button().fileSelectable(function(dv, file) {
+        console.log(file);
     files.push(file);
 });
 
