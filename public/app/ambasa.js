@@ -76,7 +76,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             var prevParams = curObj.getParams();
             curSlide.addUndo(prevParams);
             curObj.setParams();
-            objStateBar.text(JSON.stringify(curObj.getParams()));
         }
         if (typeof fn === 'function')
             fn();
@@ -417,6 +416,10 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         };
 
         this.full = function () {
+            if (curObj)
+                curObj.deactive();
+            curObj = undefined;
+            curDiv = undefined;
             parent.displayNone();
             fullscreenViewer.displayInlineBlock();
             curBackground.appendTo(fullscreenViewer).overflowHidden();
@@ -679,9 +682,16 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
 
     var rightMenuBarWrapper = div().appendTo(menuBar).size('30%', '100%').padding(10);
     var userBar = div().appendTo(rightMenuBarWrapper).size('100%', '30%').border(borderGray).borderRadius(3)
-        .text(username).fontColor('gray').textAlignRight().paddingRight(10);
-    var objStateBar = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
-        .overflowAuto().fontColor('gray');
+        .text(username+'@amba.com').fontColor('gray').textAlignRight().paddingRight(10);
+    var members = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
+        .fontColor('gray').padding(10);
+    var cntMember = 0;
+    var insertMember = function (name) {
+        var member = div().appendTo(members).floatRight().size(40,'100%').margin(5);
+        div().appendTo(member).size('100%','90%').text(name).textAlignCenter();
+        div().appendTo(member).size('100%','10%').color(colors[(++cntMember*11)%15]);
+    };
+
 
     /** status bar **/
 
@@ -718,13 +728,13 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             event.preventDefault();
             slideManager.new();
         }
-        // up
+        // up key
         else if (event.which === 38 && !curObj && curSlide) {
             event.preventDefault();
             slideManager.prev();
         }
-        // down
-        else if (event.which === 40 && !curObj && curSlide) {
+        // down key or space bar
+        else if ((event.which === 40 || event.which === 32)&& !curObj && curSlide) {
             event.preventDefault();
             slideManager.next();
         }
@@ -769,4 +779,7 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     var isFullscreen = false;
     var copyParam;
     slideManager.new();
+    insertMember(username);
+    insertMember('kks');
+    insertMember('yjs');
 });
