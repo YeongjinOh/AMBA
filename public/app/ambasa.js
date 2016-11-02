@@ -1,5 +1,8 @@
 require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
 
+    /** set global module **/
+    window.ambasa = {};
+
     /** set user authentication **/
 
     var authFactory = function () {
@@ -148,11 +151,12 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
             });
     };
 
-    var onLoad = function () {
-        var fName = prompt('파일명을 입력해주세요.');
-        if (fName == null)
-            return;
-
+    var onLoad = function (fName) {
+        if (typeof fName !== 'string') {
+            var fName = prompt('파일명을 입력해주세요.');
+            if (fName == null)
+                return;
+        }
         var param = {
             cid:'ambasa',
             token:token,
@@ -168,7 +172,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
                 } else {
                         alert('해당 파일을 불러올 수 없습니다.');
                 }
-                console.log(data);
             });
     };
 
@@ -817,4 +820,6 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
     insertMember(username);
     insertMember('kks');
     insertMember('yjs');
+
+    window.ambasa.load = onLoad;
 });
