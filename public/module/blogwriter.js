@@ -1,7 +1,9 @@
 /**
  * Created by Lightsoo on 2016. 10. 26..
  */
+
 define([], function(){
+
     function getName() {
         var info = localStorage.getItem('ainfo');
         return JSON.parse(info).username;
@@ -25,25 +27,14 @@ define([], function(){
         + "-" + curr_year);// + "  " + curr_hour + ":" + curr_min + ":" + curr_sec);
     };
 
-    var getTime = function () {
-        var date = new Date();
-
-        var hour = date.getHours();
-        var min = addZeroIfNeeded(date.getMinutes());
-        if (hour < 13) {
-            return "오전 " + hour + ":" + min;
-        } else {
-            hour -= 12;
-            return "오후 " + hour + ":" + min;
-        }
-
-    };
-
     var Module = {};
-    Module.appendTo = function(dv) {
-        var writeFrame = div().size(600, 600).appendTo(dv).border(1);
 
-        var headerDv = div().size('100%', 40).appendTo(writeFrame).text('Write to Blog').fontSize(20).textAlign('center');
+    Module.appendTo = function(dv) {
+        var writeFrame = div().size(600, 'auto').appendTo(dv).border(1);
+        var aauth = localStorage.getItem('aauth');
+        var headerDv = div().size('100%', 40).appendTo(writeFrame)
+            .marginTop(5)
+            .text('Write to Blog').fontSize(20).textAlign('center');
         div().size('auto').appendTo(headerDv).text('Save').float('right').padding(4).boxShadow('2px 2px')
             .marginRight(6).marginTop(2).border(1).borderRadius(6).click(function(dv){
 
@@ -54,19 +45,20 @@ define([], function(){
                     aauth: localStorage.getItem('aauth'),
                     name: getName()
                 };
-                console.log('date : ' , data);
-                console.log(JSON.stringify(data));
+                //console.log('date : ' , data);
+                //console.log(JSON.stringify(data));
                 //var cid = AB.module.getCid();
 
                 $.post("/blog",
                     {
-                        cid: 'kks',//AB.module.getCid(),
-                        hashkey : data.title,
+                        cid: 'blogtest',//AB.module.getCid(),
+                        hashkey : aauth,//uid
                         akey: data.title + data.timestamp,
                         value: JSON.stringify(data)
 
                     }, function (result) {
                         console.log(result);
+                        writeFrame.remove();
                         //outputView.empty();
                         //outputView.text(JSON.stringify(result));
                     });
@@ -78,12 +70,10 @@ define([], function(){
 
         div().size(80, 40).appendTo(writeFrame).text('Title').textAlign('center').fontSize(20).fontColor('#CCC');
 
-        var titleDv = div().size(writeFrame.widthPixel()-100, 40).appendTo(writeFrame)
+        var titleDv = div().size(writeFrame.widthPixel()-100, 40).appendTo(writeFrame).textAlign('left')
             .border(1).borderRadius(6).padding(8).editable().text('').fontSize(20).cursorText();
 
         var contentDv = div().size('100%', 400).appendTo(writeFrame).tinymce().textAlign('center').marginTop(20);
-
-
     };
 
     return Module;
