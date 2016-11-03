@@ -66,8 +66,7 @@ define([],function () {
             .click(function () {
                 posting.reset();
                 page=1;
-                console.log(posting.getPost());
-                //posting.getPost();
+                posting.getPost();
             })
             .hoverTextColor('grey','black');
 
@@ -166,7 +165,7 @@ define([],function () {
             };
 
             this.getPost = function () {
-                return $.get("/blog",
+                return $.get("/blog/1",
                     {//query
                         cid: 'kks',
                         page : page
@@ -179,7 +178,7 @@ define([],function () {
                         }
 
                         var cpText = 'PAGE ' + page +' OF '+maxPage;
-                        console.log('current page : ' + page + ', maxPage : '+ maxPage);
+                        //console.log('current page : ' + page + ', maxPage : '+ maxPage);
 
 
                         if(maxPage == 1){
@@ -225,7 +224,8 @@ define([],function () {
                     .text(postValue.title).fontSize(22).fontColor('#333333').fontBold(),
                 postTime : div().appendTo(posting).floatRight()
                     .text(postValue.timestamp),
-                contents : div().appendTo(posting).text(postValue.content)
+                contents : div().appendTo(posting)
+                    .text(postValue.content)
                     .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
                     .minWidth('100%')
                     .borderRadius(5)

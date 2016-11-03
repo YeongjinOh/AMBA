@@ -6,8 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var app = express();
-// var redis = require('redis');
-// var cache = redis.createClient();
+ var redis = require('redis');
+ var cache = redis.createClient();
 
 var nodeadmin = require('nodeadmin');
 

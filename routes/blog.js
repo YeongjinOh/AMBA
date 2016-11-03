@@ -6,30 +6,78 @@
 var express = require('express');
 var router = express.Router();
 var db = require('../db');
+var crypto = require('./amba_crypto');
 
 
-router.post('/', function(req, res, next) {
+// get parameters from given url
+function getParams(url) {
+    var decUrl = decodeURIComponent(url);
+    var regex = /[?&]([^=#]+)=([^&#]*)/g,
+        params = {},
+        match;
+    while (match = regex.exec(decUrl)) {
+        params[match[1]] = match[2];
+    }
+    return params;
+}
 
-    var sql = "INSERT INTO data_store VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE value = ?";
-    console.log(req.body);
-    var cid = req.body.cid;
-    var akey = req.body.akey;
-    var value = req.body.value;
 
-    var arr =[cid, akey, value, value];
-    db.query(sql, arr)
-        .then(function (data) {
-            console.log(data);
-            res.json({
-                resultCode: 0
-            });
-        })
-        .catch(function (err) {
-            res.json({
-                resultCode: -1,
-                msg: err
-            });
-        });
+// get uid from token
+function getUid(token) {
+    var aauth = JSON.parse(crypto.decrypt(token));
+    return aauth.uid;
+}
+
+router.get('/1', function(req, res, next) {
+
+    console.log(req.url);
+    var params = getParams(req.url);
+    var uid = getUid(params.token);
+
+    console.log('params : ',params);
+    console.log('uid : ',uid);
+    res.end();
+    //var sql = "INSERT INTO hash_store VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE value = ?";
+    //console.log(req.body);
+    //var cid = req.body.cid;
+    //var akey = req.body.akey;
+    //var value = req.body.value;
+    //
+    //var arr =[cid, akey, value, value];
+    //db.query(sql, arr)
+    //    .then(function (data) {
+    //        console.log(data);
+    //        res.json({
+    //            resultCode: 0
+    //        });
+    //    })
+    //    .catch(function (err) {
+    //        res.json({
+    //            resultCode: -1,
+    //            msg: err
+    //        });
+    //    });
+
+    //var sql = "INSERT INTO data_store VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE value = ?";
+    //console.log(req.body);
+    //var cid = req.body.cid;
+    //var akey = req.body.akey;
+    //var value = req.body.value;
+    //
+    //var arr =[cid, akey, value, value];
+    //db.query(sql, arr)
+    //    .then(function (data) {
+    //        console.log(data);
+    //        res.json({
+    //            resultCode: 0
+    //        });
+    //    })
+    //    .catch(function (err) {
+    //        res.json({
+    //            resultCode: -1,
+    //            msg: err
+    //        });
+    //    });
 
 });
 

@@ -47,7 +47,6 @@ define([], function(){
         div().size('auto').appendTo(headerDv).text('Save').float('right').padding(4).boxShadow('2px 2px')
             .marginRight(6).marginTop(2).border(1).borderRadius(6).click(function(dv){
 
-
                 var data = {
                     title: titleDv.text(),
                     content: contentDv.text(),
@@ -62,6 +61,7 @@ define([], function(){
                 $.post("/blog",
                     {
                         cid: 'kks',//AB.module.getCid(),
+                        hashkey : data.title,
                         akey: data.title + data.timestamp,
                         value: JSON.stringify(data)
 
