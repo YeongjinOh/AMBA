@@ -508,6 +508,17 @@ define ([], function() {
                     callback();
                 });
             });
+
+            div().appendTo(eventMenuBar).deco(decoMenu).text('hover').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                eventEdit(0, dv, function(code) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    eval('$("#' + idContainer.id + '").data("div").hover(' + code + ');');
+                    callback();
+                });
+            });
         });
 
         // 다른 곳 클릭시 context-menu hide
