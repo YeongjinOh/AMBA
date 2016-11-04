@@ -140,7 +140,8 @@ requirejs(['OnlineManager'], function (online) {
     var sideBottom =div().appendTo(sideView).size(300,70).color('#EBE8E7')
         .margin('auto');
 
-    var sideFreinds = div().appendTo(sideBottom).size(150,70).image('../images/profile.png')
+    var sideFreinds = div().appendTo(sideBottom).size(150,70)
+        .image('../images/profile.png')
         //.borderRight('solid 2px').borderRightColor('#EBE8E7')
         .paddingLeft(2).paddingRight(2).cursorPointer()
         .hoverColor('#F4F6F6','transparent')
@@ -171,12 +172,17 @@ requirejs(['OnlineManager'], function (online) {
         .padding(10);
 
     var inputView = div().appendTo(contentBottom1).size('100%','100%').color('white')
-        .editable(true).text('').overflow('scroll');
+        .editable(true).text('').overflow('scroll')
+        .keypress(function(dv, e) {
+            if (e.which == 13) {
+                $('#sendBtn').trigger('click');
+            }
+        });
 
     var contentBottom2 = div().appendTo(contentView).size(70,70).color('#EBE8E7')
         .padding(10)
         .hoverColor('#F4F6F6','#EBE8E7');
-    var sendBtn = div().appendTo(contentBottom2).size('100%','100%')
+    var sendBtn = div().id('sendBtn').appendTo(contentBottom2).size('100%','100%')
         .image('../images/send.png').cursorPointer()
         .click(function () {
             var msg = inputView.text();
@@ -198,7 +204,7 @@ requirejs(['OnlineManager'], function (online) {
                         var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
                             // .marginRight(10).color('#ffff4d').fontSize(25).maxWidth(300)
                             // .borderOption(4).borderOption('#ffff4d', 'color').borderRadius('10%')
-                            .marginRight(10).color('white').fontSize(25).maxWidth(300)
+                            .marginRight(10).color('white').fontSize(23).maxWidth(300)
                             .borderOption(4).borderOption('#EBE8E7', 'color').borderRadius('10%')
 
                             .whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
@@ -224,14 +230,19 @@ requirejs(['OnlineManager'], function (online) {
                 var msg = message.msg;
                 var receivedMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
 
-                var profile = div().appendTo(receivedMsg).size('68', '68').color('blue').borderRadius('50%').floatLeft();
+                var profile = div().appendTo(receivedMsg).size('68', '68')
+                    .borderOption(1).borderOption('#EBE8E7', 'color')
+                    .borderRadius('50%')
+                    .padding(6)
+                    .image('../images/person.png').floatLeft();
+                    //.color('blue').borderRadius('50%')
                 var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
 
                 var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
-                    .fontSize(20).textAlign('left');
+                    .fontSize(18).textAlign('left');
                 var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(msg).maxWidth(300)
                     .borderOption(4).borderOption('#EBE8E7', 'color').borderRadius('10%')
-                    .whiteSpace('pre-line').fontSize(25).textAlign('left').floatLeft().wordBreak('break-all');
+                    .whiteSpace('pre-line').fontSize(23).textAlign('left').floatLeft().wordBreak('break-all');
                 var recievdTime = div().appendTo(receivedMsg).size('auto', '15').floatLeft().text(getTime()).marginLeft(5);
                 receivedMsg.appendTo(chatListView);
             }
@@ -287,7 +298,6 @@ requirejs(['OnlineManager'], function (online) {
         return {
             email : obj.email,
             username : obj.username
-
         }
     };
 
@@ -300,7 +310,9 @@ requirejs(['OnlineManager'], function (online) {
         roomData.selected = false;
         var room = div().appendTo(roomList).deco(roomView);
         var profileWrapper = div().appendTo(room).size(50, 50).padding(3);
-        var profile = div().appendTo(profileWrapper).size('100%','100%').color('red');
+        var profile = div().appendTo(profileWrapper).size('100%','100%')
+            .image('../images/rooms.png')
+        //.color('red');
         var roomid = div().appendTo(room)
             .text(roomData.roomid);
 
@@ -337,7 +349,6 @@ requirejs(['OnlineManager'], function (online) {
         this.getFreinds = function () {
             $.get('/users',{/*query*/}
                 , function(results) {
-                    //console.log('getFreinds : ', results);
                     //array
                     friendAdapter = results.data.map(friendData);
                     for(var i=0;i<friendAdapter.length;i++){
@@ -384,7 +395,7 @@ requirejs(['OnlineManager'], function (online) {
            var time = msgData.time;
            var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
            var txt = div().appendTo(myMsg).size('auto', 'auto').text(message).floatRight()
-               .marginRight(10).color('white').fontSize(25).maxWidth(300)
+               .marginRight(10).color('white').fontSize(23).maxWidth(300)
                .borderOption(4).borderOption('#EBE8E7', 'color').borderRadius('10%')
 
                .whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
@@ -397,14 +408,19 @@ requirejs(['OnlineManager'], function (online) {
            var time = msgData.time;
            var receivedMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
 
-           var profile = div().appendTo(receivedMsg).size('68', '68').color('blue').borderRadius('50%').floatLeft();
+           var profile = div().appendTo(receivedMsg).size('60', '60')
+               .padding(6)
+               .borderOption(1).borderOption('#EBE8E7', 'color')
+               .borderRadius('50%')
+               .image('../images/person.png').floatLeft();
+               //.color('blue').borderRadius('50%').floatLeft();
            var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
 
            var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
-               .fontSize(20).textAlign('left');
+               .fontSize(18).textAlign('left');
            var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(message).maxWidth(300)
                .borderOption(4).borderOption('#EBE8E7', 'color').borderRadius('10%')
-               .whiteSpace('pre-line').fontSize(25).textAlign('left').floatLeft().wordBreak('break-all');
+               .whiteSpace('pre-line').fontSize(23).textAlign('left').floatLeft().wordBreak('break-all');
 
            var recievdTime = div().appendTo(receivedMsg).size('auto', '15').floatLeft().text(time).marginLeft(5);
            receivedMsg.appendTo(chatListView);
@@ -424,5 +440,5 @@ requirejs(['OnlineManager'], function (online) {
     var networkManager = new NetworkManager();
     networkManager.getFreinds();
     networkManager.getRooms();
-
+    //networkManager.getMsg(11);
 });

@@ -8,16 +8,41 @@
 
 requirejs(['bloglist','blogwriter'], function (bloglist, blogwriter) {
 
-    var pHeader = div().size('100%', 'auto').text('AMBA').fontSize(50).append().borderBottom('10px solid green').fontColor('green');
+
+
+
+
+    var pHeader = div().size('100%', 'auto').text('AMBA').fontSize(50).append()
+        .borderBottom('10px solid green').fontColor('green');
+
+    var bgDiv = div().size('100%','auto').append().color('white').textAlign('center').marginTop(10);
     var pContent = div().size('100%','auto').append();
     bloglist.appendTo(pContent);
 
     var btn_write = div().size('auto').appendTo(pHeader)
-        .fontSize(50).fontColor('green').text('글쓰기').float('right')
+        .fontSize(50).fontColor('green').text('write').float('right')
         .click(function () {
-            var bgDiv = div().size('100%','100%').appendTo(pContent).color('white').textAlign('center');
+            // var bgDiv = div().size('100%','100%').appendTo(pContent).color('white').textAlign('center');
             blogwriter.appendTo(bgDiv);
         });
+
+
+
+    //
+    //var pHeader = div().size('100%', 'auto').text('AMBA').fontSize(50).append().borderBottom('10px solid green').fontColor('green');
+    //var pContent = div().size('100%','auto').append();
+    //bloglist.appendTo(pContent);
+    //
+    //var btn_write = div().size('auto').appendTo(pHeader)
+    //    .fontSize(50).fontColor('green').text('글쓰기').float('right')
+    //    .click(function () {
+    //        var bgDiv = div().size('100%','100%').appendTo(pContent).color('white').textAlign('center');
+    //        blogwriter.appendTo(bgDiv);
+    //    });
+
+
+
+
 });
 
 //div().size('200','100').append().image('https://www.google.co.kr/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')

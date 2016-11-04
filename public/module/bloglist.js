@@ -13,7 +13,6 @@ define([],function () {
                     aauth : localStorage.getItem('aauth'),
                     title : '?????????????????????????????????????????' + i,
                     content : '1aaasasasasaksnknaslnasalsmlamslamslamslamskanskanskanskansajsnksandaskldnlasdklasd1aaasasasasaksnknaslnasalsmlamslamslamslamskanskanskanskansajsnksandaskldnlasdklasd1aaasasasasaksnknaslnasalsmlamslamslamslamskanskanskanskansajsnksandaskldnlasdklasd',
-                    //content : '1????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????',
                     name : 'lightsoo',
                     timestamp : "2016-02-12"
                 };
@@ -34,11 +33,12 @@ define([],function () {
                 nextPage.appendTo(pBottom);
                 currentPage.appendTo(pBottom).text(cpText);
             }
-
         }
 
         var page = 1;
         var maxPage =0;//exam
+        var aauth = localStorage.getItem('aauth');
+
 
         // postItem view
         var postView = function (div) {
@@ -66,8 +66,7 @@ define([],function () {
             .click(function () {
                 posting.reset();
                 page=1;
-                console.log(posting.getPost());
-                //posting.getPost();
+                posting.getPost();
             })
             .hoverTextColor('grey','black');
 
@@ -168,7 +167,8 @@ define([],function () {
             this.getPost = function () {
                 return $.get("/blog",
                     {//query
-                        cid: 'kks',
+                        cid: 'blogtest',
+                        aauth : aauth,
                         page : page
                     }, function (results) {
                         posting = results.value.map(buildPost);
@@ -179,7 +179,7 @@ define([],function () {
                         }
 
                         var cpText = 'PAGE ' + page +' OF '+maxPage;
-                        console.log('current page : ' + page + ', maxPage : '+ maxPage);
+                        //console.log('current page : ' + page + ', maxPage : '+ maxPage);
 
 
                         if(maxPage == 1){
@@ -225,7 +225,8 @@ define([],function () {
                     .text(postValue.title).fontSize(22).fontColor('#333333').fontBold(),
                 postTime : div().appendTo(posting).floatRight()
                     .text(postValue.timestamp),
-                contents : div().appendTo(posting).text(postValue.content)
+                contents : div().appendTo(posting)
+                    .text(postValue.content)
                     .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
                     .minWidth('100%')
                     .borderRadius(5)
