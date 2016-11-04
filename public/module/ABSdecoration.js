@@ -25,18 +25,26 @@ define ([], function() {
             return this;
         };
 
+        function syncMenu(cls, id) {
+            if (AB.find('.'+cls)) {
+                absRemove(AB.find('.' + cls).id());
+                return true;
+            }
+            if (AB.find('#'+id)) {
+                absRemove(id);
+                return false;
+            }
+            return true;
+        }
+
         function absRemove(id) {
             $('#'+id).hide(200);
             setTimeout(function() {$('#'+id).remove();}, 200);
         }
 
         function paperNum (seq, target, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if ($(document).find('#abs-papernum')[0]) {
-                absRemove('abs-papernum');
+            if (!syncMenu('third', 'abs-papernum'))
                 return false;
-            }
 
             var root = div().class('third').id('abs-papernum').appendTo(target).position('absolute').size(60, 25).top(seq * 25).left(100)
                 .color('white').borderRadius(2).border('2px solid gray').keypress(function(dv, e) {
@@ -63,12 +71,8 @@ define ([], function() {
         }
 
         function paperText (seq, target, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if ($(document).find('#abs-papertext')[0]) {
-                absRemove('abs-papertext');
+            if (!syncMenu('third', 'abs-papertext'))
                 return false;
-            }
 
             var root = div().class('third').id('abs-papertext').appendTo(target).position('absolute').size(150, 'auto').minHeight(25).top(seq * 25).left(100)
                 .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
@@ -87,12 +91,8 @@ define ([], function() {
         }
 
         function paperTextAuto (seq, target, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if ($(document).find('#abs-papertext')[0]) {
-                absRemove('abs-papertext');
+            if (!syncMenu('third', 'abs-papertext'))
                 return false;
-            }
 
             var root = div().class('third').id('abs-papertext').appendTo(target).position('absolute').size(150, 'auto').minHeight(25).top(seq * 25).left(100)
                 .color('white').borderRadius(2).border('2px solid gray').keypress(function(dv, e) {
@@ -114,36 +114,28 @@ define ([], function() {
             value.$text.focus();
         }
 
-
-        function board (seq, target, list, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if ($(document).find('#abs-board')[0]) {
-                absRemove('abs-board');
+        function listView(seq, target, list, getView, fn) {
+            if (!syncMenu('third', 'abs-list'))
                 return false;
-            }
 
-            var root = div().class('third').id('abs-board').appendTo(target).position('absolute').size(100, 'auto').top(seq * 25).left(100)
-                .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
+            var root = div().class('third').id('abs-list').appendTo(target).position('absolute').size(100, 'auto').top(seq * 25).left(100)
+                .color('white').borderRadius(2).border('2px solid gray').click(function (dv, e) {
                     e.stopPropagation();
                     e.preventDefault();
                 });
 
-            for(i=0; i<list.length; i++) {
-                var cell = div().appendTo(root).size('100%', 50).color('white').hoverColor('#cccccc', 'white').click(function (dv) {
-                    fn(dv.children()[0].borderStyle());
-                });
-                div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderStyle(list[i]);
+            listAdapter(target, root, list, getView, fn);
+        }
+
+        function listAdapter(target, dv, list, getView, fn) {
+            for (i = 0; i < list.length; i++) {
+                getView(target, dv, list, fn);
             }
         }
 
         function pallet (seq, target, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if ($(document).find('#pallet')[0]) {
-                absRemove('pallet');
+            if (!syncMenu('third', 'pallet'))
                 return false;
-            }
 
             var pallet_color = [
                 ['#660000', '#800000', '#990000', '#b30000', '#cc0000', '#e60000', '#ff0000', '#ff1a1a',
@@ -179,26 +171,19 @@ define ([], function() {
             }
         }
 
-        function eventEdit(seq, target, fn) {
-            if ($(document).find('.third')[0])
-                absRemove($(document).find('.third')[0].id);
-            if ($(document).find('#abs-event-editor')[0]) {
-                absRemove('abs-event-editor');
-                return false;
-            }
+        // id를 설정하기!
+        function eventEdit(id, fn) {
+            syncMenu(undefined, 'abs-event-'+id);
 
-            var root = div().class('third').id('abs-event-editor').appendTo(target).position('absolute').size(325, 'auto').minHeight(300)
-                .top((seq-1) * 25).left(100).borderRadius(2).border('2px solid gray').click(function(dv, e) {
+            var root = div().id('abs-event-'+id).append().position('absolute').size(325, 'auto').minHeight(300)
+                .top(98).left(1280).borderRadius(2).border('2px solid gray').draggable().click(function(dv, e) { //.top((seq-1) * 25).left(100)
                     e.stopPropagation();
                     e.preventDefault();
                 });
 
-            div().appendTo(root).displayBlock().text('update').size('100%', 30).button().click(function() {
-                fn(editor.text());
-            });
+            div().appendTo(root).displayBlock().text('update').size('100%', 30).color('green');
             var editor = div().appendTo(root).displayBlock().size('100%', 'auto').minHeight(270).aceEditor();
         }
-
 
         // context menubar 생성
         var contextMenuBar = div().append().id('abs-context-menu').size(100, 'auto').zIndex(1000).position('absolute')
@@ -208,12 +193,8 @@ define ([], function() {
         };
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('font').click(function (dv) {
-            if ($(document).find('.second')[0])
-                absRemove($(document).find('.second')[0].id);
-            if (dv.children()[0]) {
-                absRemove('abs-font-menu');
+            if (!syncMenu('second', 'abs-font-menu'))
                 return false;
-            }
 
             var fontMenuBar = div().appendTo(dv).class('second').id('abs-font-menu').size(100, 'auto').zIndex(1000).position('absolute')
                 .top(0).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
@@ -246,56 +227,34 @@ define ([], function() {
                 e.stopPropagation();
                 e.preventDefault();
 
-                if ($(document).find('.third')[0])
-                    absRemove($(document).find('.third')[0].id);
-                if (dv.children()[0]) {
-                    absRemove('abs-fontweight');
-                    return false;
-                }
-
                 var font_weight = ['normal', 'bold'];
 
-                var root = div().class('third').id('abs-fontweight').appendTo(dv).position('absolute').size(100, 'auto').top(50).left(100)
-                    .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
-                        e.stopPropagation();
-                        e.preventDefault();
+                listView(2, dv, font_weight, function(target, dv, list, fn) {
+                    div().appendTo(dv).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontWeight(list[i]).hoverColor('#cccccc', 'white').click(function (me) {
+                        fn(me.fontWeight());
                     });
-
-                for(i=0; i<font_weight.length; i++) {
-                    div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontWeight(font_weight[i]).hoverColor('#cccccc', 'white').click(function (dv) {
-                        var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.fontWeight(dv.fontWeight());
-                        callback();
-                    });
-                }
+                }, function(v) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.fontWeight(v);
+                    callback();
+                });
             });
 
             div().appendTo(fontMenuBar).deco(decoMenu).text('family').click(function(dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
 
-                if ($(document).find('.third')[0])
-                    absRemove($(document).find('.third')[0].id);
-                if (dv.children()[0]) {
-                    absRemove('abs-fontfamily');
-                    return false;
-                }
-
                 var font_family = ['normal', 'serif', 'sans-serif', 'Arial', 'Charcoal', 'Impact'];
 
-                var root = div().class('third').id('abs-fontfamily').appendTo(dv).position('absolute').size(100, 'auto').top(75).left(100)
-                    .color('white').borderRadius(2).border('2px solid gray').click(function(dv, e) {
-                        e.stopPropagation();
-                        e.preventDefault();
+                listView(3, dv, font_family, function(target, dv, list, fn) {
+                    div().appendTo(dv).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontFamily(list[i]).hoverColor('#cccccc', 'white').click(function (me) {
+                        fn(me.fontFamily());
                     });
-
-                for(i=0; i<font_family.length; i++) {
-                    div().appendTo(root).size('100%', 50).text('font').fontSize(35).textAlignCenter().color('white').fontFamily(font_family[i]).hoverColor('#cccccc', 'white').click(function (dv) {
-                        var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.fontFamily(dv.fontFamily());
-                        callback();
-                    });
-                }
+                }, function(v) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.fontFamily(v);
+                    callback();
+                });
             });
 
             div().appendTo(fontMenuBar).deco(decoMenu).text('color').click(function(dv, e) {
@@ -311,12 +270,8 @@ define ([], function() {
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('background').click(function(dv) {
-            if ($(document).find('.second')[0])
-                absRemove($(document).find('.second')[0].id);
-            if (dv.children()[0]) {
-                absRemove('abs-bg-menu');
+            if (!syncMenu('second', 'abs-bg-menu'))
                 return false;
-            }
 
             var bgMenuBar = div().appendTo(dv).class('second').id('abs-bg-menu').size(100, 'auto').zIndex(1000).position('absolute')
                 .top(25).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
@@ -347,12 +302,8 @@ define ([], function() {
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('edge').click(function(dv) {
-            if ($(document).find('.second')[0])
-                absRemove($(document).find('.second')[0].id);
-            if (dv.children()[0]) {
-                absRemove('abs-edge-menu');
+            if (!syncMenu('second', 'abs-edge-menu'))
                 return false;
-            }
 
             var edgeMenuBar = div().appendTo(dv).class('second').id('abs-edge-menu').size(100, 'auto').zIndex(1000).position('absolute')
                 .top(50).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
@@ -374,7 +325,12 @@ define ([], function() {
 
                 var edge_style = ['none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
 
-                board(1, dv, edge_style, function(s) {
+                listView(1, dv, edge_style, function(target, dv, list, fn) {
+                    var cell = div().appendTo(dv).size('100%', 50).color('white').hoverColor('#cccccc', 'white').click(function(target) {
+                        fn(target.children()[0].borderStyle());
+                    });
+                    div().appendTo(cell).displayBlock().size(80, 40).margin('auto').marginTop(5).marginBottom(5).borderWidth(3).borderStyle(list[i]);
+                }, function(s) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderStyle(s);
                     callback();
@@ -405,12 +361,8 @@ define ([], function() {
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('media').click(function(dv) {
-            if ($(document).find('.second')[0])
-                absRemove($(document).find('.second')[0].id);
-            if (dv.children()[0]) {
-                absRemove('abs-media-menu');
+            if (!syncMenu('second', 'abs-media-menu'))
                 return false;
-            }
 
             var mediaMenuBar = div().appendTo(dv).class('second').id('abs-media-menu').size(100, 'auto').zIndex(1000).position('absolute')
                 .top(75).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
@@ -419,46 +371,11 @@ define ([], function() {
                 e.stopPropagation();
                 e.preventDefault();
 
-                if ($(document).find('.third')[0])
-                    absRemove($(document).find('.third')[0].id);
-                if (dv.children()[0]) {
-                    absRemove('abs-image-menu');
-                    return false;
-                }
-
-
-                /* Image Upload 이야기 좀 더 해보기 */
-                var imageMenuBar = div().appendTo(dv).class('second').id('abs-image-menu').size(100, 'auto').zIndex(1000).position('absolute')
-                    .top(0).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
-
-                div().appendTo(imageMenuBar).deco(decoMenu).text('local').click(function(dv, e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-
-                    // dv.fileSelectable(function(dv, file) {
-                    //     var curDiv = $('#' + idContainer.id).data('div');
-                    //     curDiv.image(file);
-                    //     callback();
-                    // });
-
-                    paperTextAuto(0, dv, function(txt) {
-                        var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.backgroundSize('100%', '100%');
-                        curDiv.backgroundImage("url('/images/" + txt + ".png')");
-                        callback();
-                    });
-                });
-
-                div().appendTo(imageMenuBar).deco(decoMenu).text('url').click(function(dv, e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-
-                    paperTextAuto(1, dv, function(txt) {
-                        var curDiv = $('#' + idContainer.id).data('div');
-                        curDiv.backgroundSize('100%', '100%');
-                        curDiv.backgroundImage("url(" + txt + ")");
-                        callback();
-                    });
+                paperTextAuto(0, dv, function(txt) {
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.backgroundSize('100%', '100%');
+                    curDiv.backgroundImage(txt);
+                    callback();
                 });
             });
 
@@ -468,8 +385,8 @@ define ([], function() {
 
                 paperTextAuto(1, dv, function(txt) {
                     var curDiv = $('#' + idContainer.id).data('div');
-                    // curDiv.video(txt);
-                    curDiv.video(idContainer.id, 'http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
+                    curDiv.audio(idContainer.id, txt);
+                    // curDiv.audio(idContainer.id, 'http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
                     callback();
                 });
             });
@@ -480,44 +397,19 @@ define ([], function() {
 
                 paperTextAuto(2, dv, function(txt) {
                     var curDiv = $('#' + idContainer.id).data('div');
-                    // curDiv.video(txt);
-                    curDiv.video(idContainer.id, 'http://media.w3.org/2010/05/bunny/movie.ogv');
+                    curDiv.video(idContainer.id, txt);
+                    // curDiv.video(idContainer.id, 'http://media.w3.org/2010/05/bunny/movie.ogv');
                     callback();
                 });
             });
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('event').click(function(dv) {
-            if ($(document).find('.second')[0])
-                absRemove($(document).find('.second')[0].id);
-            if (dv.children()[0]) {
-                absRemove('abs-event-menu');
+            if (!syncMenu('second', 'abs-event-menu'))
                 return false;
-            }
 
-            var eventMenuBar = div().appendTo(dv).class('second').id('abs-event-menu').size(100, 'auto').zIndex(1000).position('absolute')
-                .top(100).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
-
-            div().appendTo(eventMenuBar).deco(decoMenu).text('click').click(function(dv, e) {
-                e.stopPropagation();
-                e.preventDefault();
-
-                eventEdit(0, dv, function(code) {
-                    var curDiv = $('#' + idContainer.id).data('div');
-                    eval('$("#' + idContainer.id + '").data("div").click(' + code + ');');
-                    callback();
-                });
-            });
-
-            div().appendTo(eventMenuBar).deco(decoMenu).text('hover').click(function(dv, e) {
-                e.stopPropagation();
-                e.preventDefault();
-
-                eventEdit(0, dv, function(code) {
-                    var curDiv = $('#' + idContainer.id).data('div');
-                    eval('$("#' + idContainer.id + '").data("div").hover(' + code + ');');
-                    callback();
-                });
+            eventEdit(idContainer.id, function(code) {
+                return 0;
             });
         });
 
