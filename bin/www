@@ -19,7 +19,7 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
- var redis = require('redis');
+ // var redis = require('redis');
 
 
 var Primus = require('primus');
@@ -31,8 +31,8 @@ primus = new Primus(server,options);
 //클라이언트에서 primus라이브러리를 사용하기 위한 용도
 //primus.save(__dirname +'/primus.js');
 
-  var sub = redis.createClient();
-  var pub = redis.createClient();
+  // var sub = redis.createClient();
+  // var pub = redis.createClient();
 
 
 primus.on('connection',function(spark){

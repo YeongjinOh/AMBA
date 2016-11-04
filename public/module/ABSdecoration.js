@@ -171,18 +171,62 @@ define ([], function() {
             }
         }
 
-        // id를 설정하기!
         function eventEdit(id, fn) {
-            syncMenu(undefined, 'abs-event-'+id);
+            syncMenu(undefined, 'abs-event-' + id);
 
-            var root = div().id('abs-event-'+id).append().position('absolute').size(325, 'auto').minHeight(300)
-                .top(98).left(1280).borderRadius(2).border('2px solid gray').draggable().click(function(dv, e) { //.top((seq-1) * 25).left(100)
+            var curEvent;
+
+            function switchManager(dv) {
+                curEvent.color('#cccccc');
+                dv.color('gray');
+
+                curEvent.code = editor.text();
+                editor.text(dv.code);
+                curEvent = dv;
+            }
+
+            var root = div().id('abs-event-' + id).append().position('absolute').size(325, 'auto').minHeight(300).zIndex(parseInt(id.split('-')[1]))
+                .top(98).left(1280).borderRadius(2).border('2px solid black').draggable().click(function (dv, e) { //.top((seq-1) * 25).left(100)
                     e.stopPropagation();
                     e.preventDefault();
                 });
 
-            div().appendTo(root).displayBlock().text('update').size('100%', 30).color('green');
-            var editor = div().appendTo(root).displayBlock().size('100%', 'auto').minHeight(270).aceEditor();
+            var menuBar = div().appendTo(root).displayBlock().size('100%', 30).color('#cccccc').selectable(false);
+            div().appendTo(menuBar).text('#' + id).textAlignCenter().fontBold().fontSize(20).size('25%', '100%').color('gray').border('2px solid black').cursorDefault();
+            div().appendTo(menuBar).id('abs-event-click').text('click').textAlignCenter().fontSize(20).size('25%', '100%')
+                .color('#cccccc').border('2px solid black').cursorPointer().click(function (dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                switchManager(dv);
+            });
+            div().appendTo(menuBar).id('abs-event-hover').text('hover').textAlignCenter().fontSize(20).size('25%', '100%')
+                .color('#cccccc').border('2px solid black').cursorPointer().click(function (dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                switchManager(dv);
+            });
+            var apply = div().appendTo(menuBar).id('abs-event-apply').text('apply').textAlignCenter().fontSize(20).size('25%', '100%')
+                .color('#cccccc').border('2px solid black').cursorPointer().hoverColor('gray', '#cccccc').click(function (dv, e) {
+                    // TODO: code 여기서 전달해주기!
+                    console.log(curEvent.id());
+                    console.log(editor.text());
+                });
+
+            div().appendTo(apply).float('right').text('X').textAlignCenter().fontSize(1).size(18, 19).color('#cccccc')
+                .borderRadius(9).border('2px solid black').cursorPointer().hoverColor('gray', '#cccccc').click(function (dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                absRemove('abs-event-' + id);
+                $('#abs-event-apply').trigger('click');
+            });
+
+            var editor = div().appendTo(root).displayBlock().text('function(dv, e) {\n\t// input code\n}').size('100%', 'auto').minHeight(270).aceEditor();
+
+            curEvent = $('#abs-event-click').data('div');
+            $('#'+curEvent.id()).trigger('click');
         }
 
         // context menubar 생성
@@ -222,7 +266,6 @@ define ([], function() {
                 });
             });
 
-            /* need refactoring */
             div().appendTo(fontMenuBar).deco(decoMenu).text('weight').click(function(dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -409,7 +452,7 @@ define ([], function() {
                 return false;
 
             eventEdit(idContainer.id, function(code) {
-                return 0;
+
             });
         });
 
