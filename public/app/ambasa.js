@@ -433,6 +433,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         var aniViewer = div().size('100%','100%').appendTo(animationViewer).color('gray');
         var absAnimation = ABSanimation.getInstance();
         absAnimation.init(aniViewer, function () { return curObj && curObj.getId()});
+        absAnimation.append();
 
 
         // ABS Objects
@@ -454,12 +455,14 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         this.active = function () {
             slideViewerWrapper.border('2px solid #BF360C').padding(0);
             slideBackground.displayInlineBlock();
+            aniViewer.displayInlineBlock();
             pageCur.text(numberViewer.text());
             curBackground = slideBackground;
         };
         this.deactive = function () {
             slideViewerWrapper.border(borderGray).padding(1);
             slideBackground.displayNone();
+            aniViewer.displayNone();
         };
         this.full = function () {
             if (curObj)
