@@ -1,4 +1,4 @@
-require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation) {
+require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -32,6 +32,15 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         alert('로그인 페이지로 이동합니다.')
         return;
     }
+
+    /** connect online **/
+
+    online.connect();
+    online.onRecieve(function (data) {
+        console.log('onRecieve');
+        console.log(data);
+    });
+
 
 
     /** colors **/
@@ -109,6 +118,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             var prevParams = curObj.getParams();
             curSlide.addUndo(prevParams);
             curObj.setParams();
+            online.sendMessage({params:curObj.getParams});
         }
         if (typeof fn === 'function')
             fn();
@@ -144,10 +154,17 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             curSlide.redo();
     };
     var onSave = function () {
-        var fName = prompt('파일명을 입력해주세요.');
-        if (fName == null)
-            return;
-        fileName.text(fName);
+        var fName = fileName.text();
+        if(fName === defaultName){
+            var fName = prompt('파일명을 입력해주세요.');
+            if (fName == null || fName === defaultName) {
+                alert('올바르지 않은 파일명입니다.')
+                return;
+            }
+            fileName.text(fName);
+            online.join(fName);
+        }
+
         // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
         var param = {
             cid:'ambasa',
@@ -809,7 +826,8 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
 
     var leftMenuBarWrapper = div().appendTo(menuBar).size('70%', '100%');
     var fileInfoHeader = div().appendTo(leftMenuBarWrapper).size('100%', 60);
-    var fileName = div().appendTo(fileInfoHeader).size(200, 30).margin(20).text('제목 없는 프레젠테이션').fontColor('gray').fontSize(20);
+    var defaultName = "제목 없는 프레젠테이션";
+    var fileName = div().appendTo(fileInfoHeader).size(200, 30).margin(20).text(defaultName).fontColor('gray').fontSize(20);
 
     var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%', 40);
     var decoSlideMenuButton = function (div) {
@@ -951,6 +969,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
 
     window.ambasa.load = function (fName) {
         var userId = localStorage.getItem("ambasa");
+        online.join(fName);
         if (userId)
             onEnter(fName, userId);
         else
