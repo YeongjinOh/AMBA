@@ -434,6 +434,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         var absAnimation = ABSanimation.getInstance();
         absAnimation.init(aniViewer, function () { return curObj && curObj.getId()});
         absAnimation.append();
+        var animationManager = absAnimation.animationManager();
 
 
         // ABS Objects
@@ -471,14 +472,10 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             curDiv = undefined;
             parent.displayNone();
             slideShowManager.play(this.export());
-            // curBackground.appendTo(fullscreenViewer).overflowHidden();
-            // curBackground.css('zoom', (100 * zoomRatio) + '%');
         };
         this.unfull = function () {
             parent.displayInlineBlock();
             slideShowManager.stop();
-            // curBackground.appendTo(slideEditor).overflow('initial');
-            // curBackground.css('zoom', 'initial');
         };
         this.setIdx = function (idx) {
             numberViewer.text(idx);
@@ -552,6 +549,24 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         };
         this.resetRedo = function () {
             redolist = [];
+        };
+
+        // play animation;
+        this.playNext = function () {
+            if (animationManager.hasNext()) {
+                console.log('play next - animation called');
+                animationManager.next();
+                return true;
+            }
+            return false;
+        };
+        this.playBack = function () {
+            if (animationManager.hasBack()) {
+                console.log('play back - animation called');
+                animationManager.back();
+                return true;
+            }
+            return false;
         }
     };
 
@@ -584,27 +599,31 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             }
         };
         this.next = function () {
-            var next = curSlide.getIdx();
-            if (next < slides.length) {
-                curSlide.deactive();
-                if (isFullscreen)
-                    curSlide.unfull();
-                curSlide = slides[next];
-                curSlide.focus()
-                if (isFullscreen)
-                    curSlide.full();
+            if (!curSlide.playNext()) {
+                var next = curSlide.getIdx();
+                if (next < slides.length) {
+                    curSlide.deactive();
+                    if (isFullscreen)
+                        curSlide.unfull();
+                    curSlide = slides[next];
+                    curSlide.focus();
+                    if (isFullscreen)
+                        curSlide.full();
+                }
             }
         };
         this.prev = function () {
-            var prev = curSlide.getIdx() - 2;
-            if (prev >= 0) {
-                curSlide.deactive();
-                if (isFullscreen)
-                    curSlide.unfull();
-                curSlide = slides[prev];
-                curSlide.focus();
-                if (isFullscreen)
-                    curSlide.full();
+            if (!curSlide.playBack()) {
+                var prev = curSlide.getIdx() - 2;
+                if (prev >= 0) {
+                    curSlide.deactive();
+                    if (isFullscreen)
+                        curSlide.unfull();
+                    curSlide = slides[prev];
+                    curSlide.focus();
+                    if (isFullscreen)
+                        curSlide.full();
+                }
             }
         };
         this.export = function () {
@@ -652,6 +671,14 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         var slideBackground = getSlideBackground().appendTo(fullscreenViewer).css('zoom', (100 * zoomRatio) + '%');
 
         this.play = function (params) {
+
+            // remove previous objects
+            var children = slideBackground.children();
+            for (var i=0; i<children.length; i++) {
+                children[i].remove();
+            }
+
+            // append current objects
             for (var id in params) {
                 var param = $.extend({},params[id]);
                 param.id = param.id + '-clone';
@@ -661,9 +688,6 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         };
         this.stop = function () {
             fullscreenViewer.displayNone();
-        };
-        this.clear = function () {
-            
         };
     };
 
@@ -852,7 +876,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             onAnimationViewer();
         isAniViewerOn = !isAniViewerOn;
     };
-    var buttonAnimation = div().appendTo(fileInfoHeader).margin(20).padding(3).border(borderGray).borderRadius(4)
+    var buttonAnimation = div().appendTo(fileInfoHeader).class('abs-option').margin(20).padding(3).border(borderGray).borderRadius(4)
         .text('Animation').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee','white')
         .click(switchAnimationViewer);
 
