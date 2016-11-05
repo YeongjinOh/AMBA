@@ -126,10 +126,13 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
 
     var onZoom = function () {
         if (!isFullscreen) {
-            if (curSlide) {
-                curSlide.full();
-                isFullscreen = true;
-            }
+            slideManager.full();
+        }
+    };
+    var onExit = function () {
+        if (isFullscreen) {
+            slideManager.unfull();
+            isFullscreen = false;
         }
     };
     var onUndo = function () {
@@ -226,8 +229,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         if (event.which === 27) {
             if (isFullscreen && curSlide) {
                 event.preventDefault();
-                curSlide.unfull();
-                isFullscreen = false;
+                onExit();
             }
         }
         // F5
@@ -240,13 +242,13 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             event.preventDefault();
             slideManager.new();
         }
-        // up key
-        else if (event.which === 38 && !curObj && curSlide) {
+        // up or left key
+        else if ((event.which === 38 || event.which === 37)&& !curObj && curSlide) {
             event.preventDefault();
             slideManager.prev();
         }
-        // down key or space bar
-        else if ((event.which === 40 || event.which === 32)&& !curObj && curSlide) {
+        // down or right key or space bar
+        else if ((event.which === 40 || event.which === 39 || event.which === 32)&& !curObj && curSlide) {
             event.preventDefault();
             slideManager.next();
         }
@@ -465,17 +467,12 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             slideBackground.displayNone();
             aniViewer.displayNone();
         };
-        this.full = function () {
+        this.play = function () {
             if (curObj)
                 curObj.deactive();
             curObj = undefined;
             curDiv = undefined;
-            parent.displayNone();
             slideShowManager.play(this.export());
-        };
-        this.unfull = function () {
-            parent.displayInlineBlock();
-            slideShowManager.stop();
         };
         this.setIdx = function (idx) {
             numberViewer.text(idx);
@@ -603,12 +600,10 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
                 var next = curSlide.getIdx();
                 if (next < slides.length) {
                     curSlide.deactive();
-                    if (isFullscreen)
-                        curSlide.unfull();
                     curSlide = slides[next];
                     curSlide.focus();
                     if (isFullscreen)
-                        curSlide.full();
+                        curSlide.play();
                 }
             }
         };
@@ -617,14 +612,23 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
                 var prev = curSlide.getIdx() - 2;
                 if (prev >= 0) {
                     curSlide.deactive();
-                    if (isFullscreen)
-                        curSlide.unfull();
                     curSlide = slides[prev];
                     curSlide.focus();
                     if (isFullscreen)
-                        curSlide.full();
+                        curSlide.play();
                 }
             }
+        };
+        this.full = function () {
+            if (curSlide) {
+                parent.displayNone();
+                curSlide.play();
+                isFullscreen = true;
+            }
+        };
+        this.unfull = function () {
+            parent.displayInlineBlock();
+            slideShowManager.stop();
         };
         this.export = function () {
             var params = [];
