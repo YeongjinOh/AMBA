@@ -28,8 +28,10 @@ router.get('/put', function(req, res, next) {
 
 router.get('/get', function(req, res, next) {
     var param = req.query;
-    var aauth = JSON.parse(crypto.decrypt(param.token));
-    param.hashkey = aauth.uid;
+    if (!param.hashkey) {
+        var aauth = JSON.parse(crypto.decrypt(param.token));
+        param.hashkey = aauth.uid;
+    }
 
     db.query("SELECT value FROM hash_store WHERE cid = ? AND hashkey = ? AND akey = ?;", [param.cid, param.hashkey, param.key])
         .then(function (data) {
@@ -95,6 +97,23 @@ router.get('/hashs', function(req, res, next) {
 
 router.get('/keys', function(req, res, next) {
     db.query("SELECT akey FROM hash_store WHERE cid = ?;", [req.query.cid])
+        .then(function (data) {
+            res.json({
+                resultCode: 0,
+                info: data
+            })
+        })
+        .catch(function (err) {
+            res.json({
+                resultCode: -1,
+                msg: err
+            })
+        });
+});
+
+
+router.get('/key_list', function(req, res, next) {
+    db.query("SELECT hashkey, akey FROM hash_store WHERE cid = ?;", [req.query.cid])
         .then(function (data) {
             res.json({
                 resultCode: 0,
