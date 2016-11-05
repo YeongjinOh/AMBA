@@ -723,6 +723,16 @@ Div.prototype.fadeOut = function (duration, easing, complete) {
     return this;
 };
 
+Div.prototype.fadeToggle = function (duration, easing, complete) {
+    this.$.fadeToggle(duration, easing, complete);
+    return this;
+};
+
+Div.prototype.stop = function (clearQueue, jumpToEnd) {
+    this.$.stop(clearQueue, jumpToEnd);
+    return this;
+};
+
 Div.prototype.trigger = function (e) {
     this.$.trigger(e);
     return this;
@@ -766,6 +776,25 @@ Div.prototype.hoverColor = function (color1, color2) {
     if (color2) {
         fn2Func = function () {
             that.color(color2);
+        };
+    }
+
+    this.$.hover(fn1Func, fn2Func);
+    return this;
+};
+
+Div.prototype.hoverText = function (text1, text2) {
+    var that = this;
+    var fn1Func, fn2Func;
+    if (text1) {
+        fn1Func = function () {
+            that.text(text1);
+        };
+    }
+
+    if (text2) {
+        fn2Func = function () {
+            that.text(text2);
         };
     }
 

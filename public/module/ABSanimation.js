@@ -23,15 +23,16 @@ define ([], function() {
                     return animationQueue;
                 },
                 append: function () {
+                    var that = this;
                     var i;
-                    // var effects = ['fadein', 'fadeout', 'slidedown', 'slideup'];
+                    var manager = that.animationManager();
                     var params = ['duration', 'easing', 'complete'];
 
                     function editParams(dv, param) {
                         var target = dv;
                         var root = div().class('abs-option').appendTo(target).size('100%', 30).marginTop(15);
                         div().appendTo(root).size('30%', '100%').text(param + ': ').fontBold();
-                        var edit = div().id('abs-ani-' + param).appendTo(root).size('40%', '75%').color('white').text('').editable().borderRadius(2)
+                        var edit = div().id('abs-ani-'+target.id().split('-')[2]+'-'+param).appendTo(root).size('40%', '75%').color('white').text('').editable().borderRadius(2)
                             .border('2px solid black').cursorText().textAlignLeft().keypress(function (dv, e) {
                                 if (e.which == 13) {
                                     input.trigger('click');
@@ -43,12 +44,15 @@ define ([], function() {
                                 e.preventDefault();
                             });
 
-                        var input = div().appendTo(root).size('20%', '75%').color('#eeeeee').text('OK').fontBold()
-                            .textAlignCenter().cursorPointer().hoverColor('gray', '#eeeeee').border('2px solid black').click(function (dv, e) {
+                        var input = div().appendTo(root).size('20%', '75%').color('#cccccc').text('OK').fontBold()
+                            .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').border('2px solid black').click(function (dv, e) {
                                 e.stopPropagation();
                                 e.preventDefault();
 
                                 if (param === 'complete') {
+                                    if (!curId())
+                                        return;
+
                                     var aniData = {
                                         id: curId(), // Current ID를 반환, 없으면 undefined
                                         animation: {
@@ -57,10 +61,11 @@ define ([], function() {
                                         }
                                     };
                                     animationQueue.push(aniData);
+                                    refreshPreviewText();
                                 } else {
                                     params.forEach(function (data) {
                                         if (data === param)
-                                            $('#abs-ani-' + params[params.indexOf(data) + 1]).data('div').$text.focus();
+                                            $('#abs-ani-'+target.id().split('-')[2]+'-'+params[params.indexOf(data) + 1]).data('div').$text.focus();
                                     });
                                 }
                             });
@@ -68,45 +73,101 @@ define ([], function() {
                         function getArgs() {
                             var args = {};
                             params.forEach(function (data) {
-                                args[data] = parseFloat($('#abs-ani-' + data).data('div').text()) || undefined;
+                                args[data] = parseFloat($('#abs-ani-'+target.id().split('-')[2]+'-'+data).data('div').text()) || undefined;
                             });
 
                             return args;
                         }
                     }
 
-                    var root = div().class('abs-option').appendTo(target).size('100%', '100%').border('2px solid black').selectable(false).overflowScroll();
-                    div().appendTo(root).size('100%', '6%').color('black').text('AMBASA - Animation').fontColor('white').fontSize(20).textAlignCenter().border('2px solid gray');
+                    function refreshPreviewText() {
+                        previewText.text((manager.getIndex('preview')+1)+'/'+animationQueue.length);
+                    }
+
+                    function refreshPreviewBar() {
+
+                    }
 
                     var decoContent = function (dv) {
-                        dv.appendTo(body).size('100%', 'auto').textAlignCenter().fontBold().border('2px solid black').cursorPointer();
+                        dv.appendTo(body).size('100%', 'auto').textAlignCenter().fontBold().border('1px solid gray').cursorPointer();
                     };
 
+                    var decoPreviewBtn = function(dv) {
+                        dv.appendTo(preview).size('20%', '50%').color('#cccccc').border('1px solid #eeeeee').textAlignCenter().hoverColor('gray', '#cccccc');
+                    };
+
+                    var root = div().class('abs-option').appendTo(target).size('100%', '100%').color('#eeeeee').border('1px solid gray').selectable(false).overflowScroll();
+                    div().appendTo(root).size('100%', '6%').color('black').text('AMBASA - Animation').fontColor('white').fontSize(20).border('1px solid #eeeeee').textAlignCenter().cursorDefault();
+
                     var body = div().appendTo(root).size('100%', '94%');
+
+                    var preview = div().appendTo(body).size('100%', 60).border('1px solid black').cursorPointer().click(function(dv, e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+
+                            refreshPreviewText();
+                            refreshPreviewBar();
+                        });
+
+                    var previewMenu = div().appendTo(preview).size('100%', '50%').color('#cccccc').border('1px solid #eeeeee').marginTop(1).cursorDefault();
+
+                    var previewText = div().appendTo(previewMenu).size('20%', '100%').color('#cccccc').fontBold().textAlignCenter().border('1px solid #eeeeee');
+                    refreshPreviewText();
+
+                    var previewBar = div().appendTo(previewMenu).size('80%', '100%').color('#cccccc').border('1px solid #eeeeee');
+
+                    div().deco(decoPreviewBtn).text('◁◁').fontSize(16).hoverText('◀◀', '◁◁').click(function() {
+                            manager.goFirst('preview');
+                        });
+                    div().deco(decoPreviewBtn).text('◁').fontSize(16).hoverText('◀', '◁').click(function() {
+                            manager.back('preview');
+                        });
+                    div().deco(decoPreviewBtn).text('□').fontSize(18).hoverText('■', '□').click(function() {
+                            if(!manager.isEmpty()) {
+                                if (manager.getIndex('preview') === -1) {
+                                    return;
+                                }
+
+                                animationQueue.splice(manager.getIndex('preview'), 1);
+                                if (manager.getIndex('preview') === animationQueue.length) {
+                                    manager.setIndex(animationQueue.length - 1, 'preview');
+                                }
+                            }
+                        });
+                    div().deco(decoPreviewBtn).text('▷').fontSize(16).hoverText('▶', '▷').click(function() {
+                            manager.next('preview');
+                        });
+                    div().deco(decoPreviewBtn).text('▷▷').fontSize(16).hoverText('▶▶', '▷▷').click(function() {
+                            manager.goLast('preview');
+                        });
+
                     var fadeIn = div().deco(decoContent).text('Fade In').click(function (dv, e) {
                         e.stopPropagation();
                         e.preventDefault();
 
                         ani_fadein.trigger('click');
-                        $('#abs-ani-duration').data('div').$text.focus();
+                        $('#abs-ani-fadeIn-duration').data('div').$text.focus();
                     });
                     var fadeOut = div().deco(decoContent).text('Fade Out').click(function (dv, e) {
                         e.stopPropagation();
                         e.preventDefault();
 
                         ani_fadeout.trigger('click');
+                        $('#abs-ani-fadeOut-duration').data('div').$text.focus();
                     });
                     var slideDown = div().deco(decoContent).text('slide Down').click(function (dv, e) {
                         e.stopPropagation();
                         e.preventDefault();
 
                         ani_slidedown.trigger('click');
+                        $('#abs-ani-slideDown-duration').data('div').$text.focus();
                     });
                     var slideUp = div().deco(decoContent).text('Slide Up').click(function (dv, e) {
                         e.stopPropagation();
                         e.preventDefault();
 
                         ani_slideup.trigger('click');
+                        $('#abs-ani-slideUp-duration').data('div').$text.focus();
                     });
 
 
@@ -150,47 +211,130 @@ define ([], function() {
                     for (i = 0; i < params.length; i++)
                         editParams(ani_slideup, params[i]);
                 },
-                animator: function (index) {
-                    var ani_package = animationQueue[index];
-                    eval("$(#"+ani_package.id+").data('div')."+ani_package.effect+"("+ani_package.params.duration+");");
+                animator: function (index, mode) {
+                    function backup(obj, e) {
+                        switch(e) {
+                            case 'fadeIn':
+                            case 'fadeOut':
+                                obj.fadeToggle(1);
+                                break;
+                            case 'slideDown':
+                            case 'slideUp':
+                                obj.slideToggle(1);
+                                break;
+                        }
+                    }
+
+                    (function() {
+                        var temp;
+                        var ani_package = animationQueue[index];
+
+                        if (mode === 'preview') {
+                            temp = $('#' + ani_package.id).data('div');
+                            eval("$('#" + ani_package.id + "').data('div')." + ani_package.animation.effect + "(" + ani_package.animation.params.duration + ");");
+                            setTimeout(backup(temp, ani_package.animation.effect), ani_package.animation.params.duration + 1000);
+                        }
+                        else {
+                            eval("$('#" + ani_package.id + '-clone' + "').data('div')." + ani_package.animation.effect + "(" + ani_package.animation.params.duration + ");");
+                        }
+                    })();
                 },
                 animationManager: function () {
-                    var index = 0;
+                    var that = this;
+                    var index = -1, pre_index = -1;
                     var manager = {
-                        next: function() {
-                            if (this.hasNext()) {
-                                this.animator(index++);
-                                //return animationQueue[index++];
+                        next: function(mode) {
+                            if (this.hasNext(mode)) {
+                                if (mode === 'preview') {
+                                    that.animator(++pre_index, mode);
+                                    return pre_index;
+                                }
+                                else {
+                                    that.animator(++index);
+                                    return index;
+                                }
                             }
-                            return undefined;
                         },
-                        hasNext: function() {
-                            if (index === animationQueue.length)
-                                return false;
-                            return true;
-                        },
-                        back: function() {
-                            if (this.hasBack()) {
-                                this.animator(--index);
-                                // return animationQueue[--index];
+                        hasNext: function(mode) {
+                            if (mode === 'preview') {
+                                if (pre_index >= animationQueue.length - 1) {
+                                    return false;
+                                }
                             }
-                            return undefined;
-                        },
-                        hasBack: function() {
-                            if (index === 0)
-                                return false;
-                            return true;
-                        },
-                        goFirst: function() {
-                            index = 0;
-                            return index;
-                        },
-                        goLast: function() {
-                            index = animationQueue.length - 1;
-                            return index;
-                        },
-                        pop: function() {
+                            else {
+                                if (index >= animationQueue.length - 1) {
+                                    return false;
+                                }
+                            }
 
+                            return true;
+                        },
+                        back: function(mode) {
+                            if (this.hasBack(mode)) {
+                                if (mode === 'preview') {
+                                    that.animator(--pre_index, mode);
+                                    return pre_index;
+                                }
+                                else {
+                                    that.animator(--index);
+                                    return index;
+                                }
+                            }
+                        },
+                        hasBack: function(mode) {
+                            if (mode === 'preview') {
+                                if (pre_index <= 0) {
+                                    return false;
+                                }
+                            }
+                            else {
+                                if (index <= 0) {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        },
+                        goFirst: function(mode) {
+                            if (mode === 'preview') {
+                                pre_index = -1;
+                                return pre_index;
+                            }
+                            else {
+                                index = -1;
+                                return index;
+                            }
+                        },
+                        goLast: function(mode) {
+                            if (mode === 'preview') {
+                                pre_index = animationQueue.length;
+                                return pre_index;
+                            }
+                            else {
+                                index = animationQueue.length;
+                                return index;
+                            }
+                        },
+                        isEmpty: function() {
+                            if (animationQueue.length === 0)
+                                return true;
+                            return false;
+                        },
+                        getIndex: function(mode) {
+                            if (mode === 'preview') {
+                                return pre_index;
+                            }
+                            else {
+                                return index;
+                            }
+                        },
+                        setIndex: function(idx, mode) {
+                            if (mode === 'preview') {
+                                pre_index = idx;
+                            }
+                            else {
+                                index = idx;
+                            }
                         }
                     };
 

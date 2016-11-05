@@ -219,9 +219,9 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
 
     $(window).keydown(function (event) {
         // delete
-        if (event.which === 8) {
+        /*if (event.which === 8) {
             onDelete();
-        }
+        }*/
         // esc
         if (event.which === 27) {
             if (isFullscreen && curSlide) {
@@ -236,10 +236,10 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             onZoom();
         }
         // Enter
-        else if (event.which === 13 && !curObj) {
+ /*       else if (event.which === 13 && !curObj) {
             event.preventDefault();
             slideManager.new();
-        }
+        }*/
         // up key
         else if (event.which === 38 && !curObj && curSlide) {
             event.preventDefault();
