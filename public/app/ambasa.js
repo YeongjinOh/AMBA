@@ -1,4 +1,4 @@
-require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco) {
+require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -402,6 +402,9 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         this.getParams = function () {
             return params;
         };
+        this.getId = function () {
+            return id;
+        };
         return this;
     };
 
@@ -425,6 +428,12 @@ require(['ABSdecoration', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.
         var slideViewerWrapper = div().size(slideViewerWidth + 4, blockHeight + 4).appendTo(block);
         var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
         var slideBackground = getSlideBackground().appendTo(slideEditor);
+
+        // set animation viewer
+        var aniViewer = div().size('100%','100%').appendTo(animationViewer).color('gray');
+        var absAnimation = ABSanimation.getInstance();
+        absAnimation.init(aniViewer, function () { return curObj && curObj.getId()});
+
 
         // ABS Objects
         var objs = {};
