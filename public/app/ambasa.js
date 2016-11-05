@@ -189,11 +189,11 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
                 }
             });
     };
-    var onEnter = function (fName) {
+    var onEnter = function (fName, userId) {
 
         var param = {
             cid:'ambasa',
-            hashkey:window.ambasa.userId,
+            hashkey:userId,
             key:fName,
         };
         // var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
@@ -207,7 +207,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
                     alert('해당 파일을 불러올 수 없습니다.');
                 }
             });
-        window.ambasa.userId = undefined;
+        // localStorage.removeItem("ambasa");
     };
     var onDelete = function () {
         if (curObj) {
@@ -949,8 +949,9 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
     insertMember('yjs');
 
     window.ambasa.load = function (fName) {
-        if (window.ambasa.userId)
-            onEnter(fName);
+        var userId = localStorage.getItem("ambasa");
+        if (userId)
+            onEnter(fName, userId);
         else
             onLoad(fName);
     };
