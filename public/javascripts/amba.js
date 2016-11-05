@@ -697,6 +697,11 @@ Div.prototype.slideUp = function (duration, easing, complete) {
     return this;
 };
 
+Div.prototype.slideToggle = function (duration, easing, complete) {
+    this.$.slideToggle(duration, easing, complete);
+    return this;
+};
+
 
 Div.prototype.hide = function (duration, easing, complete) {
     this.$.hide(duration, easing, complete);
@@ -718,6 +723,10 @@ Div.prototype.fadeOut = function (duration, easing, complete) {
     return this;
 };
 
+Div.prototype.trigger = function (e) {
+    this.$.trigger(e);
+    return this;
+};
 
 /**
  * @desc    hover event

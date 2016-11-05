@@ -185,8 +185,8 @@ define ([], function() {
                 curEvent = dv;
             }
 
-            var root = div().id('abs-event-' + id).append().position('absolute').size(325, 'auto').minHeight(300).zIndex(parseInt(id.split('-')[1]))
-                .top(98).left(1280).borderRadius(2).border('2px solid black').draggable().click(function (dv, e) { //.top((seq-1) * 25).left(100)
+            var root = div().class('abs-option').id('abs-event-' + id).append().position('absolute').size(325, 'auto').minHeight(300).zIndex(parseInt(id.split('-')[1]))
+                .top(98).left(1280).borderRadius(2).border('2px solid black').draggable().boxShadow('2px 2px 2px 2px black').click(function (dv, e) {
                     e.stopPropagation();
                     e.preventDefault();
                 });
