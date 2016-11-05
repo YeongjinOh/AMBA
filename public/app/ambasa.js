@@ -470,15 +470,15 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
             curObj = undefined;
             curDiv = undefined;
             parent.displayNone();
-            fullscreenViewer.displayInlineBlock();
-            curBackground.appendTo(fullscreenViewer).overflowHidden();
-            curBackground.css('zoom', (100 * zoomRatio) + '%');
+            slideShowManager.play(this.export());
+            // curBackground.appendTo(fullscreenViewer).overflowHidden();
+            // curBackground.css('zoom', (100 * zoomRatio) + '%');
         };
         this.unfull = function () {
             parent.displayInlineBlock();
-            fullscreenViewer.displayNone();
-            curBackground.appendTo(slideEditor).overflow('initial');
-            curBackground.css('zoom', 'initial');
+            slideShowManager.stop();
+            // curBackground.appendTo(slideEditor).overflow('initial');
+            // curBackground.css('zoom', 'initial');
         };
         this.setIdx = function (idx) {
             numberViewer.text(idx);
@@ -634,6 +634,40 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         };
     };
 
+    /** Slide Show Manager **/
+
+
+    var SlideShowManager = function () {
+        var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
+        var fullscreenViewer = div().append().size(ww, wh).displayNone().color('black');
+        if (wh * sbgWidth > ww * sbgHeight) {
+            zoomRatio = ww / sbgWidth;
+            fullscreenViewer.paddingTop((wh - sbgHeight * zoomRatio) / 2);
+        }
+        else {
+            zoomRatio = wh / sbgHeight;
+            fullscreenViewer.paddingLeft((ww - sbgWidth * zoomRatio) / 2);
+        }
+
+        var slideBackground = getSlideBackground().appendTo(fullscreenViewer).css('zoom', (100 * zoomRatio) + '%');
+
+        this.play = function (params) {
+            for (var id in params) {
+                var param = $.extend({},params[id]);
+                param.id = param.id + '-clone';
+                absObject(param).div().appendTo(slideBackground);
+            }
+            fullscreenViewer.displayInlineBlock();
+        };
+        this.stop = function () {
+            fullscreenViewer.displayNone();
+        };
+        this.clear = function () {
+            
+        };
+    };
+
+
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -685,20 +719,6 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         return div().appendTo(slideEditor).size(sbgWidth, sbgHeight).position('absolute').color('white').boxShadow('0px 5px 20px #888888');
     };
     slideEditor.paddingLeft(sbgMarginLeft).paddingTop(sbgMarginTop);
-
-
-    /** set fullscreen viewer **/
-
-    var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
-    var fullscreenViewer = div().append().size(ww, wh).displayNone().color('black');
-    if (wh * sbgWidth > ww * sbgHeight) {
-        zoomRatio = ww / sbgWidth;
-        fullscreenViewer.paddingTop((wh - sbgHeight * zoomRatio) / 2);
-    }
-    else {
-        zoomRatio = wh / sbgHeight;
-        fullscreenViewer.paddingLeft((ww - sbgWidth * zoomRatio) / 2);
-    }
 
 
     /** set context menu **/
@@ -871,6 +891,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
     /** Initialize **/
 
     var slideManager = new SlideManager();
+    var slideShowManager = new SlideShowManager();
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
     var copyParam;
