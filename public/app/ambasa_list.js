@@ -11,7 +11,7 @@ var elementViewer = function (key) {
 
     var wrapper = div().appendTo(root).size(600,50).cursorPointer().hoverColor('#aaaaaa','white')
         .click(function () {
-            localStorage.setItem("ambasa", key.haskey);
+            localStorage.setItem("ambasa", key.hashkey);
             $(location).attr('href', '/?app=ABS#' + key.akey);
         });
     div().appendTo(wrapper).deco(decoLine).size('10%','100%').text(cnt);
