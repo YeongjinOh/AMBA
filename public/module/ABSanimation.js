@@ -2,14 +2,25 @@
  * Created by JiSoo on 2016-11-05.
  */
 define ([], function() {
-    var slideQueue ;
-    var animationQueue ;
+    var animationQueue = [];
+    var target;
+    var curId;
     var module = {
-        init: function(sq, aq) {
-            slideQueue  = sq;
+        init: function(dv, getId) {
+            target = dv;
+            curId = getId;
+        },
+        import: function(aq) {
+            if (aq === undefined || typeof aq !== 'object') {
+                animationQueue = [];
+                return;
+            }
             animationQueue = aq;
         },
-        appendTo: function(target) {
+        export: function() {
+            return animationQueue;
+        },
+        append: function() {
             var i;
             var params = ['duration', 'easing', 'complete'];
 
@@ -33,10 +44,12 @@ define ([], function() {
                         e.stopPropagation();
                         e.preventDefault();
 
-                        var v = parseFloat(edit.text()) || undefined;
-
                         if(param === 'complete') {
-                            console.log(v);
+                            var aniData = {
+                                id: curId(), // Current ID를 반환, 없으면 undefined
+                                params: getArgs()
+                            };
+                            animationQueue.push(aniData);
                         } else {
                             params.forEach(function (data) {
                                 if (data === param)
@@ -44,6 +57,15 @@ define ([], function() {
                             });
                         }
                     });
+
+                function getArgs() {
+                    var args = {};
+                    params.forEach(function (data) {
+                        args[data] = parseFloat($('#abs-ani-'+data).data('div').text()) || undefined;
+                    });
+
+                    return args;
+                }
             }
 
             var root = div().appendTo(target).size('100%', '100%').border('2px solid black').selectable(false);
@@ -67,6 +89,18 @@ define ([], function() {
 
                 ani_fadeout.trigger('click');
             });
+            var slideDown = div().deco(decoContent).text('slide Down').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                ani_slidedown.trigger('click');
+            });
+            var slideUp = div().deco(decoContent).text('Slide Up').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                ani_slideup.trigger('click');
+            });
 
 
             var ani_fadein = div().id('abs-ani-fadein').appendTo(fadeIn).displayNone().size('100%', 150).click(function(dv, e) {
@@ -88,14 +122,56 @@ define ([], function() {
 
             for(i=0; i<params.length; i++)
                 editParams(ani_fadeout, params[i]);
+
+            var ani_slidedown = div().id('abs-ani-slidedown').appendTo(slideDown).displayNone().size('100%', 150).click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                dv.slideToggle(300);
+            });
+
+            for(i=0; i<params.length; i++)
+                editParams(ani_slidedown, params[i]);
+
+            var ani_slideup = div().id('abs-ani-slideup').appendTo(slideUp).displayNone().size('100%', 150).click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                dv.slideToggle(300);
+            });
+
+            for(i=0; i<params.length; i++)
+                editParams(ani_slideup, params[i]);
         },
         animationManager: function() {
+            var iter = 0;
+            var manager = {
+                next: function() {
+                    return animationQueue[iter++];
+                },
+                hasNext: function() {
 
+                },
+                back: function() {
+
+                },
+                hasBack: function() {
+
+                },
+                react: function() {
+
+                },
+                lastact: function() {
+
+                }
+            };
+
+            return manager;
         },
         animator: function(selector) {
 
         }
     };
 
-return module;
+    return module;
 });
