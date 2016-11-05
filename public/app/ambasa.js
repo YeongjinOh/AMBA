@@ -504,6 +504,7 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
         this.remove = function () {
             blockWrapper.remove();
             slideBackground.remove();
+            aniViewer.remove();
             refresh();
         };
         this.syncBlock = function (callback) {
