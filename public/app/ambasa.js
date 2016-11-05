@@ -189,6 +189,26 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
                 }
             });
     };
+    var onEnter = function (fName) {
+
+        var param = {
+            cid:'ambasa',
+            hashkey:window.ambasa.userId,
+            key:fName,
+        };
+        // var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+        $.get("/hashstore/get", param)
+            .done(function (data) {
+                if (data.info.length > 0) {
+                    var params = JSON.parse(data.info[0].value);
+                    fileName.text(fName);
+                    slideManager.load(params);
+                } else {
+                    alert('해당 파일을 불러올 수 없습니다.');
+                }
+            });
+        window.ambasa.userId = undefined;
+    };
     var onDelete = function () {
         if (curObj) {
             curObj.remove();
@@ -928,5 +948,10 @@ require(['ABSdecoration', 'ABSanimation', 'https://cdnjs.cloudflare.com/ajax/lib
     insertMember('kks');
     insertMember('yjs');
 
-    window.ambasa.load = onLoad;
+    window.ambasa.load = function (fName) {
+        if (window.ambasa.userId)
+            onEnter(fName);
+        else
+            onLoad(fName);
+    };
 });
