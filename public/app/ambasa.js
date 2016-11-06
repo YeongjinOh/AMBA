@@ -36,10 +36,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
     /** connect online **/
 
     online.connect();
-    online.onRecieve(function (data) {
-        console.log('onRecieve');
-        console.log(data);
-    });
 
 
 
@@ -118,7 +114,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
             var prevParams = curObj.getParams();
             curSlide.addUndo(prevParams);
             curObj.setParams();
-            online.sendMessage({params:curObj.getParams});
+            if (fileName !== defaultName) {
+                online.sendMessage({params:curObj.getParams});
+            }
         }
         if (typeof fn === 'function')
             fn();
@@ -163,6 +161,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
             }
             fileName.text(fName);
             online.join(fName);
+            online.onRecieve(function (data) {
+                console.log('onRecieve');
+                console.log(data);
+            });
+
         }
 
         // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
@@ -970,6 +973,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
     window.ambasa.load = function (fName) {
         var userId = localStorage.getItem("ambasa");
         online.join(fName);
+        online.onRecieve(function (data) {
+            console.log('onRecieve');
+            console.log(data);
+        });
         if (userId)
             onEnter(fName, userId);
         else
