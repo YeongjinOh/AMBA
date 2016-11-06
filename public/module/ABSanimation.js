@@ -93,7 +93,7 @@ define ([], function() {
                     };
 
                     var decoPreviewBtn = function(dv) {
-                        dv.appendTo(preview).size('20%', '50%').color('#cccccc').border('1px solid #eeeeee').textAlignCenter().hoverColor('gray', '#cccccc');
+                        dv.appendTo(preview).size('25%', '50%').color('#cccccc').border('1px solid #eeeeee').textAlignCenter().hoverColor('gray', '#cccccc');
                     };
 
                     var root = div().class('abs-option').appendTo(target).size('100%', '100%').color('#eeeeee').border('1px solid gray').selectable(false).overflowScroll();
@@ -114,15 +114,8 @@ define ([], function() {
                     var previewText = div().appendTo(previewMenu).size('20%', '100%').color('#cccccc').fontBold().textAlignCenter().border('1px solid #eeeeee');
                     refreshPreviewText();
 
-                    var previewBar = div().appendTo(previewMenu).size('80%', '100%').color('#cccccc').border('1px solid #eeeeee');
-
-                    div().deco(decoPreviewBtn).text('◁◁').fontSize(16).hoverText('◀◀', '◁◁').click(function() {
-                            manager.goFirst('preview');
-                        });
-                    div().deco(decoPreviewBtn).text('◁').fontSize(16).hoverText('◀', '◁').click(function() {
-                            manager.back('preview');
-                        });
-                    div().deco(decoPreviewBtn).text('□').fontSize(18).hoverText('■', '□').click(function() {
+                    div().appendTo(previewMenu).size('80%', '100%').text('Delete').fontSize(17).fontBold().textAlignCenter()
+                        .color('#cccccc').border('1px solid #eeeeee').cursorPointer().hoverColor('gray', '#cccccc').click(function() {
                             if(!manager.isEmpty()) {
                                 if (manager.getIndex('preview') === -1) {
                                     return;
@@ -134,6 +127,16 @@ define ([], function() {
                                 }
                             }
                         });
+
+                    div().deco(decoPreviewBtn).text('◁◁').fontSize(16).hoverText('◀◀', '◁◁').click(function() {
+                            manager.goFirst('preview');
+                        });
+                    div().deco(decoPreviewBtn).text('◁').fontSize(16).hoverText('◀', '◁').click(function() {
+                            manager.back('preview');
+                        });
+                    // div().deco(decoPreviewBtn).text('□').fontSize(18).hoverText('■', '□').click(function() {
+                    //         manager.stop('preview');
+                    //     });
                     div().deco(decoPreviewBtn).text('▷').fontSize(16).hoverText('▶', '▷').click(function() {
                             manager.next('preview');
                         });
