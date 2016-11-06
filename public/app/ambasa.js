@@ -114,8 +114,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
             var prevParams = curObj.getParams();
             curSlide.addUndo(prevParams);
             curObj.setParams();
-            if (fileName !== defaultName) {
-                online.sendMessage({params:curObj.getParams});
+            var fName = fileName.text();
+            if (fName !== defaultName) {
+                online.sendMessage({
+                    roomid:fName,
+                    msg:curObj.getParams,
+                    username:username
+                });
             }
         }
         if (typeof fn === 'function')
