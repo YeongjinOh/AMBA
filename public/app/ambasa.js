@@ -36,7 +36,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
     /** connect online **/
 
     online.connect();
-
+    var joinOnline = function () {
+        online.join(fName);
+        online.onRecieve(function (data) {
+            console.log('onRecieve');
+            console.log(params);
+            console.log(dv);
+            var params = data.message.msg;
+            var dv = $('#'+params.id).data('div');
+            redoStyle(dv, params);
+            trigger();
+        });
+    };
 
 
     /** colors **/
@@ -116,9 +127,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
             curObj.setParams();
             var fName = fileName.text();
             if (fName !== defaultName) {
+                var msg = curObj
                 online.sendMessage({
                     roomid:fName,
-                    msg:curObj.getParams,
+                    msg:curObj.getParams(),
                     username:username
                 });
             }
@@ -165,12 +177,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
                 return;
             }
             fileName.text(fName);
-            online.join(fName);
-            online.onRecieve(function (data) {
-                console.log('onRecieve');
-                console.log(data);
-            });
-
+            joinOnline();
         }
 
         // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
@@ -977,11 +984,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager','https://cdnjs.cloudfl
 
     window.ambasa.load = function (fName) {
         var userId = localStorage.getItem("ambasa");
-        online.join(fName);
-        online.onRecieve(function (data) {
-            console.log('onRecieve');
-            console.log(data);
-        });
+        joinOnline();
         if (userId)
             onEnter(fName, userId);
         else
