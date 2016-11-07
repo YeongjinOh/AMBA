@@ -157,6 +157,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     /** ambasa actions protocol **/
 
+    var lock = function () {
+        lockAction = true;
+    };
+    var unlock = function () {
+        lockAction = false;
+    }
+
     var filterProp = function (obj, props) {
         var res = {};
         for (var i = 0; i < props.length; i++) {
@@ -189,8 +196,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var length = 0;
 
         var add = function (action) {
-            // console.log(action);
-            if (!preventAction) {
+            console.log(action);
+            if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
                 if (useOnline) {
@@ -214,7 +221,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
-                preventAction = true;
+                lock()
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
@@ -256,12 +263,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             break;
                     }
                 }
-                preventAction = false;
+                unlock()
             }
         };
         this.next = function () {
             if (cur < length - 1) {
-                preventAction = true;
+                lock();
                 var actionObj = actions[++cur];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
@@ -292,13 +299,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             slideManager.new();
                             break;
                         case 'delete':
+                            curSlide = slideManager.get(actionObj.slide);
                             slideManager.del();
                             break;
                         case 'load':
                             break;
                     }
                 }
-                preventAction = false;
+                unlock();
             }
         };
 
@@ -449,16 +457,17 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         $.get("/hashstore/get", param)
             .done(function (data) {
                 if (data.info.length > 0) {
+                    lock();
                     var params = JSON.parse(data.info[0].value);
                     fileName.text(fName);
                     slideManager.load(params);
+                    unlock();
                 } else {
                     alert('해당 파일을 불러올 수 없습니다.');
                 }
             });
     };
     var onEnter = function (fName, userId) {
-
         var param = {
             cid: 'ambasa',
             hashkey: userId,
@@ -468,9 +477,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         $.get("/hashstore/get", param)
             .done(function (data) {
                 if (data.info.length > 0) {
+                    lock();
                     var params = JSON.parse(data.info[0].value);
                     fileName.text(fName);
                     slideManager.load(params);
+                    unlock();
                 } else {
                     alert('해당 파일을 불러올 수 없습니다.');
                 }
@@ -836,8 +847,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 this.append(obj);
                 syncBlock();
             }
-            if (preventAction === undefined)
-                actionManager.onLoadSlide(that, params);
+            actionManager.onLoadSlide(that, params);
         };
         this.addUndo = function (param) {
             undolist.push(param);
@@ -995,9 +1005,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         this.load = function (params) {
             this.clear();
+            var sync = function (j) {
+                setTimeout(function () {
+                    syncBlockbyId(j)
+                }, j*100);
+            };
             for (var i = 0; i < params.length; i++) {
                 this.new();
                 slides[i].load(params[i]);
+                sync(i+1)
             }
         };
         this.get = function (id) {
@@ -1328,7 +1344,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var slideShowManager = new SlideShowManager();
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
-    var copyParam, preventAction = false;
+    var copyParam, lockAction = false;
     slideManager.new();
     insertMember(username);
     insertMember('kks');
