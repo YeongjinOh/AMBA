@@ -4,7 +4,7 @@ define ([], function() {
 
     module.value = {};
 
-    module.initContextMenu = function (callback) {
+    module.initContextMenu = function (actionManager) {
         var idContainer = {id: ''};
 
         // Div의 setContextMenu method 정의
@@ -249,9 +249,13 @@ define ([], function() {
 
                 // paperText(0, dv, function(txt) {
                 paperTextAuto(0, dv, function(txt) {
-                    var curDiv = $('#' + idContainer.id).data('div');
-                    curDiv.text(txt);
-                    callback();
+                    var type = 'text';
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    if (curObj.getParams().type === type) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.text(txt);
+                        actionManager.onMedia(curObj, type);
+                    }
                 });
             });
 
@@ -262,7 +266,8 @@ define ([], function() {
                 paperNum(1, dv, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.fontSize(v);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['font-size']);
                 });
             });
 
@@ -279,7 +284,8 @@ define ([], function() {
                 }, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.fontWeight(v);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['font-weight']);
                 });
             });
 
@@ -296,7 +302,8 @@ define ([], function() {
                 }, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.fontFamily(v);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['font-family']);
                 });
             });
 
@@ -307,7 +314,8 @@ define ([], function() {
                 pallet(4, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.fontColor(c);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['font-color']);
                 });
             });
         });
@@ -327,7 +335,8 @@ define ([], function() {
                     pallet(0, dv, function(c) {
                         var curDiv = $('#' + idContainer.id).data('div');
                         curDiv.boxShadow(v+'px '+ v +'px '+ v + 'px '+ c);
-                        callback();
+                        var curObj = $('#' + idContainer.id).data('ambasa');
+                        actionManager.onStyle(curObj, ['box-shadow']);
                     });
                 });
             });
@@ -339,7 +348,8 @@ define ([], function() {
                 pallet(1, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.color(c);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['background-color']);
                 });
             });
         });
@@ -358,7 +368,8 @@ define ([], function() {
                 paperNum(0, dv, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderWidth(v);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['border-width']);
                 });
             });
 
@@ -376,7 +387,8 @@ define ([], function() {
                 }, function(s) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderStyle(s);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['border-style']);
                 });
             });
 
@@ -387,7 +399,8 @@ define ([], function() {
                 paperNum(2, dv, function(v) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderRadius(v);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['border-radius']);
                 });
             });
 
@@ -398,7 +411,8 @@ define ([], function() {
                 pallet(3, dv, function(c) {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.borderColor(c);
-                    callback();
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['border-color']);
                 });
             });
         });
@@ -418,7 +432,7 @@ define ([], function() {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.backgroundSize('100%', '100%');
                     curDiv.backgroundImage(txt);
-                    callback();
+                    // callback();
                 });
             });
 
@@ -430,7 +444,7 @@ define ([], function() {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.audio(idContainer.id, txt);
                     // curDiv.audio(idContainer.id, 'http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
-                    callback();
+                    // callback();
                 });
             });
 
@@ -442,7 +456,7 @@ define ([], function() {
                     var curDiv = $('#' + idContainer.id).data('div');
                     curDiv.video(idContainer.id, txt);
                     // curDiv.video(idContainer.id, 'http://media.w3.org/2010/05/bunny/movie.ogv');
-                    callback();
+                    // callback();
                 });
             });
         });
