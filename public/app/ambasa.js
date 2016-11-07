@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false;
+    var useOnline = true;
 
 
     /** set user authentication **/
@@ -41,10 +41,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         if (useOnline) {
             online.join(fName);
             online.onRecieve(function (data) {
-                var action = data.message.msg;
-                console.log('onRecieve');
-                console.log(action);
-                actionManager.get(action);
+                if (data.action !== 'new') {
+                    var action = data.message.msg;
+                    console.log('onRecieve');
+                    console.log(action);
+                    actionManager.get(action);
+                }
             });
         }
     };
@@ -356,12 +358,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             })
         };
         this.onLoadSlide = function (slide, params) {
-            add({
-                target: 'slide',
-                action: 'load',
-                slide: slide.getIdx(),
-                params: params
-            })
+            // add({
+            //     target: 'slide',
+            //     action: 'load',
+            //     slide: slide.getIdx(),
+            //     params: params
+            // })
         }
     };
     var actionManager = new ActionManager();
