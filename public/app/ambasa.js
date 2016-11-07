@@ -1080,7 +1080,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var slideBackground = getSlideBackground().appendTo(fullscreenViewer).css('zoom', (100 * zoomRatio) + '%');
 
         this.play = function (params) {
-
+            lock();
             // remove previous objects
             var children = slideBackground.children();
             for (var i = 0; i < children.length; i++) {
@@ -1094,6 +1094,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 absObject(param).div().appendTo(slideBackground);
             }
             fullscreenViewer.displayInlineBlock();
+            unlock();
         };
         this.stop = function () {
             fullscreenViewer.displayNone();
