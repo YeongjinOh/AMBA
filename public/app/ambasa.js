@@ -190,19 +190,20 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         var add = function (action) {
             // console.log(action);
-            actions[++cur] = action;
-            length = cur + 1;
-            if (useOnline) {
-                var fName = fileName.text();
-                if (fName !== defaultName) {
-                    online.sendMessage({
-                        roomid: fName,
-                        msg: action,
-                        username: username
-                    });
+            if (!preventAction) {
+                actions[++cur] = action;
+                length = cur + 1;
+                if (useOnline) {
+                    var fName = fileName.text();
+                    if (fName !== defaultName) {
+                        online.sendMessage({
+                            roomid: fName,
+                            msg: action,
+                            username: username
+                        });
+                    }
                 }
             }
-
         };
         // action을 다른 사람을 통해 받은 경우
         this.get = function (action) {
@@ -213,6 +214,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
+                preventAction = true;
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
@@ -245,7 +247,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             if (curSlide)
                                 curSlide.deactive();
                             curSlide = slideManager.get(actionObj.slide);
-                            slideManager.del(true);
+                            slideManager.del();
                             break;
                         case 'delete':
                             slideManager.insert(actionObj.slide, actionObj.params);
@@ -254,10 +256,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             break;
                     }
                 }
+                preventAction = false;
             }
         };
         this.next = function () {
             if (cur < length - 1) {
+                preventAction = true;
                 var actionObj = actions[++cur];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
@@ -285,15 +289,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 else if (actionObj.target === 'slide') {
                     switch (actionObj.action) {
                         case 'new':
-                            slideManager.new(true);
+                            slideManager.new();
                             break;
                         case 'delete':
-                            slideManager.del(true);
+                            slideManager.del();
                             break;
                         case 'load':
                             break;
                     }
                 }
+                preventAction = false;
             }
         };
 
@@ -704,10 +709,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         return this;
     };
 
-    var absObject = function (params, preventAction) {
+    var absObject = function (params) {
         var obj = new ABSObject(params);
-        if (preventAction === undefined)
-            actionManager.onNewObj(obj);
+        actionManager.onNewObj(obj);
         return obj;
     };
 
@@ -826,9 +830,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             }
             return params;
         };
-        this.load = function (params, preventAction) {
+        this.load = function (params) {
             for (var id in params) {
-                var obj = absObject(params[id], preventAction);
+                var obj = absObject(params[id]);
                 this.append(obj);
                 syncBlock();
             }
@@ -895,13 +899,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var SlideManager = function () {
         var slides = [];
 
-        this.new = function (preventAction) {
+        this.new = function () {
             var slide = new Slide();
             slide.setIdx(slides.push(slide));
             slide.focus();
             syncBlock();
-            if (preventAction === undefined)
-                actionManager.onNewSlide(slides.length);
+            actionManager.onNewSlide(slides.length);
             pageTotal.text(slides.length);
         };
         this.insert = function (idx, params) {
@@ -912,7 +915,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             }
             var slide = new Slide();
             slide.setIdx(idx);
-            slide.load(params, true);
+            slide.load(params);
             slide.focus();
             syncBlock();
             slides[idx - 1] = slide;
@@ -923,10 +926,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
 
         // curSlide을 지운다.
-        this.del = function (preventAction) {
+        this.del = function () {
             if (curSlide) {
-                if (preventAction === undefined)
-                    actionManager.onDelSlide(curSlide);
+                actionManager.onDelSlide(curSlide);
                 var idx = curSlide.getIdx() - 1;
                 var slide = slides.splice(idx, 1)[0];
                 slide.remove();
@@ -1326,7 +1328,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var slideShowManager = new SlideShowManager();
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
-    var copyParam;
+    var copyParam, preventAction = false;
     slideManager.new();
     insertMember(username);
     insertMember('kks');
