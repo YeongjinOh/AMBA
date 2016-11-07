@@ -18,7 +18,6 @@ requirejs.config({
     //나중에 requirejs에서 의존 파일을 불러올때 baseUrl에 없는 파일도 여기서 경로를 등록해두면 사용할수있다.
 
     paths: {
-        test : 'http://127.0.0.1:3000/cachestore/get?cid=ida&key=src1',
         jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min',
         jqueryUi: '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min',
         underscore:'../javascripts/underscore',

@@ -60,7 +60,7 @@ define([],function () {
 
         var pTop = div().size('590','auto').appendTo(pWrapper).displayBlock().cursorPointer()
             .margin('auto').marginTop(30).marginBottom(5)
-            .text('This is blog').textAlign('center')
+            .text('AMBA BLOG').textAlign('center')
             .fontSize(30)
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7')
             .click(function () {
@@ -107,11 +107,8 @@ define([],function () {
             })
             .hoverTextColor('grey','black');
 
-
-        //?????
         var vParent = div().appendTo(target).size('100%','100%').displayNone()
             .position('absolute').left(0).top(0)
-        // .color('##196F3D').opacity(0.9);
 
         var vParentHeader = div().size('100%','40').appendTo(vParent).displayBlock();
         div().appendTo(vParentHeader).size('40','100%').image('../images/btn_close.png').floatRight()
@@ -177,26 +174,16 @@ define([],function () {
                         for(var i=0;i<posting.length;i++){
                             newPost(posting[i]);
                         }
-
                         var cpText = 'PAGE ' + page +' OF '+maxPage;
-                        //console.log('current page : ' + page + ', maxPage : '+ maxPage);
-
 
                         if(maxPage == 1){
                             nextPage.displayNone();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayNone();
                         }else if(page!=1&&page%maxPage!==0){
-                            //nextPage.appendTo(pBottom);
-                            //currentPage.appendTo(pBottom).text(cpText);
-                            //previousPage.appendTo(pBottom);
-
                             nextPage.displayBlock();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayBlock();
-
-
-
                         }else if(page%maxPage==0){
                             //currentPage.appendTo(pBottom).text(cpText);
                             //previousPage.appendTo(pBottom);

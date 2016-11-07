@@ -89,7 +89,6 @@ router.get('/msg', function (req, res, next) {
 
 /*for chat*/
 //채팅방에 참여하였을때 + 메시지를 보냈을때
-
 //Lists의 LPUSH를 이용해서 순차적으로 넣어준다
 //LPUSH KEY VALUE;
 router.post('/msg', function (req,res,next) {

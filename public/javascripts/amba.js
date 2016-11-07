@@ -293,6 +293,7 @@ var addAllCssMethods = function () {
         "left": [],
         "letter-spacing": [],
         "line-height": [],
+        "linear-gradient" :[],
         "list-style": [],
         "list-style-image": [],
         "list-style-position": [],
@@ -439,10 +440,21 @@ Div.prototype.fontFamily = function (family) {
     return this.cssText('font-family', family);
 };
 
+
+Div.prototype.linearGradient = function (angle, startColor, endColor) {
+    return this.css('background', 'linear-gradient(' +angle + ', '+startColor + ', '+endColor+ ')') ;
+};
+
+Div.prototype.radialGradient = function (startColor, endColor) {
+    return this.css('background', 'radial-gradient(' + startColor + ', '+endColor+ ')') ;
+}
 /**
  * @desc set font weight bold
  * @author Yeongjin Oh
  */
+
+
+
 Div.prototype.fontBold = function () {
     return this.cssText('font-weight', 'bold');
 };
@@ -1284,4 +1296,11 @@ Div.prototype.topPos = function () {
         return this.offset().top;
     else
         return 0;
+};
+
+
+Div.prototype.setScrollTop = function () {
+    var arr = this.children();
+    this.$.scrollTop(this.$.get(0).scrollHeight-arr[arr.length-1].$.height());
+    return this;
 };

@@ -37,9 +37,7 @@ router.post('/', function(req, res, next) {
     var value = req.body.value;
     var sql = "INSERT INTO hash_store(cid, hashkey, akey, value) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE value = ?";
 
-    console.log('hashkey : ', hashkey);
     var arr =[cid, hashkey, akey, value, value];
-
 
     db.query(sql, arr)
         .then(function (data) {
@@ -54,28 +52,6 @@ router.post('/', function(req, res, next) {
                 msg: err
             });
         });
-
-    //var sql = "INSERT INTO data_store VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE value = ?";
-    //console.log(req.body);
-    //var cid = req.body.cid;
-    //var akey = req.body.akey;
-    //var value = req.body.value;
-    //
-    //var arr =[cid, akey, value, value];
-    //db.query(sql, arr)
-    //    .then(function (data) {
-    //        console.log(data);
-    //        res.json({
-    //            resultCode: 0
-    //        });
-    //    })
-    //    .catch(function (err) {
-    //        res.json({
-    //            resultCode: -1,
-    //            msg: err
-    //        });
-    //    });
-
 });
 
 

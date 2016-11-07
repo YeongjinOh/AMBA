@@ -41,13 +41,10 @@ define([], function(){
                 var data = {
                     title: titleDv.text(),
                     content: contentDv.text(),
-                    timestamp: getCurrentDate(),//Date.now(),
+                    timestamp: getCurrentDate(),
                     aauth: localStorage.getItem('aauth'),
                     name: getName()
                 };
-                //console.log('date : ' , data);
-                //console.log(JSON.stringify(data));
-                //var cid = AB.module.getCid();
 
                 $.post("/blog",
                     {
@@ -59,8 +56,6 @@ define([], function(){
                     }, function (result) {
                         console.log(result);
                         writeFrame.remove();
-                        //outputView.empty();
-                        //outputView.text(JSON.stringify(result));
                     });
             });
         div().size('auto').appendTo(headerDv).text('Cancel').float('left').padding(4).boxShadow('2px 2px')
