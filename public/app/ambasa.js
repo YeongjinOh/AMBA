@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
     // var useOnline = true;
-    var useOnline = true;
+    var useOnline = false;
 
 
     /** set user authentication **/
@@ -108,31 +108,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             return curSlide.getIdx();
     };
 
-    // var trigger = function (fn) {
-    // if (curSlide) {
-    //     syncBlock();
-    //     curSlide.resetRedo();
-    // }
-    // if (curDiv && curObj) {
-    //     var prevParams = curObj.getParams();
-    //     curSlide.addUndo(prevParams);
-    //     curObj.setParams();
-    //     if (useOnline) {
-    //         var fName = fileName.text();
-    //         if (fName !== defaultName) {
-    //             var msg = curObj;
-    //             online.sendMessage({
-    //                 roomid: fName,
-    //                 msg: curObj.getParams(),
-    //                 username: username
-    //             });
-    //         }
-    //     }
-    // }
-    // if (typeof fn === 'function')
-    //     fn();
-    // };
-
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -181,7 +156,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var length = 0;
 
         var add = function (action) {
-            console.log(action);
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
@@ -223,24 +197,27 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'media':
+                            var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
                                 case 'text':
-                                    var abs = getABSbyId(actionObj.id);
                                     abs.div().text(actionObj.prev);
-                                    abs.setParams();
-                                    syncBlockbyId(actionObj.slide);
                                     break;
                                 case 'image':
+                                    abs.div().backgroundImage(actionObj.prev);
                                     break;
                                 case 'video':
+                                    abs.div().video(actionObj.id, actionObj.prev);
                                     break;
                                 case 'audio':
+                                    abs.div().audio(actionObj.id, actionObj.prev);
                                     break;
                             }
+                            abs.setParams();
+                            syncBlockbyId(actionObj.slide);
                             break;
                         case 'new':
-                            // TODO: param 처리
-                            $('#' + actionObj.id).remove();
+                            var slide = slideManager.get(actionObj.slide);
+                            slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'delete':
@@ -281,20 +258,23 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'media':
+                            var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
                                 case 'text':
-                                    var abs = getABSbyId(actionObj.id);
                                     abs.div().text(actionObj.cur);
-                                    abs.setParams();
-                                    syncBlockbyId(actionObj.slide);
                                     break;
                                 case 'image':
+                                    abs.div().backgroundImage(actionObj.cur);
                                     break;
                                 case 'video':
+                                    abs.div().video(actionObj.id, actionObj.cur);
                                     break;
                                 case 'audio':
+                                    abs.div().audio(actionObj.id, actionObj.cur);
                                     break;
                             }
+                            abs.setParams();
+                            syncBlockbyId(actionObj.slide);
                             break;
                         case 'new':
                             var slide = slideManager.get(actionObj.slide);
@@ -302,7 +282,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'delete':
-                            $('#' + actionObj.id).remove();
+                            var slide = slideManager.get(actionObj.slide);
+                            slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
                     }
@@ -339,16 +320,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 cur: filterProp(curStyle, props)
             });
         };
-        // text, vedio, image, audio
+        // text, video, image, audio
         this.onMedia = function (obj, type) {
-            var prev, cur;
-            switch (type) {
-                case 'text':
-                    prev = obj.getParams().media;
-                    obj.setParams();
-                    cur = obj.getParams().media;
-                    break;
-            }
+            var prev = obj.getParams().media;
+            obj.setParams();
+            var cur = obj.getParams().media;
             add({
                 target: 'obj',
                 action: 'media',
@@ -360,6 +336,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             })
         };
         this.onNewObj = function (obj) {
+            obj.setParams();
             add({
                 target: 'obj',
                 action: 'new',
@@ -426,13 +403,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         }
     };
     var onUndo = function () {
-        // if (curSlide)
-        //     curSlide.undo();
         actionManager.prev();
     };
     var onRedo = function () {
-        // if (curSlide)
-        //     curSlide.redo();
         actionManager.next();
     };
     var onSave = function () {
@@ -515,7 +488,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     };
     var onDelete = function () {
         if (curObj) {
-            curObj.remove();
+            curSlide.removeObj(curObj.getId());
         }
         else if (curSlide) {
             slideManager.del()
@@ -524,14 +497,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var onCopy = function () {
         if (curObj) {
             copyParam = curObj.getParams();
+        } else if (curSlide) {
+            // TODO
         }
     };
     var onPaste = function () {
         copyParam.id = idGenerator.get();
+        copyParam.style.left = parseInt(copyParam.style.left) + 5;
+        copyParam.style.top = parseInt(copyParam.style.top) + 5;
         var obj = absObject(copyParam);
         obj.focus();
         curSlide.append(obj);
-        // trigger();
+        syncBlock();
     };
     var onAnimationViewer = function () {
         slideEditor.width(slideEditorWidthAni).paddingLeft(sbgMaringLeftAni);
@@ -668,7 +645,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var ABSObject = function (_params) {
         var that = this, params = {};
         var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
+            .cursorMove().position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
@@ -678,11 +655,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             that.focus();
         }).mouseup(function () {
             var style1 = getParams(dv).style, style2 = params.style;
-            // trigger only when changed
             if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
                 actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
                 syncBlock();
-                // trigger();
             }
         });
 
@@ -690,17 +665,21 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         if (_params) {
             params = $.extend({}, _params);
             setAllStyles(dv, params.style);
-            switch (params.type) {
-                case 'text':
-                    if (params.media)
+            if (params.media) {
+                switch (params.type) {
+                    case 'text':
                         dv.text(params.media);
-                    break;
-                case 'image':
-                    break;
-                case 'vedio':
-                    break;
-                case 'audio':
-                    break;
+                        break;
+                    case 'image':
+                        dv.backgroundImage(params.media);
+                        break;
+                    case 'video':
+                        dv.video(id, params.media);
+                        break;
+                    case 'audio':
+                        dv.audio(id, params.media);
+                        break;
+                }
             }
         }
         if (params.style === undefined)
@@ -734,13 +713,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         this.remove = function () {
             dv.remove();
-            // that.deactive();
+            curObj = undefined;
+            curDiv = undefined;
             actionManager.onDelObj(that);
             syncBlock();
-            // trigger(function () {
-            //     curObj = undefined;
-            //     curDiv = undefined;
-            // });
+
         };
         this.div = function () {
             return dv;
@@ -749,8 +726,23 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             var dvParam = getParams(dv);
             params.id = dvParam.id;
             params.style = dvParam.style;
-            if (params.type === 'text')
-                params.media = dvParam.text;
+            switch (params.type) {
+                case 'text':
+                    params.media = dvParam.text;
+                    break;
+                case 'image':
+                    if (dvParam.style['background-image'])
+                        params.media = dvParam.style['background-image'];
+                    break;
+                case 'video':
+                    if (dv.$video && dv.$video.attr('src'))
+                        params.media = dv.$video.attr('src');
+                    break;
+                case 'audio':
+                    if (dv.$audio && dv.$audio.attr('src'))
+                        params.media = dv.$audio.attr('src');
+                    break;
+            }
         };
         this.getParams = function () {
             return params;
@@ -772,7 +764,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     var Slide = function () {
         var that = this;
-        // var undolist = [], redolist = [];
 
         // style slide block
         var blockWrapperHeight = 130, blockHeight = blockWrapperHeight * 0.85, slideViewerWidth = blockHeight * w / h;
@@ -803,6 +794,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.get = function (id) {
             return objs[id];
+        };
+        this.removeObj = function (id) {
+            objs[id].remove();
+            delete objs[id];
         };
         this.focus = function () {
             if (curSlide)
@@ -890,41 +885,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             }
             actionManager.onLoadSlide(that, params);
         };
-
-        // this.addUndo = function (param) {
-        //     undolist.push(param);
-        // };
-        // this.undo = function () {
-        //     if (undolist.length > 0) {
-        //         var param = undolist.pop();
-        //         var dv = $('#' + param.id).data('div');
-        //         redolist.push(getParams(dv));
-        //         undoStyle(dv, param);
-        //         if (curSlide) {
-        //             var obj = curSlide.get(param.id);
-        //             obj.setParams();
-        //             obj.focus();
-        //         }
-        //         syncBlock();
-        //     }
-        // };
-        // this.redo = function () {
-        //     if (redolist.length > 0) {
-        //         var param = redolist.pop();
-        //         var dv = $('#' + param.id).data('div');
-        //         undolist.push(getParams(dv));
-        //         redoStyle(dv, param);
-        //         if (curSlide) {
-        //             var obj = curSlide.get(param.id);
-        //             obj.setParams();
-        //             obj.focus();
-        //         }
-        //         syncBlock();
-        //     }
-        // };
-        // this.resetRedo = function () {
-        //     redolist = [];
-        // };
 
         // play animation;
         this.playNext = function () {
@@ -1237,7 +1197,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             obj.focus();
             curSlide.append(obj);
-            // trigger();
         }
     });
     var rectSmooth = div().deco(decoObjMenu).borderRadius(4).click(function () {
@@ -1253,7 +1212,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             obj.focus();
             curSlide.append(obj);
-            // trigger();
         }
     });
     var circle = div().deco(decoObjMenu).borderRadius('100%').click(function () {
@@ -1269,7 +1227,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             obj.focus();
             curSlide.append(obj);
-            // trigger();
         }
     });
 
@@ -1293,7 +1250,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 curDiv.color(c);
                 actionManager.onStyle(curObj, ['background-color']);
                 syncBlock();
-                // trigger();
             }
         }
     };
@@ -1315,21 +1271,21 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Image').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'image'});
+            var obj = absObject({type: 'image', media: 'none'});
             obj.focus();
             curSlide.append(obj);
         }
     });
-    div().appendTo(typeObjBar).deco(decoTypeObj).text('Vedio').click(function () {
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('video').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'vedio'});
+            var obj = absObject({type: 'video', media:''});
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Audio').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'audio'});
+            var obj = absObject({type: 'audio', media:''});
             obj.focus();
             curSlide.append(obj);
         }
@@ -1388,7 +1344,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
     var copyParam, lockAction = false;
+    lock();
     slideManager.new();
+    unlock();
     insertMember(username);
     insertMember('kks');
     insertMember('yjs');
