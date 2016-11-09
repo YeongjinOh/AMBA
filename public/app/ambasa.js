@@ -9,6 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     /** set global module **/
 
     window.ambasa = {};
+    // var useOnline = true;
     var useOnline = true;
 
 
