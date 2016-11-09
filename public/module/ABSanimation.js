@@ -61,7 +61,7 @@ define ([], function() {
                                         }
                                     };
                                     animationQueue.push(aniData);
-                                    refreshPreviewText();
+                                    // refreshPreviewText();
                                 } else {
                                     params.forEach(function (data) {
                                         if (data === param)
@@ -80,16 +80,25 @@ define ([], function() {
                         }
                     }
 
-                    function refreshPreviewText() {
-                        previewText.text((manager.getIndex('preview')+1)+'/'+animationQueue.length);
-                    }
+                    // function refreshPreviewText() {
+                    //     previewText.text((manager.getIndex('preview')+1)+'/'+animationQueue.length);
+                    // }
+                    //
+                    // function refreshPreviewBar() {
+                    //
+                    // }
 
-                    function refreshPreviewBar() {
-
-                    }
+                    /*var decoContent = function (dv) {
+                        dv.appendTo(body).size('100%', 'auto').textAlignCenter().fontBold().border('1px solid gray').cursorPointer();
+                    };*/
 
                     var decoContent = function (dv) {
-                        dv.appendTo(body).size('100%', 'auto').textAlignCenter().fontBold().border('1px solid gray').cursorPointer();
+                        dv.appendTo(body).size('100%', 'auto').minHeight(50).color('white').margin(1).cursorPointer().click(function(dv, e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+
+                            alert('click');
+                        });
                     };
 
                     var decoPreviewBtn = function(dv) {
@@ -97,52 +106,58 @@ define ([], function() {
                     };
 
                     var root = div().class('abs-option').appendTo(target).size('100%', '100%').color('#eeeeee').border('1px solid gray').selectable(false).overflowScroll();
-                    div().appendTo(root).size('100%', '6%').color('black').text('AMBASA - Animation').fontColor('white').fontSize(20).border('1px solid #eeeeee').textAlignCenter().cursorDefault();
+                    div().appendTo(root).size('100%', '5%').color('black').text('AMBASA - Animation').fontColor('white').fontSize(20).border('1px solid #eeeeee').textAlignCenter().cursorDefault();
 
-                    var body = div().appendTo(root).size('100%', '94%');
+                    var body = div().appendTo(root).size('100%', '95%');
 
-                    var preview = div().appendTo(body).size('100%', 60).border('1px solid black').cursorPointer().click(function(dv, e) {
-                            e.stopPropagation();
-                            e.preventDefault();
+                    div().deco(decoContent);
+                    div().deco(decoContent);
+                    div().deco(decoContent);
+                    div().deco(decoContent);
 
-                            refreshPreviewText();
-                            refreshPreviewBar();
-                        });
 
-                    var previewMenu = div().appendTo(preview).size('100%', '50%').color('#cccccc').border('1px solid #eeeeee').marginTop(1).cursorDefault();
-
-                    var previewText = div().appendTo(previewMenu).size('20%', '100%').color('#cccccc').fontBold().textAlignCenter().border('1px solid #eeeeee');
-                    refreshPreviewText();
-
-                    div().appendTo(previewMenu).size('80%', '100%').text('Delete').fontSize(17).fontBold().textAlignCenter()
-                        .color('#cccccc').border('1px solid #eeeeee').cursorPointer().hoverColor('gray', '#cccccc').click(function() {
-                            if(!manager.isEmpty()) {
-                                if (manager.getIndex('preview') === -1) {
-                                    return;
-                                }
-
-                                animationQueue.splice(manager.getIndex('preview'), 1);
-                                if (manager.getIndex('preview') === animationQueue.length) {
-                                    manager.setIndex(animationQueue.length - 1, 'preview');
-                                }
-                            }
-                        });
-
-                    div().deco(decoPreviewBtn).text('◁◁').fontSize(16).hoverText('◀◀', '◁◁').click(function() {
-                            manager.goFirst('preview');
-                        });
-                    div().deco(decoPreviewBtn).text('◁').fontSize(16).hoverText('◀', '◁').click(function() {
-                            manager.back('preview');
-                        });
-                    // div().deco(decoPreviewBtn).text('□').fontSize(18).hoverText('■', '□').click(function() {
-                    //         manager.stop('preview');
+                    /*// var preview = div().appendTo(body).size('100%', 60).border('1px solid black').cursorPointer().click(function(dv, e) {
+                    //         e.stopPropagation();
+                    //         e.preventDefault();
+                    //
+                    //         refreshPreviewText();
+                    //         refreshPreviewBar();
                     //     });
-                    div().deco(decoPreviewBtn).text('▷').fontSize(16).hoverText('▶', '▷').click(function() {
-                            manager.next('preview');
-                        });
-                    div().deco(decoPreviewBtn).text('▷▷').fontSize(16).hoverText('▶▶', '▷▷').click(function() {
-                            manager.goLast('preview');
-                        });
+                    //
+                    // var previewMenu = div().appendTo(preview).size('100%', '50%').color('#cccccc').border('1px solid #eeeeee').marginTop(1).cursorDefault();
+                    //
+                    // var previewText = div().appendTo(previewMenu).size('20%', '100%').color('#cccccc').fontBold().textAlignCenter().border('1px solid #eeeeee');
+                    // refreshPreviewText();
+                    //
+                    // div().appendTo(previewMenu).size('80%', '100%').text('Delete').fontSize(17).fontBold().textAlignCenter()
+                    //     .color('#cccccc').border('1px solid #eeeeee').cursorPointer().hoverColor('gray', '#cccccc').click(function() {
+                    //         if(!manager.isEmpty()) {
+                    //             if (manager.getIndex('preview') === -1) {
+                    //                 return;
+                    //             }
+                    //
+                    //             animationQueue.splice(manager.getIndex('preview'), 1);
+                    //             if (manager.getIndex('preview') === animationQueue.length) {
+                    //                 manager.setIndex(animationQueue.length - 1, 'preview');
+                    //             }
+                    //         }
+                    //     });
+                    //
+                    // div().deco(decoPreviewBtn).text('◁◁').fontSize(16).hoverText('◀◀', '◁◁').click(function() {
+                    //         manager.goFirst('preview');
+                    //     });
+                    // div().deco(decoPreviewBtn).text('◁').fontSize(16).hoverText('◀', '◁').click(function() {
+                    //         manager.back('preview');
+                    //     });
+                    // // div().deco(decoPreviewBtn).text('□').fontSize(18).hoverText('■', '□').click(function() {
+                    // //         manager.stop('preview');
+                    // //     });
+                    // div().deco(decoPreviewBtn).text('▷').fontSize(16).hoverText('▶', '▷').click(function() {
+                    //         manager.next('preview');
+                    //     });
+                    // div().deco(decoPreviewBtn).text('▷▷').fontSize(16).hoverText('▶▶', '▷▷').click(function() {
+                    //         manager.goLast('preview');
+                    //     });
 
                     var fadeIn = div().deco(decoContent).text('Fade In').click(function (dv, e) {
                         e.stopPropagation();
@@ -212,12 +227,13 @@ define ([], function() {
                     });
 
                     for (i = 0; i < params.length; i++)
-                        editParams(ani_slideup, params[i]);
+                        editParams(ani_slideup, params[i]);*/
                 },
                 animator: function (index, mode) {
                     function backup(obj, e) {
                         switch(e) {
                             case 'fadeIn':
+                                // TODO 별도 처리 해주기!
                             case 'fadeOut':
                                 obj.fadeToggle(1);
                                 break;
