@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = true;
+    var useOnline = false;
 
 
     /** set user authentication **/
@@ -180,7 +180,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var length = 0;
 
         var add = function (action) {
-            console.log(action);
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
@@ -208,6 +207,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             length = 0;
         };
 
+        // TODO : obj delete slide param에서 지우기
         this.prev = function () {
             if (cur >= 0 && length > 0) {
                 lock()
@@ -217,6 +217,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                         case 'style':
                             // TODO: Uncaught TypeError: Cannot read property 'div' of
                             var abs = getABSbyId(actionObj.id);
+                            console.log(abs.div());
+                            console.log(actionObj.prev);
                             setAllStyles(abs.div(), actionObj.prev);
                             abs.setParams();
                             syncBlockbyId(actionObj.slide);
@@ -238,8 +240,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             }
                             break;
                         case 'new':
-                            // TODO: param 처리
-                            $('#' + actionObj.id).remove();
+                            var slide = slideManager.get(actionObj.slide);
+                            slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'delete':
@@ -301,7 +303,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'delete':
-                            $('#' + actionObj.id).remove();
+                            var slide = slideManager.get(actionObj.slide);
+                            slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
                     }
@@ -359,6 +362,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             })
         };
         this.onNewObj = function (obj) {
+            obj.setParams();
             add({
                 target: 'obj',
                 action: 'new',
@@ -514,7 +518,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     };
     var onDelete = function () {
         if (curObj) {
-            curObj.remove();
+            curSlide.removeObj(curObj.getId());
         }
         else if (curSlide) {
             slideManager.del()
@@ -733,13 +737,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         this.remove = function () {
             dv.remove();
-            // that.deactive();
+            curObj = undefined;
+            curDiv = undefined;
             actionManager.onDelObj(that);
             syncBlock();
-            // trigger(function () {
-            //     curObj = undefined;
-            //     curDiv = undefined;
-            // });
+
         };
         this.div = function () {
             return dv;
@@ -802,6 +804,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.get = function (id) {
             return objs[id];
+        };
+        this.removeObj = function (id) {
+            objs[id].remove();
+            delete objs[id];
         };
         this.focus = function () {
             if (curSlide)
@@ -1387,7 +1393,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
     var copyParam, lockAction = false;
+    lock();
     slideManager.new();
+    unlock();
     insertMember(username);
     insertMember('kks');
     insertMember('yjs');
