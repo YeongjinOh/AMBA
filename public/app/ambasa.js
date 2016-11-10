@@ -9,8 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     /** set global module **/
 
     window.ambasa = {};
-    // var useOnline = true;
-    var useOnline = false;
+    var useOnline = true;
 
 
     /** set user authentication **/
@@ -173,9 +172,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         // action을 다른 사람을 통해 받은 경우
         this.get = function (action) {
-            actions[cur + 1] = action;
-            length = cur + 2;
-            this.next();
+            if (action.target === "undo")
+                this.prev();
+            else if (action.target === "redo")
+                this.next();
+            else {
+                actions[cur + 1] = action;
+                length = cur + 2;
+                this.next();
+            }
         };
         this.clear = function () {
             actions = [];
@@ -185,7 +190,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
-                lock()
+                lock();
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
@@ -377,7 +382,38 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             //     slide: slide.getIdx(),
             //     params: params
             // })
-        }
+        };
+        // action을 추가하진 않고, undo message를 보냄.
+        this.onUndo = function () {
+            if (useOnline) {
+                var fName = fileName.text();
+                var action = {
+                    target:'undo'
+                };
+                if (fName !== defaultName) {
+                    online.sendMessage({
+                        roomid: fName,
+                        msg: action,
+                        username: username
+                    });
+                }
+            }
+        };
+        this.onRedo = function () {
+            if (useOnline) {
+                var fName = fileName.text();
+                var action = {
+                    target:'redo'
+                };
+                if (fName !== defaultName) {
+                    online.sendMessage({
+                        roomid: fName,
+                        msg: action,
+                        username: username
+                    });
+                }
+            }
+        };
     };
     var actionManager = new ActionManager();
 
