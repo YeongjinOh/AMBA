@@ -429,7 +429,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     target: 'redo'
                 };
                 online.sendMessage({
-                    roomid: fName,
+                    roomid: roomid,
                     msg: action,
                     username: username
                 });
@@ -1365,14 +1365,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var rightMenuBarWrapper = div().appendTo(menuBar).size('30%', '100%').padding(10);
     var userBar = div().appendTo(rightMenuBarWrapper).size('100%', '30%').border(borderGray).borderRadius(3)
         .text(username + '@amba.com').fontColor('gray').textAlignRight().paddingRight(10);
-    var members = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
+    var membersViewer = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
         .fontColor('gray').padding(10);
     var MemberManager = function () {
         var cntMember = 0;
         var members = [];
         this.insertMember = function (name) {
+            for (var i=0; i<members.length; i++) {
+                if (members[i] === name)
+                    return;
+            }
             members.push(name);
-            var member = div().appendTo(members).floatRight().size(40, '100%').margin(5).displayNone().fadeIn(400);
+            var member = div().appendTo(membersViewer).floatRight().size(60, '100%').margin(5).displayNone().fadeIn(400).overflowHidden();
             div().appendTo(member).size('100%', '90%').text(name).textAlignCenter();
             div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
         };
@@ -1418,8 +1422,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     unlock();
     var memberManager = new MemberManager();
     memberManager.insertMember(username);
-    // insertMember('kks');
-    // insertMember('yjs');
 
     window.ambasa.load = function (fName) {
         var userId = localStorage.getItem("ambasa");
