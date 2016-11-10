@@ -248,6 +248,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     }
                 }
                 unlock()
+                sendUndo();
             }
         };
         this.next = function () {
@@ -308,6 +309,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     }
                 }
                 unlock();
+                sendRedo();
             }
         };
 
@@ -384,7 +386,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             // })
         };
         // action을 추가하진 않고, undo message를 보냄.
-        this.onUndo = function () {
+        var sendUndo = function () {
             if (useOnline) {
                 var fName = fileName.text();
                 var action = {
@@ -399,7 +401,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 }
             }
         };
-        this.onRedo = function () {
+        var sendRedo = function () {
             if (useOnline) {
                 var fName = fileName.text();
                 var action = {
