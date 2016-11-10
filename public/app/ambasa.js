@@ -10,7 +10,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
     var useOnline = true;
-
+    var isServer = true;
+    var roomid = undefined;
 
     /** set user authentication **/
 
@@ -39,14 +40,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         online.connect();
     var joinOnline = function (fName) {
         if (useOnline) {
-            online.join(fName);
+            roomid = fName;
+            online.join(roomid);
             online.onRecieve(function (data) {
                 if (data.action !== 'new') {
                     var action = data.message.msg;
                     console.log('onRecieve');
-                    console.log(action);
                     actionManager.get(action);
                 }
+            });
+            online.sendMessage({
+                roomid: roomid,
+                msg: action,
+                username: username
             });
         }
     };
@@ -158,15 +164,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
-                if (useOnline) {
-                    var fName = fileName.text();
-                    if (fName !== defaultName) {
-                        online.sendMessage({
-                            roomid: fName,
-                            msg: action,
-                            username: username
-                        });
-                    }
+                if (useOnline && roomid) {
+                    online.sendMessage({
+                        roomid: roomid,
+                        msg: action,
+                        username: username
+                    });
                 }
             }
         };
@@ -177,7 +180,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 this.prev();
                 unlock();
             }
-            else if (action.target === "redo"){
+            else if (action.target === "redo") {
                 lock();
                 this.next();
                 unlock();
@@ -196,6 +199,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
+                sendUndo();
                 lock();
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
@@ -253,12 +257,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             break;
                     }
                 }
-                unlock()
-                sendUndo();
+                unlock();
             }
         };
         this.next = function () {
             if (cur < length - 1) {
+                sendRedo();
                 lock();
                 var actionObj = actions[++cur];
                 if (actionObj.target === 'obj') {
@@ -315,7 +319,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     }
                 }
                 unlock();
-                sendRedo();
             }
         };
 
@@ -383,43 +386,29 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 params: slide.export()
             })
         };
-        this.onLoadSlide = function (slide, params) {
-            // add({
-            //     target: 'slide',
-            //     action: 'load',
-            //     slide: slide.getIdx(),
-            //     params: params
-            // })
-        };
         // action을 추가하진 않고, undo message를 보냄.
         var sendUndo = function () {
-            if (useOnline) {
-                var fName = fileName.text();
+            if (useOnline && !lockAction && roomid) {
                 var action = {
-                    target:'undo'
+                    target: 'undo'
                 };
-                if (fName !== defaultName) {
-                    online.sendMessage({
-                        roomid: fName,
-                        msg: action,
-                        username: username
-                    });
-                }
+                online.sendMessage({
+                    roomid: roomid,
+                    msg: action,
+                    username: username
+                });
             }
         };
         var sendRedo = function () {
-            if (useOnline) {
-                var fName = fileName.text();
+            if (useOnline && !lockAction && roomid) {
                 var action = {
-                    target:'redo'
+                    target: 'redo'
                 };
-                if (fName !== defaultName) {
-                    online.sendMessage({
-                        roomid: fName,
-                        msg: action,
-                        username: username
-                    });
-                }
+                online.sendMessage({
+                    roomid: fName,
+                    msg: action,
+                    username: username
+                });
             }
         };
     };
@@ -927,7 +916,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 this.append(obj);
                 syncBlock();
             }
-            actionManager.onLoadSlide(that, params);
         };
 
         // play animation;
@@ -1322,14 +1310,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('video').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'video', media:''});
+            var obj = absObject({type: 'video', media: ''});
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Audio').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'audio', media:''});
+            var obj = absObject({type: 'audio', media: ''});
             obj.focus();
             curSlide.append(obj);
         }
