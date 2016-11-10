@@ -35,12 +35,10 @@ primus.save(__dirname +'/primus.js');
 var sub = redis.createClient();
 var pub = redis.createClient();
 
-var count = 1;
 var userList = {};
 primus.on('connection',function(spark){
 
   console.log('connected!');
-  spark.up =
   spark.write({
     action : 'new',
     message : {
@@ -48,11 +46,8 @@ primus.on('connection',function(spark){
     }
   });
 
-  spark.cnt = count;
-  count ++;
   //채널 갯수,
   sub.on('subscribe', function (channel, count) {
-    console.log(spark.cnt);
     console.log('Subscribed on channel:', channel, ', count:', count);
   });
 
@@ -65,23 +60,13 @@ primus.on('connection',function(spark){
     if('join' == action){
       //커넥션이 되면 브라우저로부터 가입 요청을 받아서 'publishData'채널에 가입시킨다.
       if(action == 'join'){
-        console.log('join the ' +message.roomid + ', ' + message.username);
+        //console.log('join the ' +message.roomid + ', ' + message.username);
 
         sub.subscribe(message.roomid);
-        spark.roomid = message.roomid;
-
-        spark.myname = message.username;
-        //userList[message.roomid].push(message.username);
-        userList[message.roomid] =message.username ;
+        //spark.roomid = message.roomid;
+        //spark.myname = message.username;
+        //userList[message.roomid] =message.username ;
       }
-    }
-
-
-    if('userList' == action){
-      if(spark.roomid == message.roomid){
-        console.log('userList : ', userList[message.roomid]);
-      }
-
     }
 
     //메시지를 전송!!
@@ -129,7 +114,6 @@ primus.on('connection',function(spark){
 
 primus.on('disconnection', function (spark) {
   console.log('disconnection');
-  count--;
 // the spark that disconnected
   spark.end();
 });
