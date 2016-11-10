@@ -8,25 +8,13 @@ define(['primus'], function (Primus) {
     var Module = {};
     var primus;
     var ainfo = JSON.parse(localStorage.getItem('ainfo'));
-    var roomid = AB.random(999999);
-    console.log('ainfo : ', ainfo);
 
     Module.connect = function () {
         primus = Primus.connect();
         return this
     };
 
-    Module.join = function (rid, fn) {
-        //console.log('join : ', rid);
-        if(rid===undefined){
-            primus.write({
-                action: 'join',
-                message: {
-                    roomid : 'ABMATA_'+roomid,
-                    msg: 'join the channel'
-                }
-            });
-        }else{
+    Module.join = function (rid) {
             primus.write({
                 action: 'join',
                 message: {
@@ -35,7 +23,6 @@ define(['primus'], function (Primus) {
                     msg: 'join the channel'
                 }
             });
-        }
         return this
     };
     Module.userList = function (rid) {

@@ -9,14 +9,13 @@ var promise = require('promise');
 
 
 function setRoomid(roomid){
-    //console.log(roomid.split(':'));
     return roomid.split(':')[2]
 }
 
 //사용자이름으로 방하는데 나중에 아이디로 바꿔줘야한다.
 router.get('/rooms', function (req, res, next) {
     var username = req.query.username;
-    var key ='AA'+':'+username;
+    var key ='AMBATA'+':'+username;
     req.cache.lrange(key, 0, -1, function (err, results) {
         if(err){
             console.log(err);
@@ -44,7 +43,7 @@ router.post('/rooms', function (req,res,next) {
     var userList = req.body['userList[]'];
 
     for(var i=0; i<userList.length;i++){
-        var key = 'AA:' + userList[i];
+        var key = 'AMBATA:' + userList[i];
         req.cache.lpush(key, roomid, function (err, result) {
             if(err){
                 console.log(err);
@@ -67,7 +66,7 @@ router.post('/rooms', function (req,res,next) {
 //roomid, username을 받아서
 router.get('/msg', function (req, res, next) {
     var roomid = req.query.roomid;
-    var key = 'AA' + ':' + roomid ;
+    var key = 'AMBATA' + ':' + roomid ;
     req.cache.lrange(key, 0, -1, function (err, results) {
         if(err){
             console.log(err);
@@ -100,7 +99,7 @@ router.post('/msg', function (req,res,next) {
         time : body.time,
         message : body.message
     };
-    var key ='AA';
+    var key ='AMBATA';
     //value = "\""+JSON.stringify(value)+"\"";
     value = JSON.stringify(value);
     key = key + ':' +roomid;
@@ -123,10 +122,6 @@ router.post('/msg', function (req,res,next) {
 });
 
 
-
-router.post('/test', function (req, res, next) {
-
-});
 
 
 module.exports = router;

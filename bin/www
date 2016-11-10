@@ -61,7 +61,6 @@ primus.on('connection',function(spark){
       //커넥션이 되면 브라우저로부터 가입 요청을 받아서 'publishData'채널에 가입시킨다.
       if(action == 'join'){
         //console.log('join the ' +message.roomid + ', ' + message.username);
-
         sub.subscribe(message.roomid);
         //spark.roomid = message.roomid;
         //spark.myname = message.username;
