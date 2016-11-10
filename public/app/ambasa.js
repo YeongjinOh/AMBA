@@ -1,4 +1,4 @@
-require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online) {
+require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online, tele) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -1369,6 +1369,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     });
 
 
+    /** set telegram **/
+    var showTelegram = false;
+    var onTelegram = function () {
+        if (showTelegram)
+            teleWrapper.fadeOut(300);
+        else
+            teleWrapper.fadeIn(300);
+        showTelegram = !showTelegram;
+    };
+    var teleWrapper = div().appendTo(parent).border('2px solid gray').position('absolute').draggable().resizable().top(100).left(30).displayNone();
+    tele.appendTo(teleWrapper);
+
+
     // animation viewer switch
     var isAniViewerOn = false;
     var switchAnimationViewer = function () {
@@ -1378,7 +1391,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             onAnimationViewer();
         isAniViewerOn = !isAniViewerOn;
     };
-    var buttonAnimation = div().appendTo(fileInfoHeader).class('abs-option').margin(20).padding(3).border(borderGray).borderRadius(4)
+    var buttonTelegram =div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
+        .text('Telegram').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee', 'white')
+        .click(onTelegram);
+
+    var buttonAnimation = div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
         .text('Animation').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee', 'white')
         .click(switchAnimationViewer);
 
