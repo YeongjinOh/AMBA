@@ -429,10 +429,15 @@ define ([], function() {
                 e.preventDefault();
 
                 paperTextAuto(0, dv, function(txt) {
-                    var curDiv = $('#' + idContainer.id).data('div');
-                    curDiv.backgroundSize('100%', '100%');
-                    curDiv.backgroundImage(txt);
-                    // callback();
+
+                    var type = 'image';
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    if (curObj.getParams().type === type) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.backgroundSize('100%', '100%');
+                        curDiv.backgroundImage('url('+txt+')');
+                        actionManager.onMedia(curObj, type);
+                    }
                 });
             });
 
@@ -441,10 +446,14 @@ define ([], function() {
                 e.preventDefault();
 
                 paperTextAuto(1, dv, function(txt) {
-                    var curDiv = $('#' + idContainer.id).data('div');
-                    curDiv.audio(idContainer.id, txt);
-                    // curDiv.audio(idContainer.id, 'http://media.w3.org/2010/07/bunny/04-Death_Becomes_Fur.oga');
-                    // callback();
+
+                    var type = 'audio';
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    if (curObj.getParams().type === type) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.audio(idContainer.id, txt);
+                        actionManager.onMedia(curObj, type);
+                    }
                 });
             });
 
@@ -453,10 +462,13 @@ define ([], function() {
                 e.preventDefault();
 
                 paperTextAuto(2, dv, function(txt) {
-                    var curDiv = $('#' + idContainer.id).data('div');
-                    curDiv.video(idContainer.id, txt);
-                    // curDiv.video(idContainer.id, 'http://media.w3.org/2010/05/bunny/movie.ogv');
-                    // callback();
+                    var type = 'video';
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    if (curObj.getParams().type === type) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.video(idContainer.id, txt);
+                        actionManager.onMedia(curObj, type);
+                    }
                 });
             });
         });

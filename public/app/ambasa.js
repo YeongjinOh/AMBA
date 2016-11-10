@@ -10,7 +10,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
     var useOnline = true;
-
+    var isServer = true;
+    var roomid = undefined;
 
     /** set user authentication **/
 
@@ -39,14 +40,47 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         online.connect();
     var joinOnline = function (fName) {
         if (useOnline) {
-            online.join(fName);
+            roomid = fName;
+            online.join(roomid);
             online.onRecieve(function (data) {
-                if (data.action !== 'new') {
+                if (data.action === 'broadcast_msg') {
                     var action = data.message.msg;
-                    console.log('onRecieve');
-                    console.log(action);
-                    actionManager.get(action);
+                    if (action.target === 'obj' || action.target === 'slide') {
+                        console.log('onRecieve');
+                        actionManager.get(action);
+                    }
+                    // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
+                    else if (isServer && action.target === 'server' && action.action === 'join') {
+                        var members = memberManager.getMembers();
+                        var actions = actionManager.export();
+                        online.sendMessage({
+                            roomid: roomid,
+                            msg: {
+                                target: 'client',
+                                action: 'join',
+                                members: members,
+                                actions: actions
+                            },
+                            username: username
+                        });
+                        memberManager.insertMember(data.message.username);
+                    }
+                    else if (action.target === 'client' && action.action === 'join') {
+                        var members = action.members;
+                        var actions = action.actions;
+                        memberManager.setMembers(members);
+                        actionManager.syncActions(actions);
+                        isServer = false;
+                    }
                 }
+            });
+            online.sendMessage({
+                roomid: roomid,
+                msg: {
+                    target: 'server',
+                    action: 'join'
+                },
+                username: username
             });
         }
     };
@@ -107,31 +141,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             return curSlide.getIdx();
     };
 
-    // var trigger = function (fn) {
-    // if (curSlide) {
-    //     syncBlock();
-    //     curSlide.resetRedo();
-    // }
-    // if (curDiv && curObj) {
-    //     var prevParams = curObj.getParams();
-    //     curSlide.addUndo(prevParams);
-    //     curObj.setParams();
-    //     if (useOnline) {
-    //         var fName = fileName.text();
-    //         if (fName !== defaultName) {
-    //             var msg = curObj;
-    //             online.sendMessage({
-    //                 roomid: fName,
-    //                 msg: curObj.getParams(),
-    //                 username: username
-    //             });
-    //         }
-    //     }
-    // }
-    // if (typeof fn === 'function')
-    //     fn();
-    // };
-
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -180,27 +189,35 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var length = 0;
 
         var add = function (action) {
-            console.log(action);
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
-                if (useOnline) {
-                    var fName = fileName.text();
-                    if (fName !== defaultName) {
-                        online.sendMessage({
-                            roomid: fName,
-                            msg: action,
-                            username: username
-                        });
-                    }
+                if (useOnline && roomid) {
+                    online.sendMessage({
+                        roomid: roomid,
+                        msg: action,
+                        username: username
+                    });
                 }
             }
         };
         // action을 다른 사람을 통해 받은 경우
         this.get = function (action) {
-            actions[cur + 1] = action;
-            length = cur + 2;
-            this.next();
+            if (action.target === "undo") {
+                lock();
+                this.prev();
+                unlock();
+            }
+            else if (action.target === "redo") {
+                lock();
+                this.next();
+                unlock();
+            }
+            else {
+                actions[cur + 1] = action;
+                length = cur + 2;
+                this.next();
+            }
         };
         this.clear = function () {
             actions = [];
@@ -210,7 +227,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
-                lock()
+                sendUndo();
+                lock();
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
@@ -222,24 +240,27 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'media':
+                            var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
                                 case 'text':
-                                    var abs = getABSbyId(actionObj.id);
                                     abs.div().text(actionObj.prev);
-                                    abs.setParams();
-                                    syncBlockbyId(actionObj.slide);
                                     break;
                                 case 'image':
+                                    abs.div().backgroundImage(actionObj.prev);
                                     break;
                                 case 'video':
+                                    abs.div().video(actionObj.id, actionObj.prev);
                                     break;
                                 case 'audio':
+                                    abs.div().audio(actionObj.id, actionObj.prev);
                                     break;
                             }
+                            abs.setParams();
+                            syncBlockbyId(actionObj.slide);
                             break;
                         case 'new':
-                            // TODO: param 처리
-                            $('#' + actionObj.id).remove();
+                            var slide = slideManager.get(actionObj.slide);
+                            slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'delete':
@@ -264,11 +285,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             break;
                     }
                 }
-                unlock()
+                unlock();
             }
         };
         this.next = function () {
             if (cur < length - 1) {
+                sendRedo();
                 lock();
                 var actionObj = actions[++cur];
                 if (actionObj.target === 'obj') {
@@ -280,20 +302,23 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'media':
+                            var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
                                 case 'text':
-                                    var abs = getABSbyId(actionObj.id);
                                     abs.div().text(actionObj.cur);
-                                    abs.setParams();
-                                    syncBlockbyId(actionObj.slide);
                                     break;
                                 case 'image':
+                                    abs.div().backgroundImage(actionObj.cur);
                                     break;
                                 case 'video':
+                                    abs.div().video(actionObj.id, actionObj.cur);
                                     break;
                                 case 'audio':
+                                    abs.div().audio(actionObj.id, actionObj.cur);
                                     break;
                             }
+                            abs.setParams();
+                            syncBlockbyId(actionObj.slide);
                             break;
                         case 'new':
                             var slide = slideManager.get(actionObj.slide);
@@ -301,7 +326,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             syncBlockbyId(actionObj.slide);
                             break;
                         case 'delete':
-                            $('#' + actionObj.id).remove();
+                            var slide = slideManager.get(actionObj.slide);
+                            slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
                     }
@@ -323,6 +349,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 unlock();
             }
         };
+        this.export = function () {
+            return actions;
+        };
+        this.syncActions = function (_actions) {
+            actions = _actions;
+            lock();
+            for (var i=0; i<actions.length; i++)
+                this.next();
+            unlock();
+        };
 
         // drag, resize, change style
         this.onStyle = function (obj, props) {
@@ -338,16 +374,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 cur: filterProp(curStyle, props)
             });
         };
-        // text, vedio, image, audio
+        // text, video, image, audio
         this.onMedia = function (obj, type) {
-            var prev, cur;
-            switch (type) {
-                case 'text':
-                    prev = obj.getParams().media;
-                    obj.setParams();
-                    cur = obj.getParams().media;
-                    break;
-            }
+            var prev = obj.getParams().media;
+            obj.setParams();
+            var cur = obj.getParams().media;
             add({
                 target: 'obj',
                 action: 'media',
@@ -359,6 +390,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             })
         };
         this.onNewObj = function (obj) {
+            obj.setParams();
             add({
                 target: 'obj',
                 action: 'new',
@@ -392,14 +424,31 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 params: slide.export()
             })
         };
-        this.onLoadSlide = function (slide, params) {
-            // add({
-            //     target: 'slide',
-            //     action: 'load',
-            //     slide: slide.getIdx(),
-            //     params: params
-            // })
-        }
+        // action을 추가하진 않고, undo message를 보냄.
+        var sendUndo = function () {
+            if (useOnline && !lockAction && roomid) {
+                var action = {
+                    target: 'undo'
+                };
+                online.sendMessage({
+                    roomid: roomid,
+                    msg: action,
+                    username: username
+                });
+            }
+        };
+        var sendRedo = function () {
+            if (useOnline && !lockAction && roomid) {
+                var action = {
+                    target: 'redo'
+                };
+                online.sendMessage({
+                    roomid: roomid,
+                    msg: action,
+                    username: username
+                });
+            }
+        };
     };
     var actionManager = new ActionManager();
 
@@ -425,13 +474,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         }
     };
     var onUndo = function () {
-        // if (curSlide)
-        //     curSlide.undo();
         actionManager.prev();
     };
     var onRedo = function () {
-        // if (curSlide)
-        //     curSlide.redo();
         actionManager.next();
     };
     var onSave = function () {
@@ -514,7 +559,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     };
     var onDelete = function () {
         if (curObj) {
-            curObj.remove();
+            curSlide.removeObj(curObj.getId());
         }
         else if (curSlide) {
             slideManager.del()
@@ -523,14 +568,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var onCopy = function () {
         if (curObj) {
             copyParam = curObj.getParams();
+        } else if (curSlide) {
+            // TODO
         }
     };
     var onPaste = function () {
         copyParam.id = idGenerator.get();
+        copyParam.style.left = parseInt(copyParam.style.left) + 5;
+        copyParam.style.top = parseInt(copyParam.style.top) + 5;
         var obj = absObject(copyParam);
         obj.focus();
         curSlide.append(obj);
-        // trigger();
+        syncBlock();
     };
     var onAnimationViewer = function () {
         slideEditor.width(slideEditorWidthAni).paddingLeft(sbgMaringLeftAni);
@@ -667,7 +716,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var ABSObject = function (_params) {
         var that = this, params = {};
         var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .color('initial').cursorMove().position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
+            .cursorMove().position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
@@ -677,11 +726,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             that.focus();
         }).mouseup(function () {
             var style1 = getParams(dv).style, style2 = params.style;
-            // trigger only when changed
             if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
                 actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
                 syncBlock();
-                // trigger();
             }
         });
 
@@ -689,17 +736,21 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         if (_params) {
             params = $.extend({}, _params);
             setAllStyles(dv, params.style);
-            switch (params.type) {
-                case 'text':
-                    if (params.media)
+            if (params.media) {
+                switch (params.type) {
+                    case 'text':
                         dv.text(params.media);
-                    break;
-                case 'image':
-                    break;
-                case 'vedio':
-                    break;
-                case 'audio':
-                    break;
+                        break;
+                    case 'image':
+                        dv.backgroundImage(params.media);
+                        break;
+                    case 'video':
+                        dv.video(id, params.media);
+                        break;
+                    case 'audio':
+                        dv.audio(id, params.media);
+                        break;
+                }
             }
         }
         if (params.style === undefined)
@@ -733,13 +784,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         this.remove = function () {
             dv.remove();
-            // that.deactive();
+            curObj = undefined;
+            curDiv = undefined;
             actionManager.onDelObj(that);
             syncBlock();
-            // trigger(function () {
-            //     curObj = undefined;
-            //     curDiv = undefined;
-            // });
+
         };
         this.div = function () {
             return dv;
@@ -748,8 +797,23 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             var dvParam = getParams(dv);
             params.id = dvParam.id;
             params.style = dvParam.style;
-            if (params.type === 'text')
-                params.media = dvParam.text;
+            switch (params.type) {
+                case 'text':
+                    params.media = dvParam.text;
+                    break;
+                case 'image':
+                    if (dvParam.style['background-image'])
+                        params.media = dvParam.style['background-image'];
+                    break;
+                case 'video':
+                    if (dv.$video && dv.$video.attr('src'))
+                        params.media = dv.$video.attr('src');
+                    break;
+                case 'audio':
+                    if (dv.$audio && dv.$audio.attr('src'))
+                        params.media = dv.$audio.attr('src');
+                    break;
+            }
         };
         this.getParams = function () {
             return params;
@@ -771,7 +835,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     var Slide = function () {
         var that = this;
-        // var undolist = [], redolist = [];
 
         // style slide block
         var blockWrapperHeight = 130, blockHeight = blockWrapperHeight * 0.85, slideViewerWidth = blockHeight * w / h;
@@ -802,6 +865,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         this.get = function (id) {
             return objs[id];
+        };
+        this.removeObj = function (id) {
+            objs[id].remove();
+            delete objs[id];
         };
         this.focus = function () {
             if (curSlide)
@@ -887,43 +954,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 this.append(obj);
                 syncBlock();
             }
-            actionManager.onLoadSlide(that, params);
         };
-
-        // this.addUndo = function (param) {
-        //     undolist.push(param);
-        // };
-        // this.undo = function () {
-        //     if (undolist.length > 0) {
-        //         var param = undolist.pop();
-        //         var dv = $('#' + param.id).data('div');
-        //         redolist.push(getParams(dv));
-        //         undoStyle(dv, param);
-        //         if (curSlide) {
-        //             var obj = curSlide.get(param.id);
-        //             obj.setParams();
-        //             obj.focus();
-        //         }
-        //         syncBlock();
-        //     }
-        // };
-        // this.redo = function () {
-        //     if (redolist.length > 0) {
-        //         var param = redolist.pop();
-        //         var dv = $('#' + param.id).data('div');
-        //         undolist.push(getParams(dv));
-        //         redoStyle(dv, param);
-        //         if (curSlide) {
-        //             var obj = curSlide.get(param.id);
-        //             obj.setParams();
-        //             obj.focus();
-        //         }
-        //         syncBlock();
-        //     }
-        // };
-        // this.resetRedo = function () {
-        //     redolist = [];
-        // };
 
         // play animation;
         this.playNext = function () {
@@ -1080,7 +1111,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var slideBackground = getSlideBackground().appendTo(fullscreenViewer).css('zoom', (100 * zoomRatio) + '%');
 
         this.play = function (params) {
-
+            lock();
             // remove previous objects
             var children = slideBackground.children();
             for (var i = 0; i < children.length; i++) {
@@ -1094,6 +1125,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 absObject(param).div().appendTo(slideBackground);
             }
             fullscreenViewer.displayInlineBlock();
+            unlock();
         };
         this.stop = function () {
             fullscreenViewer.displayNone();
@@ -1235,7 +1267,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             obj.focus();
             curSlide.append(obj);
-            // trigger();
         }
     });
     var rectSmooth = div().deco(decoObjMenu).borderRadius(4).click(function () {
@@ -1251,7 +1282,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             obj.focus();
             curSlide.append(obj);
-            // trigger();
         }
     });
     var circle = div().deco(decoObjMenu).borderRadius('100%').click(function () {
@@ -1267,7 +1297,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             obj.focus();
             curSlide.append(obj);
-            // trigger();
         }
     });
 
@@ -1291,7 +1320,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 curDiv.color(c);
                 actionManager.onStyle(curObj, ['background-color']);
                 syncBlock();
-                // trigger();
             }
         }
     };
@@ -1313,21 +1341,21 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Image').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'image'});
+            var obj = absObject({type: 'image', media: 'none'});
             obj.focus();
             curSlide.append(obj);
         }
     });
-    div().appendTo(typeObjBar).deco(decoTypeObj).text('Vedio').click(function () {
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('video').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'vedio'});
+            var obj = absObject({type: 'video', media: ''});
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Audio').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'audio'});
+            var obj = absObject({type: 'audio', media: ''});
             obj.focus();
             curSlide.append(obj);
         }
@@ -1351,14 +1379,31 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var rightMenuBarWrapper = div().appendTo(menuBar).size('30%', '100%').padding(10);
     var userBar = div().appendTo(rightMenuBarWrapper).size('100%', '30%').border(borderGray).borderRadius(3)
         .text(username + '@amba.com').fontColor('gray').textAlignRight().paddingRight(10);
-    var members = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
+    var membersViewer = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
         .fontColor('gray').padding(10);
-    var cntMember = 0;
-    var insertMember = function (name) {
-        var member = div().appendTo(members).floatRight().size(40, '100%').margin(5);
-        div().appendTo(member).size('100%', '90%').text(name).textAlignCenter();
-        div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
+    var MemberManager = function () {
+        var cntMember = 0;
+        var members = [];
+        this.insertMember = function (name) {
+            for (var i=0; i<members.length; i++) {
+                if (members[i] === name)
+                    return;
+            }
+            members.push(name);
+            var member = div().appendTo(membersViewer).floatRight().size(60, '100%').margin(5).displayNone().fadeIn(400).overflowHidden();
+            div().appendTo(member).size('100%', '90%').text(name).textAlignCenter();
+            div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
+        };
+        this.setMembers = function (members) {
+            for (var i=0; i<members.length; i++) {
+                this.insertMember(members[i]);
+            }
+        };
+        this.getMembers = function () {
+            return members;
+        }
     };
+
 
 
     /** status bar **/
@@ -1386,10 +1431,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var curSlide, curBackground, curObj, curDiv;
     var isFullscreen = false;
     var copyParam, lockAction = false;
+    lock();
     slideManager.new();
-    insertMember(username);
-    insertMember('kks');
-    insertMember('yjs');
+    unlock();
+    var memberManager = new MemberManager();
+    memberManager.insertMember(username);
 
     window.ambasa.load = function (fName) {
         var userId = localStorage.getItem("ambasa");
