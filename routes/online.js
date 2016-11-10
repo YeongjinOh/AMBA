@@ -124,5 +124,9 @@ router.post('/msg', function (req,res,next) {
 
 
 
+router.post('/test', function (req, res, next) {
+
+});
+
 
 module.exports = router;

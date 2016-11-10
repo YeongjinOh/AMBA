@@ -35,7 +35,8 @@ primus.save(__dirname +'/primus.js');
 var sub = redis.createClient();
 var pub = redis.createClient();
 
-
+var count = 1;
+var userList = {};
 primus.on('connection',function(spark){
 
   console.log('connected!');
@@ -47,8 +48,11 @@ primus.on('connection',function(spark){
     }
   });
 
+  spark.cnt = count;
+  count ++;
   //채널 갯수,
   sub.on('subscribe', function (channel, count) {
+    console.log(spark.cnt);
     console.log('Subscribed on channel:', channel, ', count:', count);
   });
 
@@ -61,16 +65,30 @@ primus.on('connection',function(spark){
     if('join' == action){
       //커넥션이 되면 브라우저로부터 가입 요청을 받아서 'publishData'채널에 가입시킨다.
       if(action == 'join'){
-        console.log('join the ', message.roomid);
+        console.log('join the ' +message.roomid + ', ' + message.username);
+
         sub.subscribe(message.roomid);
+        spark.roomid = message.roomid;
+
+        spark.myname = message.username;
+        //userList[message.roomid].push(message.username);
+        userList[message.roomid] =message.username ;
       }
+    }
+
+
+    if('userList' == action){
+      if(spark.roomid == message.roomid){
+        console.log('userList : ', userList[message.roomid]);
+      }
+
     }
 
     //메시지를 전송!!
     if('sendMessage' == action){
       var roomid = message.roomid;
-      var msg = data.message.msg;
-      var username = data.message.username;
+      var msg = message.msg;
+      var username = message.username;
       //메시지를 보낸사람
       spark.myname = username;
 
@@ -87,12 +105,12 @@ primus.on('connection',function(spark){
   sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
     console.log("sub channel " + channel + " : " + message);
     var temp = JSON.parse(message);
-    if(channel == temp.roomid){
+    if(channel == temp.roomid){//같은 채널에만 메시지를 보낸다.
       var msg = temp.msg;
       var username = temp.username;
       //console.log("msg : " + msg + ", username : ", username);
 
-      if(spark.myname != username){
+      if(spark.myname != username){//보낸이를 제외하고 보낸다
         spark.write({
           action : 'broadcast_msg',
           message : {
@@ -102,6 +120,7 @@ primus.on('connection',function(spark){
           }
         });
       }
+
     }
   });
 
@@ -110,6 +129,7 @@ primus.on('connection',function(spark){
 
 primus.on('disconnection', function (spark) {
   console.log('disconnection');
+  count--;
 // the spark that disconnected
   spark.end();
 });

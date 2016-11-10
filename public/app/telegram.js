@@ -2,18 +2,12 @@
  * Created by Lightsoo on 2016. 10. 28..
  */
 
- //requirejs(['OnlineManager'], function (online) {
-define(['OnlineManager'], function (online) {
+ requirejs(['OnlineManager'], function (online) {
+//define(['OnlineManager'], function (online) {
 
     var addZeroIfNeeded = function (num) {
         num = parseInt(num);
         return num < 10 ? '0' + num : num;
-    };
-    var setCurrentView = function (v) {
-        roomList.displayNone();
-        freindList.displayNone();
-        chatView.displayNone();
-        v.displayBlock();
     };
 
     var getTime = function () {
@@ -31,7 +25,14 @@ define(['OnlineManager'], function (online) {
 
     var Module ={};
 
-    Module.appendTo = function(target){
+    //Module.appendTo = function(target){
+
+        var setCurrentView = function (v) {
+            roomList.displayNone();
+            freindList.displayNone();
+            chatView.displayNone();
+            v.displayBlock();
+        };
 
         // var online = AB.module.OnlineManager;
         online.connect();
@@ -46,7 +47,7 @@ define(['OnlineManager'], function (online) {
          .position('absolute').left(0).top(0);
 
 
-     var popupWrapper = div().appendTo(vParent).size(300, 410).color('white')
+     var popupWrapper = div().appendTo(vParent).size(300, 398).color('white')
          .borderOption(1).borderOption('#EBE8E7', 'color');
 
         var popupHeader = div().appendTo(popupWrapper).size(300,50)
@@ -55,32 +56,34 @@ define(['OnlineManager'], function (online) {
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7');
 
         var popupContent = div().appendTo(popupWrapper).size(300,300).overflow('scroll');
-        var popupBottom = div().appendTo(popupWrapper).size(300,60)
+        var popupBottom = div().appendTo(popupWrapper).size(300,48)
             .borderTop('solid 2px').borderTopColor('#EBE8E7')
             .padding(12);
 
-        var popupBottomNext = div().appendTo(popupBottom).size('auto',35).floatRight()
+     var popupBottomNext = div().appendTo(popupBottom).size('auto',23).floatRight()
             .hoverColor('#F4F6F6','transparent').cursorPointer()
-            .text('Next').fontSize(24).marginRight(5)
+            .text('NEXT').fontSize(20).marginRight(5).fontFamily('Meiryo')
                 .click(function () {
-                newRoomView.displayBlock();
-                //console.log('ok : ', friendAdapter);
-                userList =[];
-                for(var i=0;i<friendAdapter.length;i++){
-                    if(friendAdapter[i].selected == true){
-                        userList.push(friendAdapter[i].username)
-                    }
-                    friendAdapter[i].selected =false;
-                }
-                newRoomHeader.text(userList.reduce(function (memo, value) {
-                    return memo + ', '+ value;
-                }));
 
+                    userList =[];
+                    for(var i=0;i<friendAdapter.length;i++){
+                        if(friendAdapter[i].selected == true){
+                            userList.push(friendAdapter[i].username)
+                        }
+                        friendAdapter[i].selected =false;
+                    }
+                    newRoomHeader.text(userList.reduce(function (memo, value) {
+                        return memo + ', '+ value;
+                    }));
+                    if(userList.length !==0){
+                        newRoomView.displayBlock();
+                    }
             });
 
-        var popupBottomCancel = div().appendTo(popupBottom).size('auto',35).floatRight()
+
+        var popupBottomCancel = div().appendTo(popupBottom).size('auto',23).floatRight()
             .hoverColor('#F4F6F6','transparent').cursorPointer()
-            .text('CANCEL').fontSize(24)
+            .text('CANCEL').fontSize(20).fontFamily('Meiryo')
             .marginRight(15)
             .click(function () {
                 console.log('calcel : ', friendAdapter);
@@ -95,13 +98,13 @@ define(['OnlineManager'], function (online) {
 
         var newRoomView = div().appendTo(vParent).size(300, 590).color('transparent').displayNone()
             .position('absolute').left(0).top(0);
-        var newRoomWrapper = div().appendTo(newRoomView).size(300,224).color('white')
+        var newRoomWrapper = div().appendTo(newRoomView).size(300,222).color('white')
             .borderOption(1).borderOption('#99A3A4  ', 'color')
             .marginTop(160);
 
          var newRoomHeader = div().appendTo(newRoomWrapper).size(300,52)
              //.maxHeight(60)
-             .padding(6).overflow('scroll')
+             .padding(6).overflow('scroll').textOverflow('clip').whiteSpace('nowrap')
              .fontSize(27).fontColor('green')//.fontBold()
              .borderBottom('solid 2px').borderBottomColor('#99A3A4');
 
@@ -114,14 +117,14 @@ define(['OnlineManager'], function (online) {
             .text('').editable();
 
 
-         var newRoomBottom = div().appendTo(newRoomWrapper).size(300,50)
+         var newRoomBottom = div().appendTo(newRoomWrapper).size(300,48)
              .borderTop('solid 2px').borderTopColor('#EBE8E7')
-             .padding(8);
+             .padding(12);
 
 
-         var newRoomBottomOk = div().appendTo(newRoomBottom).size('auto',35).floatRight()
+         var newRoomBottomOk = div().appendTo(newRoomBottom).size('auto',23).floatRight()
              .hoverColor('#F4F6F6','transparent').cursorPointer()
-             .text('OK').fontSize(24).marginRight(5)
+             .text('OK').fontSize(20).marginRight(5).fontFamily('Meiryo')
              .click(function () {
                  if(userList.length!==0){
                      $.ajax({
@@ -142,11 +145,11 @@ define(['OnlineManager'], function (online) {
                              //online.join(randomRoomid);
                              currentRoomid = newRoomContentRoomName.text();
                              online.join(newRoomContentRoomName.text());
-                             newRoomContentRoomName.text('')
+                             newRoomContentRoomName.text('');
                              chatListView.empty();
                              setCurrentView(chatView);
                              //
-                             userList = []
+                             userList = [];
                              newRoomView.displayNone();
                              vParent.displayNone();
                          }
@@ -155,24 +158,15 @@ define(['OnlineManager'], function (online) {
 
              });
 
-         var newRoomBottomCancel = div().appendTo(newRoomBottom).size('auto',35).floatRight()
+         var newRoomBottomCancel = div().appendTo(newRoomBottom).size('auto',23).floatRight()
              .hoverColor('#F4F6F6','transparent').cursorPointer()
-             .text('CANCEL').fontSize(24)
+             .text('CANCEL').fontSize(20).fontFamily('Meiryo')
              .marginRight(15)
              .click(function () {
                  userList = [];
                  newRoomView.displayNone();
                  vParent.displayNone();
              });
-
-
-
-
-
-
-
-
-
 
 
         var sideView = div().appendTo(parent).size(300,590);
@@ -200,28 +194,28 @@ define(['OnlineManager'], function (online) {
        var chatView = div().appendTo(listView).size('300','100%').displayNone();
 
 
-        var sideBottom =div().appendTo(sideView).size(300,70).color('#EBE8E7');
-        var sideBottom1 = div().appendTo(sideBottom).size(100,70)
+        var sideBottom =div().appendTo(sideView).size(300,55).color('#EBE8E7');
+        var sideBottom1 = div().appendTo(sideBottom).size(100,55)
             .hoverColor('#F4F6F6','transparent')
             .click(function () {
                 setCurrentView(freindList);
             });
-         var sideFreinds = div().appendTo(sideBottom1).size(70,70).displayBlock().margin('auto')
+         var sideFreinds = div().appendTo(sideBottom1).size(55,55).displayBlock().margin('auto')
              .image('../images/profile.png').cursorPointer();
-        var sideBottom2 = div().appendTo(sideBottom).size(100,70)
+        var sideBottom2 = div().appendTo(sideBottom).size(100,55)
             .hoverColor('#F4F6F6','transparent').cursorPointer()
             .click(function () {
                 setCurrentView(roomList);
             });
-        var sideRooms = div().appendTo(sideBottom2).size(70,70).image('../images/chat.png').displayBlock().margin('auto');
+        var sideRooms = div().appendTo(sideBottom2).size(55,55).image('../images/chat.png').displayBlock().margin('auto');
 
-     var sideBottom3 = div().appendTo(sideBottom).size(100,70)
+     var sideBottom3 = div().appendTo(sideBottom).size(100,55)
          .hoverColor('#F4F6F6','transparent').cursorPointer()
          .click(function () {
              setCurrentView(chatView);
          });
 
-        var currentRoom = div().appendTo(sideBottom3).size(70,70).image('../images/1chat.png').displayBlock().margin('auto');
+        var currentRoom = div().appendTo(sideBottom3).size(55,55).image('../images/1chat.png').displayBlock().margin('auto');
 
         var chatListView = div().id('abc1').appendTo(chatView).size(300,420).overflow('scroll')
             .padding(3)
@@ -262,13 +256,14 @@ define(['OnlineManager'], function (online) {
                             time : getTime(),
                             message : msg
                         }, function (result) {
-                            var myMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
+                            var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
                             var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
-                                .marginRight(10).color('white').fontSize(23).maxWidth(300)
-                                .borderOption(3).borderOption('#EBE8E7', 'color').borderRadius('10%')
-
-                                .whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
-                            var myTime = div().appendTo(myMsg).size('auto', '15').floatRight()
+                                .marginRight(10).color('white').fontSize(15).maxWidth(200)
+                                .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
+                                .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
+                                .fontFamily('Meiryo');
+                            var myTime = div().appendTo(myMsg).size('auto', '13').floatRight()
+                                .fontSize(11)
                                 .text(getTime()).marginRight(5);
                             myMsg.appendTo(chatListView);
                             chatListView.setScrollTop();
@@ -289,24 +284,26 @@ define(['OnlineManager'], function (online) {
                     console.log(message);
                     var username = message.username;
                     var msg = message.msg;
-                    var receivedMsg = div().size('100%', 'auto').minHeight(60).marginTop(5);
+                    var receivedMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
 
-                    var profile = div().appendTo(receivedMsg).size('68', '68')
+                    var profile = div().appendTo(receivedMsg).size(38, 38)
                         .borderOption(1).borderOption('#EBE8E7', 'color')
                         .borderRadius('50%')
                         .padding(6)
                         .image('../images/person.png').floatLeft();
-                    //.color('blue').borderRadius('50%')
                     var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
 
                     var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
-                        .fontSize(18).textAlign('left');
+                        .fontSize(12).textAlign('left');
 
                     var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(msg).maxWidth(200)
-                        .borderOption(3).borderOption('#EBE8E7', 'color').borderRadius('10%')
-                        .whiteSpace('pre-line').fontSize(23).textAlign('left').floatLeft().wordBreak('break-all');
+                        .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
+                        .whiteSpace('pre-line').fontSize(15).textAlign('left').floatLeft().wordBreak('break-all')
+                        .fontFamily('Meiryo');;
 
-                    var recievdTime = div().appendTo(receivedMsg).size('auto', '15').floatLeft().text(getTime()).marginLeft(5);
+                    var recievdTime = div().appendTo(receivedMsg).size('auto', '13').floatLeft()
+                        .fontSize(11)
+                        .text(getTime()).marginLeft(5);
                     receivedMsg.appendTo(chatListView);
                     chatListView.setScrollTop();
                 }
@@ -456,39 +453,37 @@ define(['OnlineManager'], function (online) {
             if(ainfo.username == msgData.writer){
                 var message = msgData.message;
                 var time = msgData.time;
-                var myMsg = div().size('100%', 'auto').minHeight(50)
-                    .marginTop(5);
+                var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
                 var txt = div().appendTo(myMsg).size('auto', 'auto').text(message).floatRight()
-
-                    .marginRight(10).color('white').fontSize(20).maxWidth(200)
+                    .marginRight(10).color('white').fontSize(15).maxWidth(200)
                     .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
-                    .whiteSpace('pre-line').textAlign('left').wordBreak('break-all');
-                var myTime = div().appendTo(myMsg).size('auto', '14').floatRight()
-                    .fontSize(12)
+                    .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
+                    .fontFamily('Meiryo');
+                var myTime = div().appendTo(myMsg).size('auto', '13').floatRight()
+                    .fontSize(11)
                     .text(time).marginRight(5);
                 myMsg.appendTo(chatListView);
             }else {
                 var username = msgData.writer;
                 var message = msgData.message;
                 var time = msgData.time;
-                var receivedMsg = div().size('100%', 'auto').minHeight(50).marginTop(5);
+                var receivedMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
 
-                var profile = div().appendTo(receivedMsg).size('50', '50')
+                var profile = div().appendTo(receivedMsg).size(38, 38)
                     .padding(6)
                     .borderOption(1).borderOption('#EBE8E7', 'color')
                     .borderRadius('50%')
                     .image('../images/person.png').floatLeft();
-                //.color('blue').borderRadius('50%').floatLeft();
                 var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
 
                 var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
-                    .fontSize(17).textAlign('left');
+                    .fontSize(12).textAlign('left');
                 var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(message).maxWidth(200)
                     .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
-                    .whiteSpace('pre-line').fontSize(20).textAlign('left').floatLeft().wordBreak('break-all').fontFamily('Meiryo');
+                    .whiteSpace('pre-line').fontSize(15).textAlign('left').floatLeft().wordBreak('break-all').fontFamily('Meiryo');
 
-                var recievdTime = div().appendTo(receivedMsg).size('auto', '14').floatLeft().text(time).marginLeft(5)
-                    .fontSize(12);
+                var recievdTime = div().appendTo(receivedMsg).size('auto', '13').floatLeft().text(time).marginLeft(5)
+                    .fontSize(11);
                 receivedMsg.appendTo(chatListView);
             }
             chatListView.setScrollTop();
@@ -510,7 +505,7 @@ define(['OnlineManager'], function (online) {
 
         //networkManager.getMsg(11);
         //setCurrentView(chatView);
-    }
+    //}
 
     return Module;
 });
