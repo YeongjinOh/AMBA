@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
     var useOnline = true;
-    var isServer = true;
+    var isServer = true, isJoining = true;
     var roomid = undefined;
 
     /** set user authentication **/
@@ -66,11 +66,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                         memberManager.insertMember(data.message.username);
                     }
                     else if (action.target === 'client' && action.action === 'join') {
+                        if (isJoining) {
+                            var actions = action.actions;
+                            actionManager.syncActions(actions);
+                            isServer = false;
+                            isJoining = false;
+                        }
                         var members = action.members;
-                        var actions = action.actions;
                         memberManager.setMembers(members);
-                        actionManager.syncActions(actions);
-                        isServer = false;
                     }
                 }
             });
@@ -355,8 +358,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         this.syncActions = function (_actions) {
             actions = _actions;
             lock();
-            for (var i=0; i<actions.length; i++)
+            for (var i=0; i<actions.length; i++) {
+                cur=-1;
+                length = actions.length;
                 this.next();
+            }
+
             unlock();
         };
 
