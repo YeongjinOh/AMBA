@@ -52,12 +52,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
                     else if (isServer && action.target === 'server' && action.action === 'join') {
                         var members = memberManager.getMembers();
+                        var actions = actionManager.export();
                         online.sendMessage({
                             roomid: roomid,
                             msg: {
                                 target: 'client',
                                 action: 'join',
-                                members: members
+                                members: members,
+                                actions: actions
                             },
                             username: username
                         });
@@ -65,7 +67,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     }
                     else if (action.target === 'client' && action.action === 'join') {
                         var members = action.members;
+                        var actions = action.actions;
                         memberManager.setMembers(members);
+                        actionManager.syncActions(actions);
                         isServer = false;
                     }
                 }
@@ -344,6 +348,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 }
                 unlock();
             }
+        };
+        this.export = function () {
+            return actions;
+        };
+        this.syncActions = function (_actions) {
+            actions = _actions;
+            lock();
+            for (var i=0; i<actions.length; i++)
+                this.next();
+            unlock();
         };
 
         // drag, resize, change style
