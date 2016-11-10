@@ -43,15 +43,39 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             roomid = fName;
             online.join(roomid);
             online.onRecieve(function (data) {
-                if (data.action !== 'new') {
+                if (data.action === 'broadcast_msg') {
                     var action = data.message.msg;
-                    console.log('onRecieve');
-                    actionManager.get(action);
+                    if (action.target === 'obj' || action.target === 'slide') {
+                        console.log('onRecieve');
+                        actionManager.get(action);
+                    }
+                    // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
+                    else if (isServer && action.target === 'server' && action.action === 'join') {
+                        var members = memberManager.getMembers();
+                        online.sendMessage({
+                            roomid: roomid,
+                            msg: {
+                                target: 'client',
+                                action: 'join',
+                                members: members
+                            },
+                            username: username
+                        });
+                        memberManager.insertMember(data.message.username);
+                    }
+                    else if (action.target === 'client' && action.action === 'join') {
+                        var members = action.members;
+                        memberManager.setMembers(members);
+                        isServer = false;
+                    }
                 }
             });
             online.sendMessage({
                 roomid: roomid,
-                msg: action,
+                msg: {
+                    target: 'server',
+                    action: 'join'
+                },
                 username: username
             });
         }
@@ -1343,12 +1367,25 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         .text(username + '@amba.com').fontColor('gray').textAlignRight().paddingRight(10);
     var members = div().appendTo(rightMenuBarWrapper).size('100%', '70%').border(borderGray).borderRadius(3)
         .fontColor('gray').padding(10);
-    var cntMember = 0;
-    var insertMember = function (name) {
-        var member = div().appendTo(members).floatRight().size(40, '100%').margin(5);
-        div().appendTo(member).size('100%', '90%').text(name).textAlignCenter();
-        div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
+    var MemberManager = function () {
+        var cntMember = 0;
+        var members = [];
+        this.insertMember = function (name) {
+            members.push(name);
+            var member = div().appendTo(members).floatRight().size(40, '100%').margin(5).displayNone().fadeIn(400);
+            div().appendTo(member).size('100%', '90%').text(name).textAlignCenter();
+            div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
+        };
+        this.setMembers = function (members) {
+            for (var i=0; i<members.length; i++) {
+                this.insertMember(members[i]);
+            }
+        };
+        this.getMembers = function () {
+            return members;
+        }
     };
+
 
 
     /** status bar **/
@@ -1379,9 +1416,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     lock();
     slideManager.new();
     unlock();
-    insertMember(username);
-    insertMember('kks');
-    insertMember('yjs');
+    var memberManager = new MemberManager();
+    memberManager.insertMember(username);
+    // insertMember('kks');
+    // insertMember('yjs');
 
     window.ambasa.load = function (fName) {
         var userId = localStorage.getItem("ambasa");
