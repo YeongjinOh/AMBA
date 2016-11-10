@@ -172,10 +172,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         // action을 다른 사람을 통해 받은 경우
         this.get = function (action) {
-            if (action.target === "undo")
+            if (action.target === "undo") {
+                lock();
                 this.prev();
-            else if (action.target === "redo")
+                unlock();
+            }
+            else if (action.target === "redo"){
+                lock();
                 this.next();
+                unlock();
+            }
             else {
                 actions[cur + 1] = action;
                 length = cur + 2;
