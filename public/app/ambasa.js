@@ -858,6 +858,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var absAnimation = ABSanimation.getInstance();
         absAnimation.init(aniViewer, function () {
             return curObj && curObj.getId()
+        }, function () {
+            return curSlide;
         });
         absAnimation.append();
         var animationManager = absAnimation.animationManager();
@@ -907,6 +909,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             curObj = undefined;
             curDiv = undefined;
             slideShowManager.play(this.export());
+            absAnimation.initShowtime();
         };
         this.setIdx = function (idx) {
             numberViewer.text(idx);
