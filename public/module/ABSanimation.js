@@ -2,10 +2,10 @@
  * Created by JiSoo on 2016-11-05.
  */
 
-// 글자 겹치는 문제
+// 글자 겹치는 문제 zIndex이용해도 해결 못함
 // Animation 재생, 중지 문제... (타이밍의 문제가 생긴다!!)
-// 한꺼번에 진행 할 경우, 다시 되살리는 문제 -> 반복문 돌려서 다시 원위치로!?
-// 쇼타임의 경우, fadeIn 애들은 그냥 초기에 다 displayNone? 그럼 시작될 때를 내가 알아야 한다.
+// 한꺼번에 진행 할 경우, 다시 되살리는 문제 -> 반복문 돌려서 다시 원위치로!? -> 이렇게 구현은 가능할거 같음
+// 쇼타임의 경우, fadeIn,  애들은 그냥 초기에 다 displayNone? 그럼 시작될 때를 내가 알아야 한다.
 // Timing의 문제... 어떻게 시작시켜야할까?
 // id : 의미 - slide - sequence
 // Obj focus 시키기! -> 영진이 형
@@ -14,12 +14,12 @@ define ([], function() {
     var ABSAnimation = {
         getInstance: function() {
             var animationQueue = [];
-            var target;
-            var curId;
+            var target, curId, curSlide;
             var module = {
-                init: function (dv, getId) {
+                init: function (dv, getId, getSlide) {
                     target = dv;
                     curId = getId;
+                    curSlide = getSlide;
                 },
                 import: function (aq) {
                     if (aq === undefined || typeof aq !== 'object') {
@@ -103,13 +103,8 @@ define ([], function() {
                         .fontBold().textAlignCenter().borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function(dv, e) {
                             //TODO 여기서 Queue를 꺼내는 작업을 한다.
                             dv.detach();
+
                             previewStop.appendTo(preview);
-                            for(i=0; i<animationQueue.length; i++) {
-                                $('#abs-ani-menu-'+animationQueue[i].ify).data('div').border('2px solid blue');
-                                manager.next('preview');
-                                $('#abs-ani-menu-'+animationQueue[i].ify).data('div').border('');
-                            }
-                            manager.goFirst('preview');
                     });
 
                     var previewStop = div().displayBlock().size('60%', 23).color('#eeeeee').margin('auto').marginTop(12).text('정지')
@@ -127,7 +122,8 @@ define ([], function() {
                             e.preventDefault();
                             var ify = seq;
 
-                            if (curId()) {
+                            console.log(curSlide());
+                            /*if (curId()) {
                                 dv.detach();
                                 var menu = div().id('abs-ani-menu-' + ify).deco(decoMenu).fontBold().click(function(dv, e) {
                                     e.stopPropagation();
@@ -221,45 +217,76 @@ define ([], function() {
                                 packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
                                 seq++;
                                 dv.appendTo(body);
-                            }
+                            }*/
                         });
                 },
                 animator: function (index, mode) {
                     function backup(obj, e) {
                     }
 
-                    var temp;
+                    var target;
+                    var waiting = 0, tempWaiting;
                     var ani_package = animationQueue[index];
 
-                    if (mode === 'preview') {
-                        temp = $('#' + ani_package.id).data('div');
-                        if (ani_package.effect === 'fadeIn') {
-                            temp.displayNone();
+                    var play = setTimeout(function() {
+                        /*if (!that.hasNext('preview')) {
+                            return;
                         }
-                        else if (ani_package.effect === 'slideDown') {
-                            temp.displayNone();
-                        }
-
-                        eval("$('#" + ani_package.id + "').data('div')." + ani_package.effect + "(" + ani_package.duration + ");");
-                        // setTimeout(function(){}, ani_package.duration);
-                        // setTimeout(backup(temp, ani_package.effect), ani_package.duration + 1000);
-                    }
-                    else {
-                        temp = $('#' + ani_package.id+'-clone').data('div');
-                        if (ani_package.effect === 'fadeIn') {
-                            temp.displayNone();
-                        }
-                        else if (ani_package.effect === 'slideDown') {
-                            temp.displayNone();
+                        else if (ani_package.timing === '클릭시') {
+                            return;
                         }
 
-                        eval("$('#" + ani_package.id + '-clone' + "').data('div')." + ani_package.effect + "(" + ani_package.duration + ");");
-                    }
+                        $('#abs-ani-menu-'+ani_package.ify).data('div').border('2px solid blue');
+
+                        if (mode === 'preview') {
+                            target = $('#' + ani_package.id).data('div');
+                            if (ani_package.effect === 'fadeIn') {
+                                target.displayNone();
+                            }
+                            else if (ani_package.effect === 'slideDown') {
+                                target.displayNone();
+                            }
+
+                            eval("$('#" + ani_package.id + "').data('div')." + ani_package.effect + "(" + ani_package.duration + ");");
+                        }
+                        else {
+                            target = $('#' + ani_package.id+'-clone').data('div');
+                            if (ani_package.effect === 'fadeIn') {
+                                target.displayNone();
+                            }
+                            else if (ani_package.effect === 'slideDown') {
+                                target.displayNone();
+                            }
+
+                            eval("$('#" + ani_package.id + '-clone' + "').data('div')." + ani_package.effect + "(" + ani_package.duration + ");");
+                        }
+
+                        setTimeout(function() {
+                            $('#abs-ani-menu-'+ani_package.ify).data('div').border('');
+                        }, ani_package.duration);
+
+                        if (ani_package.timing === '이전 애니메이션 시작 시') {
+                            waiting = 0;
+                        }
+                        else if (ani_package.timing === '이전 애니메이션 완료 후') {
+                            waiting = ani_package.duration;
+                        }
+
+                        play();*/
+                    },waiting);
                 },
                 animationManager: function () {
                     var that = this;
                     var index = -1, pre_index = -1;
                     var manager = {
+                        initAnimation: function() {
+                            var i;
+                            for(i=0; i<animationQueue.length; i++) {
+                                if(animationQueue[i].effect === 'fadeIn' || animationQueue[i].effect === 'slideDown') {
+                                    $('#' + animationQueue[i].id+'-clone').data('div').displayNone();
+                                }
+                            }
+                        },
                         next: function(mode) {
                             if (this.hasNext(mode)) {
                                 if (mode === 'preview') {
