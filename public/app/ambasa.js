@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = true;
+    var useOnline = false;
     var isServer = true, isJoining = true;
     var roomid = undefined;
 
@@ -1379,7 +1379,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         showTelegram = !showTelegram;
     };
     var teleWrapper = div().appendTo(parent).border('2px solid gray').position('absolute').draggable().resizable().top(100).left(30).displayNone();
-    tele.appendTo(teleWrapper);
+    if (useOnline)
+        tele.appendTo(teleWrapper);
 
 
     // animation viewer switch

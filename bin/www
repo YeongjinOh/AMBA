@@ -18,10 +18,10 @@ app.set('port', port);
  * Create HTTP server.
  */
 
+////////// set true if you want to use redis ///////////
+var useRedis = false;
+
 var server = http.createServer(app);
-var redis = require('redis');
-
-
 var Primus = require('primus');
 var options = {
   transformer: "engine.io"
@@ -30,10 +30,15 @@ primus = new Primus(server,options);
 
 
 //클라이언트에서 primus라이브러리를 사용하기 위한 용도
-primus.save(__dirname +'/primus.js');
+// primus.save(__dirname +'/primus.js');
 
-var sub = redis.createClient();
-var pub = redis.createClient();
+var redis, sub, pub;
+if (useRedis) {
+  redis = require('redis');
+  sub = redis.createClient();
+  pub = redis.createClient();
+}
+
 
 var userList = {};
 primus.on('connection',function(spark){
