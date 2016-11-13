@@ -6,3 +6,4 @@ out/
 public/dist
 docs/
 datas/
+bin/primus.js

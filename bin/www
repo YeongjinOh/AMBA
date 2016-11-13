@@ -18,8 +18,12 @@ app.set('port', port);
  * Create HTTP server.
  */
 
+////////// set true if you want to use redis ///////////
+var useRedis = false;
+
 var server = http.createServer(app);
 require('../routes/chat')(server);
+
 
 /**
  * Listen on provided port, on all network interfaces.
