@@ -775,16 +775,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         dv.audio(id, params.media);
                         break;
                     case 'html':
-                        dv.tinymce({
-                            inline: true,
-                            width:'100%',
-                        }, function () {
-                            actionManager.onMedia(obj,'html');
-                        });
+
                         if (isClone)
                             dv.html(params.media);
-                        else
+                        else {
+                            dv.tinymce({
+                                inline: true,
+                                width:'100%',
+                            }, function () {
+                                actionManager.onMedia(that,'html');
+                            });
                             dv.text(params.media);
+                        }
                         break;
                 }
             }
