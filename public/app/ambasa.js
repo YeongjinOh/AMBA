@@ -494,8 +494,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
     var onSave = function () {
         var fName = fileName.text();
+        console.log(fName);
         if (fName === defaultName) {
-            var fName = prompt('파일명을 입력해주세요.');
+            fName = prompt('파일명을 입력해주세요.');
             if (fName == null || fName === defaultName) {
                 alert('올바르지 않은 파일명입니다.')
                 return;
@@ -774,7 +775,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         dv.audio(id, params.media);
                         break;
                     case 'html':
-                        dv.html(params.media);
+                        dv.tinymce({
+                            inline: true,
+                            width:'100%',
+                        }, function () {
+                            actionManager.onMedia(obj,'html');
+                        });
+                        if (isClone)
+                            dv.html(params.media);
+                        else
+                            dv.text(params.media);
                         break;
                 }
             }
@@ -907,7 +917,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         absAnimation.init(aniViewer, function () {
             return curObj && curObj.getId()
         }, function () {
-            return curSlide;
+            return id;
         });
         absAnimation.append();
         var animationManager = absAnimation.animationManager();
@@ -964,9 +974,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         this.getIdx = function () {
             return parseInt(numberViewer.text());
-        };
-        this.getId = function () {
-            return id;
         };
         // 중간에 slide를 insert한 경우 순서를 맞춰 보여주기 위해서 detach와 attach를 한다.
         this.detach = function () {
@@ -1405,12 +1412,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             });
             obj.focus();
             // tinymce option과 콜백 함수 전달
-            obj.div().tinymce({
-                inline: true,
-                width:'100%',
-            }, function () {
-                actionManager.onMedia(obj,'html');
-            });
             curSlide.append(obj);
         }
     });
