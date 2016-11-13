@@ -2,9 +2,6 @@
  * Created by JiSoo on 2016-11-05.
  */
 
-// 글자 겹치는 문제 zIndex이용해도 해결 못함
-// id : 의미 - slide - sequence
-
 define ([], function() {
     var ABSAnimation = {
         getInstance: function() {
@@ -35,7 +32,7 @@ define ([], function() {
                     var timing = ['클릭시', '이전 애니메이션 시작 시', '이전 애니메이션 완료 후'];
 
                     var decoSelectMenu = function (dv) {
-                        dv.size('100%', 'auto').minHeight(20).color('#eeeeee').fontBold().marginTop(5).borderRadius(3).boxShadow('1px 1px 1px 1px black');
+                        dv.position('relative').size('100%', 'auto').minHeight(20).color('#eeeeee').fontBold().marginTop(5).borderRadius(3).boxShadow('1px 1px 1px 1px black');
                     };
 
                     var decoSelector = function (dv) {
@@ -127,79 +124,78 @@ define ([], function() {
 
                             if (curId()) {
                                 var ify = seq++;
-                                console.log(curSlide().getIdx());
 
                                 dv.detach();
-                                var menu = div().id('abs-ani-menu-'+ify).deco(decoMenu).fontBold().click(function (dv, e) {
+                                var menu = div().id('abs-ani-menu-'+curSlide().getIdx()+'-'+ify).deco(decoMenu).fontBold().click(function (dv, e) {
                                     e.stopPropagation();
                                     e.preventDefault();
 
-                                    focus(ify);
-                                    if (AB.find('abs-ani-con-' + ify)) {
-                                        $('#abs-ani-con-' + ify).remove();
+                                    focus(curSlide().getIdx()+'-'+ify);
+
+                                    if (AB.find('abs-ani-con-'+curSlide().getIdx()+'-'+ify)) {
+                                        $('#abs-ani-con-'+curSlide().getIdx()+'-'+ify).remove();
                                     }
                                     else {
-
-
-                                        var content = div().id('abs-ani-con-' + ify).deco(decoContent).appendTo(menu).click(function (dv, e) {
+                                        var content = div().id('abs-ani-con-'+curSlide().getIdx()+'-'+ify).deco(decoContent).appendTo(menu).click(function (dv, e) {
                                             e.stopPropagation();
                                             e.preventDefault();
                                         });
 
-                                        var conEffect = div().id('abs-ani-sel-ani' + ify).deco(decoSelector).appendTo(content).text($('#abs-ani-menu-effect-' + ify).data('div').text())
+                                        var conEffect = div().id('abs-ani-sel-ani'+curSlide().getIdx()+'-'+ify).deco(decoSelector)
+                                            .appendTo(content).text($('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).data('div').text())
                                             .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                                 e.stopPropagation();
                                                 e.preventDefault();
 
-                                                focus(ify);
+                                                focus(curSlide().getIdx()+'-'+ify);
 
-                                                if (AB.find('abs-ani-sel-' + ify)) {
-                                                    $('#abs-ani-sel-' + ify).remove();
+                                                if (AB.find('abs-ani-sel-'+curSlide().getIdx()+'-'+ify)) {
+                                                    $('#abs-ani-sel-'+curSlide().getIdx()+'-'+ify).remove();
                                                 }
                                                 else {
-                                                    var selEffect = div().id('abs-ani-sel-' + ify).deco(decoSelectMenu).appendTo(conEffect).click(function (dv, e) {
+                                                    var selEffect = div().id('abs-ani-sel-'+curSlide().getIdx()+'-'+ify).deco(decoSelectMenu).appendTo(conEffect).click(function (dv, e) {
                                                         e.stopPropagation();
                                                         e.preventDefault();
 
-                                                        focus(ify);
+                                                        focus(curSlide().getIdx()+'-'+ify);
                                                     });
 
                                                     for (i = 0; i < effect.length; i++) {
                                                         div().appendTo(selEffect).size('100%', 20).color('#eeeeee').text(effect[i]).fontBold()
                                                             .hoverTextColor('blue', 'black').click(function (dv) {
                                                             conEffect.text(dv.text());
-                                                            $('#abs-ani-menu-effect-' + menu.id().split('-')[3]).data('div').text(dv.text());
-                                                            packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
+                                                            $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+menu.id().split('-')[4]).data('div').text(dv.text());
+                                                            packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), durationValue.text());
                                                             selEffect.detach();
                                                         });
                                                     }
                                                 }
                                             });
 
-                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-' + ify).data('div').text().slice(1, length - 1))
+                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).data('div').text().slice(1, length - 1))
                                             .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                                 e.stopPropagation();
                                                 e.preventDefault();
 
-                                                focus(ify);
+                                                focus(curSlide().getIdx()+'-'+ify);
 
-                                                if (AB.find('abs-ani-sel-' + ify)) {
-                                                    $('#abs-ani-sel-' + ify).remove();
+                                                if (AB.find('abs-ani-sel-'+curSlide().getIdx()+'-'+ify)) {
+                                                    $('#abs-ani-sel-'+curSlide().getIdx()+'-'+ify).remove();
                                                 }
                                                 else {
-                                                    var selTiming = div().id('abs-ani-sel-' + ify).deco(decoSelectMenu).appendTo(conTiming).click(function (dv, e) {
+                                                    var selTiming = div().id('abs-ani-sel-'+curSlide().getIdx()+'-'+ify).deco(decoSelectMenu).appendTo(conTiming).click(function (dv, e) {
                                                         e.stopPropagation();
                                                         e.preventDefault();
 
-                                                        focus(ify);
+                                                        focus(curSlide().getIdx()+'-'+ify);
                                                     });
 
                                                     for (i = 0; i < timing.length; i++) {
                                                         div().appendTo(selTiming).size('100%', 20).color('#eeeeee').text(timing[i]).fontBold()
                                                             .hoverTextColor('blue', 'black').click(function (dv) {
                                                             conTiming.text(dv.text());
-                                                            $('#abs-ani-menu-timing-' + menu.id().split('-')[3]).data('div').text('(' + dv.text() + ')');
-                                                            packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
+                                                            $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+menu.id().split('-')[4]).data('div').text('(' + dv.text() + ')');
+                                                            packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), durationValue.text());
                                                             selTiming.detach();
                                                         });
                                                     }
@@ -223,26 +219,22 @@ define ([], function() {
                                         var durationValue = div().appendTo(conDuration).size('80%', '100%').text('1000').editable().textAlignCenter().cursorText().fontBold().hoverTextColor('blue', 'black');
                                         var durationOK = div().appendTo(conDuration).size('20%', '100%').text('OK').fontBold().textAlignCenter().cursorPointer()
                                             .hoverTextColor('blue', 'black').click(function () {
-                                                packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
+                                                packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), durationValue.text());
                                             });
                                     }
                                 });
 
-                                div().id('abs-ani-menu-effect-' + ify).appendTo(menu).size('90%', 'auto').text(effect[0]).fontBold();
+                                div().id('abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).appendTo(menu).size('90%', 'auto').text(effect[0]).fontBold();
                                 div().appendTo(menu).size('auto', 'auto').text('×').fontBold().hoverTextColor('blue', 'black').click(function (dv, e) {
                                     e.stopPropagation();
                                     e.preventDefault();
 
                                     menu.remove();
-                                    for (i = 0; i < animationQueue.length; i++) {
-                                        if (animationQueue[i].ify === ify) {
-                                            animationQueue.splice(i, 1);
-                                        }
-                                    }
+                                    manager.remove(curSlide().getIdx()+'-'+ify);
                                 });
-                                div().id('abs-ani-menu-timing-' + ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + timing[0] + ')').fontSize(12).fontBold();
+                                div().id('abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + timing[0] + ')').fontSize(12).fontBold();
 
-                                packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), 1000);
+                                packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), 1000);
 
                                 dv.appendTo(body);
 
@@ -251,6 +243,8 @@ define ([], function() {
                 },
                 initShowtime: function() {
                     var i;
+
+                    index = -1;
                     showtimeQueue = animationQueue.slice(0);
                     for(i=0; i<showtimeQueue.length; i++) {
                         if(showtimeQueue[i].effect === 'show' || showtimeQueue[i].effect === 'fadeIn' || showtimeQueue[i].effect === 'slideDown') {
@@ -290,7 +284,7 @@ define ([], function() {
                             var temp = previewQueue.splice(0, 1)[0];
                             var next_temp = previewQueue.slice(0, 1)[0];
 
-                            var curAni = $('#abs-ani-menu-' + temp.ify).data('div');
+                            var curAni = $('#abs-ani-menu-'+temp.ify).data('div');
                             curAni.border('3px dotted blue');
 
                             target = $('#' + temp.id).data('div');
@@ -359,7 +353,6 @@ define ([], function() {
                         },
                         back: function() {
                             var target;
-                            var waiting = 0;
 
                             function backup(obj, e) {
                                 switch(e) {
@@ -394,12 +387,9 @@ define ([], function() {
                                     if (temp.timing === '클릭시') {
                                         return;
                                     }
-                                    else {
-                                        waiting = 0;
-                                    }
                                 }
 
-                                setTimeout(play, waiting);
+                                play();
                             })();
                         }
                     }
@@ -435,6 +425,13 @@ define ([], function() {
                                 return false;
                             }
                             return true;
+                        },
+                        remove: function(ify) {
+                            for (var i = 0; i < animationQueue.length; i++) {
+                                if (animationQueue[i].ify === ify) {
+                                    animationQueue.splice(i, 1);
+                                }
+                            }
                         },
                         isEmpty: function() {
                             if (animationQueue.length === 0) {
