@@ -753,6 +753,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         var id;
 
+        // initialize if params given
         if (_params) {
             params = $.extend({}, _params);
             setAllStyles(dv, params.style);
@@ -771,7 +772,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         dv.audio(id, params.media);
                         break;
                     case 'html':
-                        dv.text(params.media);
+                        dv.html(params.media);
                         break;
                 }
             }
@@ -865,9 +866,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         this.incZidx = function () {
             dv.zIndex(parseInt(dv.zIndex())+1);
+            actionManager.onStyle(this, ['z-index']);
         };
         this.decZidx = function () {
             dv.zIndex(parseInt(dv.zIndex())-1);
+            actionManager.onStyle(this, ['z-index']);
         };
         return this;
     };

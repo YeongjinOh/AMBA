@@ -293,7 +293,7 @@ var addAllCssMethods = function () {
         "left": [],
         "letter-spacing": [],
         "line-height": [],
-        "linear-gradient" :[],
+        "linear-gradient": [],
         "list-style": [],
         "list-style-image": [],
         "list-style-position": [],
@@ -442,11 +442,11 @@ Div.prototype.fontFamily = function (family) {
 
 
 Div.prototype.linearGradient = function (angle, startColor, endColor) {
-    return this.css('background', 'linear-gradient(' +angle + ', '+startColor + ', '+endColor+ ')') ;
+    return this.css('background', 'linear-gradient(' + angle + ', ' + startColor + ', ' + endColor + ')');
 };
 
 Div.prototype.radialGradient = function (startColor, endColor) {
-    return this.css('background', 'radial-gradient(' + startColor + ', '+endColor+ ')') ;
+    return this.css('background', 'radial-gradient(' + startColor + ', ' + endColor + ')');
 }
 /**
  * @desc set font weight bold
@@ -464,7 +464,7 @@ Div.prototype.fontNormal = function () {
 };
 
 Div.prototype.fontBgColor = function (color) {
-    this.$text.css('background-color',color);
+    this.$text.css('background-color', color);
     return this;
 };
 Div.prototype.border = function (value) {
@@ -537,7 +537,7 @@ Div.prototype.widthPixel = function () {
     return parseInt(this.$.css('width'));
 };
 
-Div.prototype.backgroundSize = function(w, h) {
+Div.prototype.backgroundSize = function (w, h) {
     if (w === undefined)
         return this.css('background-size');
     else if (h === undefined)
@@ -639,7 +639,6 @@ Div.prototype.dblclick = function (fn) {
     });
     return this;
 };
-
 
 
 Div.prototype.mousedown = function (fn) {
@@ -881,11 +880,11 @@ Div.prototype.keypress = function (fn) {
     return this;
 };
 
-Div.prototype.focus = function() {
+Div.prototype.focus = function () {
     this.$.focus();
     return this;
 };
-Div.prototype.focusout = function(fn) {
+Div.prototype.focusout = function (fn) {
     this.$.focusout(fn);
     return this;
 };
@@ -962,6 +961,11 @@ Div.prototype.button = function () {
 Div.prototype.html = function (tag) {
     if (tag === undefined)
         return this.$text.html();
+
+    if (this.isAddedText === false) {
+        this.isAddedText = true;
+        this.$text.appendTo(this.$);
+    }
     this.$text.html(tag);
     return this;
 };
@@ -1011,7 +1015,7 @@ Div.prototype.image = function (src) {
         return this;
     }
 
-    if(src===undefined && this.$image)
+    if (src === undefined && this.$image)
         return this.$image.attr('src');
 
     //downloadingImage를 다운 받았을때,
@@ -1024,12 +1028,12 @@ Div.prototype.image = function (src) {
         var h = e.target.naturalHeight;
 
         //부모 div의 사이즈
-        var pw = parseInt(that.width(),10);
-        var ph = parseInt(that.height(),10);
+        var pw = parseInt(that.width(), 10);
+        var ph = parseInt(that.height(), 10);
 
-        if(w*ph<h*pw){
+        if (w * ph < h * pw) {
             that.$image.height('100%').attr('src', src);
-        }else{
+        } else {
             that.$image.width('100%').attr('src', src);
         }
     });
@@ -1043,7 +1047,7 @@ Div.prototype.video = function (id, src) {
         return this;
     }
 
-    if(src===undefined && this.$video)
+    if (src === undefined && this.$video)
         return this.$video.attr('src');
 
     var pw = this.width();
@@ -1053,7 +1057,7 @@ Div.prototype.video = function (id, src) {
         .attr('height', ph).attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
 
     var that = this;
-    $('#'+id).resize(function() {
+    $('#' + id).resize(function () {
         pw = that.width();
         ph = that.height();
         that.$video.attr('width', pw).attr('height', ph);
@@ -1069,7 +1073,7 @@ Div.prototype.audio = function (id, src) {
         return this;
     }
 
-    if(src===undefined && this.$audio)
+    if (src === undefined && this.$audio)
         return this.$audio.attr('src');
 
     var pw = this.width();
@@ -1079,7 +1083,7 @@ Div.prototype.audio = function (id, src) {
         .attr('controls', 'controls').appendTo(this.$);//.height('100%').width('100%');
 
     var that = this;
-    $('#'+id).resize(function() {
+    $('#' + id).resize(function () {
         pw = that.width();
         ph = that.height();
         that.$audio.attr('width', pw).attr('height', ph);
@@ -1087,7 +1091,6 @@ Div.prototype.audio = function (id, src) {
 
     return this;
 };
-
 
 
 Div.prototype.uploadTest = function () {
@@ -1151,7 +1154,7 @@ Div.prototype.fileSelectable = function (fn) {
 Div.prototype.aceEditor = function (opt) {
     var that = this;
     var tmpText = this.text();
-    that.textInterceptor(function(txt) {
+    that.textInterceptor(function (txt) {
         if (txt === undefined)
             return tmpText;
         tmpText = txt;
@@ -1193,17 +1196,17 @@ Div.prototype.aceEditor = function (opt) {
 
 Div.prototype.tinymce = function (opt, fn) {
     var that = this;
-    var id = 'ab_tm'+AB.random(99999);
-    var child = div().id(id).size('100%','100%').appendTo(this);
+    var id = 'ab_tm' + AB.random(99999);
+    var child = div().id(id).size('100%', '100%').appendTo(this);
 
     if (opt === undefined) {
-        opt = {selector: '#'+id};
+        opt = {selector: '#' + id};
     }
     else {
-        opt.selector = '#'+id;
+        opt.selector = '#' + id;
     }
     var tmpText = this.text();
-    that.textInterceptor(function(txt) {
+    that.textInterceptor(function (txt) {
         if (txt === undefined)
             return tmpText;
         tmpText = txt;
@@ -1217,7 +1220,7 @@ Div.prototype.tinymce = function (opt, fn) {
     require(['//cdn.tinymce.com/4/tinymce.min.js'], function () {
         tinymce.init(opt);
         tinymce.get(id).setContent(tmpText);
-        that.textInterceptor(function(txt) {
+        that.textInterceptor(function (txt) {
             if (txt === undefined)
                 return tinymce.get(id).getContent();
             tinymce.get(id).setContent(txt);
@@ -1232,7 +1235,7 @@ Div.prototype.summernote = function (opt, src) {
     var that = this;
     var child = div().size('100%', '100%').appendTo(this);
     var tmpText = this.text();
-    that.textInterceptor(function(txt) {
+    that.textInterceptor(function (txt) {
         if (txt === undefined)
             return tmpText;
         tmpText = txt;
@@ -1244,7 +1247,7 @@ Div.prototype.summernote = function (opt, src) {
         // child.remove(); 를 하면 binding된 object가 사라져서 안된다.
         child.detach();
         child.$.summernote('code', tmpText);
-        that.textInterceptor(function(txt) {
+        that.textInterceptor(function (txt) {
             if (txt === undefined)
                 return child.$.summernote('code');
             child.$.summernote('code', txt);
@@ -1276,7 +1279,7 @@ Div.prototype.disqus = function (sector, title) {
         this.page.url = '//amba.com/unique-path-' + sector + '/';
         this.page.title = title;
     };
-    (function() {
+    (function () {
         var d = document, s = d.createElement('script');
         s.src = '//amba.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
@@ -1348,6 +1351,6 @@ Div.prototype.topPos = function () {
 
 Div.prototype.setScrollTop = function () {
     var arr = this.children();
-    this.$.scrollTop(this.$.get(0).scrollHeight-arr[arr.length-1].$.height());
+    this.$.scrollTop(this.$.get(0).scrollHeight - arr[arr.length - 1].$.height());
     return this;
 };
