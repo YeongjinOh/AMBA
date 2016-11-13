@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false;
+    var useOnline = true, useLocalStorage = false;
     var isServer = true, isJoining = true;
     var roomid = undefined;
 
@@ -45,6 +45,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             online.onRecieve(function (data) {
                 if (data.action === 'broadcast_msg') {
                     var action = data.message.msg;
+                    console.log(action);
                     if (action.target === 'obj' || action.target === 'slide') {
                         console.log('onRecieve');
                         actionManager.get(action);
@@ -179,11 +180,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             curObj.deactive();
         }
         var slide = slideManager.get(id);
-        slide.syncBlock(function () {
-            if (curObj) {
-                curObj.active();
-            }
-        });
+        if (slide)
+            slide.syncBlock(function () {
+                if (curObj) {
+                    curObj.active();
+                }
+            });
+        else
+            console.log('can not find slide by id');
     };
 
     var ActionManager = function () {
@@ -347,7 +351,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                             slideManager.new();
                             break;
                         case 'delete':
-                            curSlide.deactive();
+                            if (curSlide)
+                                curSlide.deactive();
                             curSlide = slideManager.get(actionObj.slide);
                             slideManager.del();
                             break;
@@ -494,7 +499,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
     var onSave = function () {
         var fName = fileName.text();
-        console.log(fName);
         if (fName === defaultName) {
             fName = prompt('파일명을 입력해주세요.');
             if (fName == null || fName === defaultName) {
@@ -505,23 +509,28 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             joinOnline(fName);
         }
 
-        // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
-        var param = {
-            cid: 'ambasa',
-            token: token,
-            key: fName,
-            value: JSON.stringify(slideManager.export())
-        };
-        $.get("/hashstore/put", param)
-            .done(function (data) {
-                if (data.resultCode == 0) {
-                    alert('저장하였습니다.');
-                }
-                else {
-                    console.log(data.msg);
-                    alert('실패하였습니다.');
-                }
-            });
+        if (useLocalStorage) {
+            localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+            alert('저장하였습니다.');
+        }
+        else {
+            var param = {
+                cid: 'ambasa',
+                token: token,
+                key: fName,
+                value: JSON.stringify(slideManager.export())
+            };
+            $.get("/hashstore/put", param)
+                .done(function (data) {
+                    if (data.resultCode == 0) {
+                        alert('저장하였습니다.');
+                    }
+                    else {
+                        console.log(data.msg);
+                        alert('실패하였습니다.');
+                    }
+                });
+        }
     };
     var onLoad = function (fName) {
         if (typeof fName !== 'string') {
@@ -529,25 +538,34 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             if (fName == null)
                 return;
         }
-        var param = {
-            cid: 'ambasa',
-            token: token,
-            key: fName,
-        };
-        // var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-        $.get("/hashstore/get", param)
-            .done(function (data) {
-                if (data.info.length > 0) {
-                    lock();
-                    var params = JSON.parse(data.info[0].value);
-                    fileName.text(fName);
-                    slideManager.load(params);
-                    actionManager.clear();
-                    unlock();
-                } else {
-                    alert('해당 파일을 불러올 수 없습니다.');
-                }
-            });
+        if (useLocalStorage) {
+            var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+            lock();
+            fileName.text(fName);
+            slideManager.load(params);
+            actionManager.clear();
+            unlock();
+        }
+        else {
+            var param = {
+                cid: 'ambasa',
+                token: token,
+                key: fName,
+            };
+            $.get("/hashstore/get", param)
+                .done(function (data) {
+                    if (data.info.length > 0) {
+                        lock();
+                        var params = JSON.parse(data.info[0].value);
+                        fileName.text(fName);
+                        slideManager.load(params);
+                        actionManager.clear();
+                        unlock();
+                    } else {
+                        alert('해당 파일을 불러올 수 없습니다.');
+                    }
+                });
+        }
     };
     var onEnter = function (fName, userId) {
         var param = {
@@ -931,6 +949,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         blockWrapper.click(function () {
             that.focus();
+            that.syncBlock();
         });
 
         this.get = function (id) {
@@ -969,7 +988,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 curObj.deactive();
             curObj = undefined;
             curDiv = undefined;
-            slideShowManager.play(this.export());
+            slideShowManager.play(that.export().params);
             absAnimation.initShowtime();
         };
         this.setIdx = function (idx) {
@@ -999,7 +1018,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 onrendered: function (canvas) {
                     slideViewer.image(canvas.toDataURL("image/png"));
                     slideViewer.$image.load(function () {
-                        callback();
+                        if (typeof callback === 'function')
+                            callback();
                         that.displayNone();
                         if (curSlide)
                             curSlide.display();
@@ -1017,9 +1037,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             for (var id in objs) {
                 params[id] = objs[id].getParams();
             }
-            return params;
+            var animationQueue = absAnimation.export();
+            return {
+                params:params,
+                aniQueue:animationQueue
+            };
         };
-        this.load = function (params) {
+        this.load = function (slideParam) {
+            var params = slideParam.params;
+            var aniQueue = slideParam.aniQueue;
+            absAnimation.import(aniQueue);
             for (var id in params) {
                 var obj = absObject(params[id]);
                 this.append(obj);
