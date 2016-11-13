@@ -720,25 +720,29 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     /** ABS Object **/
 
-    var ABSObject = function (_params) {
+    var ABSObject = function (_params, isClone) {
         var that = this, params = {};
-        var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .cursorMove().position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
+        var dv = div().class('abs-object').size(100, 100).position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
         // remove icon and resize ui-resizable-se
-        $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
-        dv.mousedown(function (e) {
-            if (!isFullscreen)
-                that.focus();
-        }).mouseup(function () {
-            var style1 = getParams(dv).style, style2 = params.style;
-            if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
-                actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
-                syncBlock();
-            }
-        });
+        if (isClone !== true) {
+            dv.resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).draggable().cursorMove();
+            $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
+            dv.mousedown(function (e) {
+                if (!isFullscreen)
+                    that.focus();
+            }).mouseup(function () {
+                var style1 = getParams(dv).style, style2 = params.style;
+                if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
+                    actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
+                    syncBlock();
+                }
+            });
+        } else {
+            console.log(_params)
+        }
 
         var id;
         if (_params) {
@@ -832,8 +836,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         return this;
     };
 
-    var absObject = function (params) {
-        var obj = new ABSObject(params);
+    var absObject = function (params, isClone) {
+        var obj = new ABSObject(params, isClone);
         actionManager.onNewObj(obj);
         return obj;
     };
@@ -1133,7 +1137,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             for (var id in params) {
                 var param = $.extend({}, params[id]);
                 param.id = param.id + '-clone';
-                absObject(param).div().appendTo(slideBackground);
+                absObject(param, true).div().appendTo(slideBackground).cursorDefault();
             }
             fullscreenViewer.displayInlineBlock();
             unlock();
