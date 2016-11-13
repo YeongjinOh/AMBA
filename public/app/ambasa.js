@@ -898,7 +898,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var slideViewerWrapper = div().size(slideViewerWidth + 4, blockHeight + 4).appendTo(block);
         var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
         var id = idSlideGenerator.get();
-        var slideBackground = getSlideBackground().appendTo(slideEditor).id(id).data('abs-slide', this);
+        var slideBackground = getSlideBackground().appendTo(slideEditor).id(id);
+        slideBackground.$.data('abs-slide', this);
 
         // set animation viewer
         var aniViewer = div().size('100%', '100%').appendTo(animationViewer).color('gray');
