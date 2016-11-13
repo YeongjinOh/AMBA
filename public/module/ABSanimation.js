@@ -4,12 +4,12 @@
 
 // 글자 겹치는 문제 zIndex이용해도 해결 못함
 // id : 의미 - slide - sequence
-// Obj focus 시키기! -> 영진이 형
 
 define ([], function() {
     var ABSAnimation = {
         getInstance: function() {
             var animationQueue = [], showtimeQueue, previewQueue;
+            var index = -1;
             var target, curId, curSlide;
             var module = {
                 init: function (dv, getId, getSlide) {
@@ -31,7 +31,7 @@ define ([], function() {
                     var that = this;
                     var i, seq = 0;
                     var manager = that.animationManager();
-                    var effect = ['Fade In', 'Fade Out', 'Slide Down', 'Slide Up'];
+                    var effect = ['Show', 'Hide', 'Fade In', 'Fade Out', 'Slide Down', 'Slide Up'];
                     var timing = ['클릭시', '이전 애니메이션 시작 시', '이전 애니메이션 완료 후'];
 
                     var decoSelectMenu = function (dv) {
@@ -56,11 +56,27 @@ define ([], function() {
                             .paddingTop(15).paddingLeft(10).color('white').margin(1).cursorPointer();
                     };
 
+                    var focus = function(ify) {
+                        if (animationQueue.length != 0) {
+                            for (i = 0; i < animationQueue.length; i++) {
+                                if (ify === animationQueue[i].ify) {
+                                    $('#'+animationQueue[i].id).data('ambasa').focus();
+                                }
+                            }
+                        }
+                    };
+
                     var packaging = function (ify, eff, tim, dur) {
                         var aniData = {};
                         aniData.ify = ify;
                         aniData.id = curId();
                         switch (eff) {
+                            case 'Show':
+                                aniData.effect = 'show';
+                                break;
+                            case 'Hide':
+                                aniData.effect = 'hide';
+                                break;
                             case 'Fade In':
                                 aniData.effect = 'fadeIn';
                                 break;
@@ -95,12 +111,12 @@ define ([], function() {
                     var body = div().appendTo(root).size('100%', '95%');
 
                     var preview = div().appendTo(body).size('100%', 50).color('white');
-                    var previewPlay = div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(30).marginTop(12).text('▶').fontBold().textAlignCenter()
+                    div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(30).marginTop(12).text('▶').fontBold().textAlignCenter()
                         .paddingTop(2).borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function () {
                             manager.preview(true);
                         });
 
-                    var previewStop = div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(10).marginTop(12).text('■').fontBold().textAlignCenter()
+                    div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(10).marginTop(12).text('■').fontBold().textAlignCenter()
                         .paddingTop(2).borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function () {
                             manager.preview(false);
                         });
@@ -111,17 +127,20 @@ define ([], function() {
 
                             if (curId()) {
                                 var ify = seq++;
-                                console.log(curSlide());
+                                console.log(curSlide().getIdx());
 
                                 dv.detach();
-                                var menu = div().id('abs-ani-menu-' + ify).deco(decoMenu).fontBold().click(function (dv, e) {
+                                var menu = div().id('abs-ani-menu-'+ify).deco(decoMenu).fontBold().click(function (dv, e) {
                                     e.stopPropagation();
                                     e.preventDefault();
 
+                                    focus(ify);
                                     if (AB.find('abs-ani-con-' + ify)) {
                                         $('#abs-ani-con-' + ify).remove();
                                     }
                                     else {
+
+
                                         var content = div().id('abs-ani-con-' + ify).deco(decoContent).appendTo(menu).click(function (dv, e) {
                                             e.stopPropagation();
                                             e.preventDefault();
@@ -132,6 +151,8 @@ define ([], function() {
                                                 e.stopPropagation();
                                                 e.preventDefault();
 
+                                                focus(ify);
+
                                                 if (AB.find('abs-ani-sel-' + ify)) {
                                                     $('#abs-ani-sel-' + ify).remove();
                                                 }
@@ -139,6 +160,8 @@ define ([], function() {
                                                     var selEffect = div().id('abs-ani-sel-' + ify).deco(decoSelectMenu).appendTo(conEffect).click(function (dv, e) {
                                                         e.stopPropagation();
                                                         e.preventDefault();
+
+                                                        focus(ify);
                                                     });
 
                                                     for (i = 0; i < effect.length; i++) {
@@ -158,6 +181,8 @@ define ([], function() {
                                                 e.stopPropagation();
                                                 e.preventDefault();
 
+                                                focus(ify);
+
                                                 if (AB.find('abs-ani-sel-' + ify)) {
                                                     $('#abs-ani-sel-' + ify).remove();
                                                 }
@@ -165,6 +190,8 @@ define ([], function() {
                                                     var selTiming = div().id('abs-ani-sel-' + ify).deco(decoSelectMenu).appendTo(conTiming).click(function (dv, e) {
                                                         e.stopPropagation();
                                                         e.preventDefault();
+
+                                                        focus(ify);
                                                     });
 
                                                     for (i = 0; i < timing.length; i++) {
@@ -189,6 +216,7 @@ define ([], function() {
                                             e.stopPropagation();
                                             e.preventDefault();
 
+                                            focus(ify);
                                             durationValue.$text.focus();
                                         });
 
@@ -225,139 +253,163 @@ define ([], function() {
                     var i;
                     showtimeQueue = animationQueue.slice(0);
                     for(i=0; i<showtimeQueue.length; i++) {
-                        if(showtimeQueue[i].effect === 'fadeIn' || showtimeQueue[i].effect === 'slideDown') {
+                        if(showtimeQueue[i].effect === 'show' || showtimeQueue[i].effect === 'fadeIn' || showtimeQueue[i].effect === 'slideDown') {
                             $('#' + showtimeQueue[i].id+'-clone').data('div').displayNone();
                         }
                     }
                 },
-                animator: function (mode) {
-                    var manager = this.animationManager();
-                    var target;
-                    var playqueue;
-                    var waiting = 0;
+                animator: {
+                    preview: function() {
+                        var target;
+                        var waiting = 0;
 
-                    function backup(obj, e) {
-                        switch(e) {
-                            case 'fadeOut':
-                                obj.fadeToggle(1);
-                                break;
-                            case 'slideUp':
-                                obj.slideToggle(1);
-                                break;
+                        function backup(obj, e) {
+                            switch(e) {
+                                case 'hide':
+                                    obj.show(1);
+                                    break;
+                                case 'fadeOut':
+                                    obj.fadeToggle(1);
+                                    break;
+                                case 'slideUp':
+                                    obj.slideToggle(1);
+                                    break;
+                            }
+                        }
+
+                        if (!previewQueue) {
+                            previewQueue = animationQueue.slice(0);
+                        }
+
+                        (function play() {
+                            if (previewQueue.length === 0) {
+                                previewQueue = undefined;
+                                return;
+                            }
+
+                            var temp = previewQueue.splice(0, 1)[0];
+                            var next_temp = previewQueue.slice(0, 1)[0];
+
+                            var curAni = $('#abs-ani-menu-' + temp.ify).data('div');
+                            curAni.border('3px dotted blue');
+
+                            target = $('#' + temp.id).data('div');
+
+                            if (temp.effect === 'show') {
+                                target.displayNone();
+                            }
+                            else if (temp.effect === 'fadeIn') {
+                                target.displayNone();
+                            }
+                            else if (temp.effect === 'slideDown') {
+                                target.displayNone();
+                            }
+
+                            eval("$('#" + temp.id + "').data('div')." + temp.effect + "(" + temp.duration + ");");
+
+                            backup(target, temp.effect);
+
+                            setTimeout(function () {
+                                curAni.border('');
+                            }, temp.duration);
+
+                            if (next_temp) {
+                                if (next_temp.timing === '클릭시') {
+                                    return;
+                                }
+                                if (next_temp.timing === '이전 애니메이션 시작 시') {
+                                    waiting = 0;
+                                }
+                                else if (next_temp.timing === '이전 애니메이션 완료 후') {
+                                    waiting = next_temp.duration;
+                                }
+                            }
+
+                            setTimeout(play, waiting);
+                        })();
+                    },
+                    showtime: {
+                        next: function() {
+                            var waiting = 0;
+
+                            (function play() {
+                                if (index >= animationQueue.length-1) {
+                                    return;
+                                }
+
+                                var temp = animationQueue[++index];
+                                var next_temp = animationQueue[index+1];
+
+                                eval("$('#" + temp.id + '-clone' + "').data('div')." + temp.effect + "(" + temp.duration + ");");
+
+                                if (next_temp) {
+                                    if (next_temp.timing === '클릭시') {
+                                        return;
+                                    }
+                                    else if (next_temp.timing === '이전 애니메이션 시작 시') {
+                                        waiting = 0;
+                                    }
+                                    else if (next_temp.timing === '이전 애니메이션 완료 후') {
+                                        waiting = next_temp.duration;
+                                    }
+                                }
+
+                                setTimeout(play, waiting);
+                            })();
+                        },
+                        back: function() {
+                            var target;
+                            var waiting = 0;
+
+                            function backup(obj, e) {
+                                switch(e) {
+                                    case 'show':
+                                        obj.hide(1);
+                                        break;
+                                    case 'hide':
+                                        obj.show(1);
+                                        break;
+                                    case 'fadeOut':
+                                    case 'fadeIn':
+                                        obj.fadeToggle(1);
+                                        break;
+                                    case 'slideUp':
+                                    case 'slideDown':
+                                        obj.slideToggle(1);
+                                        break;
+                                }
+                            }
+
+                            (function play() {
+                                if (index <= -1) {
+                                    return;
+                                }
+
+                                var temp = animationQueue[index--];
+
+                                target = $('#' + temp.id + '-clone').data('div');
+                                backup(target, temp.effect);
+
+                                if (temp) {
+                                    if (temp.timing === '클릭시') {
+                                        return;
+                                    }
+                                    else {
+                                        waiting = 0;
+                                    }
+                                }
+
+                                setTimeout(play, waiting);
+                            })();
                         }
                     }
-
-                    (function play() {
-                        if (mode === 'preview') {
-                            playqueue = previewQueue;
-                        }
-                        else {
-                            playqueue = showtimeQueue;
-                        }
-
-                        if (playqueue.length === 0) {
-                            previewQueue = undefined;
-                            showtimeQueue = undefined;
-                            return;
-                        }
-
-                        var temp = playqueue.splice(0, 1)[0];
-                        var next_temp = playqueue.slice(0,1)[0];
-
-                        var curAni = $('#abs-ani-menu-'+temp.ify).data('div');
-                        curAni.border('3px dotted blue');
-
-                        if (mode === 'preview') {
-                            target = $('#' + temp.id).data('div');
-                        }
-                        else {
-                            target = $('#' + temp.id + '-clone').data('div');
-                        }
-
-                        if (temp.effect === 'fadeIn') {
-                            target.displayNone();
-                        }
-                        else if (temp.effect === 'slideDown') {
-                            target.displayNone();
-                        }
-
-                        if (mode === 'preview') {
-                            eval("$('#" + temp.id + "').data('div')." + temp.effect + "(" + temp.duration + ");");
-                        }
-                        else {
-                            eval("$('#" + temp.id + '-clone' + "').data('div')." + temp.effect + "(" + temp.duration + ");");
-                        }
-
-                        setTimeout(function() {
-                            curAni.border('');
-                        }, temp.duration);
-
-                        if (next_temp) {
-                            if (next_temp.timing === '클릭시') {
-                                return;
-                            }
-                            if (next_temp.timing === '이전 애니메이션 시작 시') {
-                                waiting = 0;
-                            }
-                            else if (next_temp.timing === '이전 애니메이션 완료 후') {
-                                waiting = next_temp.duration;
-                            }
-                        }
-
-                        if (mode === 'preview') {
-                            backup(target, temp.effect);
-                        }
-
-                        setTimeout(play, waiting);
-                    })();
-
-/*                    (function showtime() {
-                        var temp = animationQueue.slice(index, 1)[0];
-                        if (mode === 1) {
-                            var next_temp = animationQueue.slice(index + 1, 1)[0];
-                        }
-                        else if (mode === -1) {
-                            var next_temp = animationQueue.slice(index - 1, 1)[0];
-                        }
-
-                        eval("$('#" + temp.id + '-clone' + "').data('div')." + temp.effect + "(" + temp.duration + ");");
-
-                        if (next_temp) {
-                            if (next_temp.timing === '클릭시') {
-                                return;
-                            }
-                            else {
-                                waiting = 0;
-                            }
-                            /!*if (next_temp.timing === '이전 애니메이션 시작 시') {
-                                waiting = 0;
-                            }
-                            else if (next_temp.timing === '이전 애니메이션 완료 후') {
-                                waiting = next_temp.duration;
-                            }*!/
-                        }
-
-                        if (mode === 1) {
-                            if (manager.hasNext()) {
-                                setTimeout(manager.next(), waiting);
-                            }
-                        }
-                        else if (mode === -1) {
-                            if (manager.hasBack()) {
-                                setTimeout(manager.back(), waiting);
-                            }
-                        }
-                    })();*/
                 },
                 animationManager: function () {
                     var that = this;
-                    var index = -1;
                     var manager = {
                         preview: function (cmd) {
                             if (cmd) {
-                                if (!previewQueue)
-                                    previewQueue = animationQueue.slice(0);
-                                that.animator('preview');
+                                that.animator.preview();
                             }
                             else {
                                 previewQueue = [];
@@ -365,54 +417,30 @@ define ([], function() {
                         },
                         next: function() {
                             if (this.hasNext())
-                                that.animator();
-
-                            // if (this.hasNext()) {
-                            //     ++index;
-                            //     that.animator(1);
-                            // }
+                                that.animator.showtime.next();
                         },
                         hasNext: function() {
-                            if (!showtimeQueue || showtimeQueue.length === 0) {
+                            if (index >= animationQueue.length-1) {
                                 return false
                             }
                             return true;
-
-                            // if (index >= animationQueue.length - 1) {
-                            //     return false;
-                            // }
-                            // return true;
                         },
                         back: function() {
                             if (this.hasBack()) {
-                                --index;
-                                that.animator(-1);
+                                that.animator.showtime.back();
                             }
                         },
                         hasBack: function() {
-                            if (index <= 0) {
+                            if (index <= -1) {
                                 return false;
                             }
                             return true;
                         },
-                        goFirst: function() {
-                            index = -1;
-                            return index;
-                        },
-                        goLast: function() {
-                            index = animationQueue.length;
-                            return index;
-                        },
                         isEmpty: function() {
-                            if (animationQueue.length === 0)
+                            if (animationQueue.length === 0) {
                                 return true;
+                            }
                             return false;
-                        },
-                        getIndex: function() {
-                            return index;
-                        },
-                        setIndex: function(idx) {
-                            index = idx;
                         }
                     };
 
