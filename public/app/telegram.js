@@ -396,7 +396,7 @@
                     chatListView.empty();
                     currentRoomid = roomData.roomid;
                     online.join(roomData.roomid);
-                    networkManager.getMsg(currentRoomid);
+                    networkManager.loadMessage(currentRoomid);
                     setCurrentView(chatView);
                 });
         };
@@ -434,10 +434,8 @@
                     });
                 return this;
             };
-            //loadMessage
-            this.getMsg = function (roomid) {
-                // $.get('/online/hisory',{
-                $.get('/online/msg',{
+            this.loadMessage = function (roomid) {
+                 $.get('/online/hisory',{
                     roomid : roomid
                 }, function (results) {
                     var msgs = results.data.map(msgData);

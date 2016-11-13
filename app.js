@@ -27,6 +27,7 @@ app.use(nodeadmin(app));
 
 //라우터보다 먼저 미들웨어 등록!!
 var useRedis = false;
+
 var redis, cache;
 
 if (useRedis) {

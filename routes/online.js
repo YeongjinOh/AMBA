@@ -62,7 +62,7 @@ router.post('/rooms', function (req,res,next) {
 });
 
 //roomid, username을 받아서
-router.get('/msg', function (req, res, next) {
+router.get('/history', function (req, res, next) {
     var roomid = req.query.roomid;
     var key = 'AMBATA' + ':' + roomid ;
     req.cache.lrange(key, 0, -1, function (err, results) {
@@ -117,38 +117,5 @@ router.post('/msg', function (req,res,next) {
         res.status(200).json(data);
     });
 });
-
-
-//router.post('/rooms', function (req,res,next) {
-//
-//    console.log('body : ', req.body);
-//    var roomid = req.body.roomid;
-//    var userList = req.body['userList[]'];
-//
-//
-//    promise.map(userList, function(user) {
-//        //var key = 'AMBATA:' + user;
-//        return req.cache.lpush('AMBATA:'+user, roomid, function (err, result) {
-//            if (err) {
-//                console.log(err);
-//                var data = {
-//                    'resultCode': -1,
-//                    'msg': 'fail to getting msg'
-//                };
-//                res.status(200).json(data);
-//            }
-//        });
-//
-//    }).then(function() {
-//        console.log("done");
-//        var data = {
-//            'resultCode' : 0,
-//            'msg' : 'success to make the room'
-//        };
-//        res.status(200).json(data);
-//    });
-//});
-
-
 
 module.exports = router;

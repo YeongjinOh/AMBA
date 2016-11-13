@@ -13,7 +13,6 @@ var options = {
 module.exports = function (server) {
     var primus = new Primus(server, options);
     // add rooms to Primus
-    //primus.use('rooms', Rooms);
     primus.plugin('rooms', Rooms);
 
     primus.on('connection',function(spark){
@@ -101,17 +100,12 @@ module.exports = function (server) {
 };
 
 
-
 /*module.exports = function (server) {
     var options = {
         transformer: "engine.io"
     };
 
     primus = new Primus(server,options);
-
-
-
-
 
     var sub = redis.createClient();
     var pub = redis.createClient();
