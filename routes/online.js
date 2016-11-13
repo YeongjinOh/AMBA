@@ -7,7 +7,6 @@ var router = express.Router();
 var db = require('../db');
 var promise = require('promise');
 
-
 function setRoomid(roomid){
     return roomid.split(':')[2]
 }
@@ -35,7 +34,6 @@ router.get('/rooms', function (req, res, next) {
     });
 });
 
-//나중에 promise로 바꿔줘야한다
 router.post('/rooms', function (req,res,next) {
 
     console.log('body : ', req.body);
@@ -100,7 +98,6 @@ router.post('/msg', function (req,res,next) {
         message : body.message
     };
     var key ='AMBATA';
-    //value = "\""+JSON.stringify(value)+"\"";
     value = JSON.stringify(value);
     key = key + ':' +roomid;
     req.cache.lpush(key, value, function (err, result) {
@@ -121,6 +118,36 @@ router.post('/msg', function (req,res,next) {
     });
 });
 
+
+//router.post('/rooms', function (req,res,next) {
+//
+//    console.log('body : ', req.body);
+//    var roomid = req.body.roomid;
+//    var userList = req.body['userList[]'];
+//
+//
+//    promise.map(userList, function(user) {
+//        //var key = 'AMBATA:' + user;
+//        return req.cache.lpush('AMBATA:'+user, roomid, function (err, result) {
+//            if (err) {
+//                console.log(err);
+//                var data = {
+//                    'resultCode': -1,
+//                    'msg': 'fail to getting msg'
+//                };
+//                res.status(200).json(data);
+//            }
+//        });
+//
+//    }).then(function() {
+//        console.log("done");
+//        var data = {
+//            'resultCode' : 0,
+//            'msg' : 'success to make the room'
+//        };
+//        res.status(200).json(data);
+//    });
+//});
 
 
 

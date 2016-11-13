@@ -66,15 +66,19 @@ router.get('/', function(req, res, next) {
     var sql1 = 'SELECT value FROM hash_store WHERE cid = ? ORDER BY seq DESC';
     //var arr1 = [cid];
     var arr1 = ['aa'];
+
     db.query(sql1, arr1)
         .then(function (results) {
             // 전체 아이템 개수,
             var totalItem = parseInt(results.length);
             // 전체 페이지
             var maxPage = Math.floor(totalItem / itemNumInPage);
+
             var temp = 1;
-            if(totalItem/itemNumInPage ===Math.floor(totalItem/itemNumInPage))
+            if(totalItem/itemNumInPage === Math.floor(totalItem/itemNumInPage))
                 temp = 0;
+
+            console.log('maxpage : '+ maxPage + ', temp : ' + temp);
 
             // Skip할 개수 계산. page는 1부터 시작
             var skip = itemNumInPage * (currentPage-1);
@@ -82,6 +86,7 @@ router.get('/', function(req, res, next) {
             var arr2 = [cid, skip, itemNumInPage];
             db.query(sql2, arr2)
                 .then(function (results) {
+                    console.log('results : ', results);
                     res.json({
                         resultCode : 0,
                         maxPage: maxPage + temp,

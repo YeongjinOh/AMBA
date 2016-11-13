@@ -6,39 +6,10 @@ define([],function () {
     var Module = {};
 
     Module.appendTo = function (target) {
-        function init(){
-            var value =[];
-            for(var i =0;i<5;i++){
-                value = {
-                    aauth : localStorage.getItem('aauth'),
-                    title : '?????????????????????????????????????????' + i,
-                    content : '1aaasasasasaksnknaslnasalsmlamslamslamslamskanskanskanskansajsnksandaskldnlasdklasd1aaasasasasaksnknaslnasalsmlamslamslamslamskanskanskanskansajsnksandaskldnlasdklasd1aaasasasasaksnknaslnasalsmlamslamslamslamskanskanskanskansajsnksandaskldnlasdklasd',
-                    name : 'lightsoo',
-                    timestamp : "2016-02-12"
-                };
-                console.log(value);
-                newPost(value);
-            }
-            var cpText = 'PAGE ' + page +' OF '+maxPage;
-            if(maxPage == 1){
-                currentPage.appendTo(pBottom).text(cpText);
-            }else if(page!=1&&page%maxPage!==0){
-                nextPage.appendTo(pBottom);
-                currentPage.appendTo(pBottom).text(cpText);
-                previousPage.appendTo(pBottom);
-            }else if(page%maxPage==0){
-                currentPage.appendTo(pBottom).text(cpText);
-                previousPage.appendTo(pBottom);
-            }else{
-                nextPage.appendTo(pBottom);
-                currentPage.appendTo(pBottom).text(cpText);
-            }
-        }
 
         var page = 1;
         var maxPage =0;//exam
         var aauth = localStorage.getItem('aauth');
-
 
         // postItem view
         var postView = function (div) {
@@ -52,7 +23,7 @@ define([],function () {
                 .borderOption(1).borderOption('#EBE8E7', 'color').displayBlock();
         };
 
-        var parent = div().appendTo(target).size('100%', '100%')//.color('#C2B4B1');
+        var parent = div().appendTo(target).size('100%', '100%');
         var pWrapper = div().appendTo(parent).size('700','auto').overflow('scroll').color('white').displayBlock()
             .margin('auto')
             .marginTop(30).marginBottom(30)
@@ -60,7 +31,7 @@ define([],function () {
 
         var pTop = div().size('590','auto').appendTo(pWrapper).displayBlock().cursorPointer()
             .margin('auto').marginTop(30).marginBottom(5)
-            .text('AMBA BLOG').textAlign('center')
+            .text('AMBA TECH BLOG').textAlign('center')
             .fontSize(30)
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7')
             .click(function () {
@@ -107,8 +78,9 @@ define([],function () {
             })
             .hoverTextColor('grey','black');
 
+
         var vParent = div().appendTo(target).size('100%','100%').displayNone()
-            .position('absolute').left(0).top(0)
+            .position('absolute').left(0).top(0);
 
         var vParentHeader = div().size('100%','40').appendTo(vParent).displayBlock();
         div().appendTo(vParentHeader).size('40','100%').image('../images/btn_close.png').floatRight()
@@ -118,9 +90,7 @@ define([],function () {
             });
 
         //viewer about item
-        var viewer = div().appendTo(vParent).size('100%','auto').overflow('scroll')
-            .marginTop(90).maxHeight(600)
-
+        var viewer = div().appendTo(vParent).size('100%','auto').marginTop(90);
 
         var viewerContent = div().deco(postView).marginTop(0).appendTo(viewer);
         var pTitle = div().appendTo(viewerContent).paddingLeft(10).floatLeft()
@@ -139,8 +109,6 @@ define([],function () {
             .padding(20)
             .borderOption(1).borderOption('#EBE8E7', 'color');
 
-
-        //???
         var postItem = function (value) {
             this.aauth = value.aauth;//uid
             this.title = value.title;
@@ -170,20 +138,23 @@ define([],function () {
                     }, function (results) {
                         posting = results.value.map(buildPost);
                         maxPage = results.maxPage;
-                        //pList.
                         for(var i=0;i<posting.length;i++){
                             newPost(posting[i]);
                         }
-                        var cpText = 'PAGE ' + page +' OF '+maxPage;
 
+                        var cpText = 'PAGE ' + page +' OF '+maxPage;
                         if(maxPage == 1){
                             nextPage.displayNone();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayNone();
                         }else if(page!=1&&page%maxPage!==0){
+                            //nextPage.appendTo(pBottom);
+                            //currentPage.appendTo(pBottom).text(cpText);
+                            //previousPage.appendTo(pBottom);
                             nextPage.displayBlock();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayBlock();
+
                         }else if(page%maxPage==0){
                             //currentPage.appendTo(pBottom).text(cpText);
                             //previousPage.appendTo(pBottom);
@@ -194,14 +165,10 @@ define([],function () {
                             nextPage.displayBlock();
                             currentPage.text(cpText).displayBlock();
                             previousPage.displayNone();
-
-                            //nextPage.appendTo(pBottom);
-                            //currentPage.appendTo(pBottom).text(cpText);
                         }
                     });
             };
         };
-
 
         var newPost = function (postValue) {
             var posting = div().appendTo(pList).deco(postView);
@@ -212,8 +179,11 @@ define([],function () {
                     .text(postValue.title).fontSize(22).fontColor('#333333').fontBold(),
                 postTime : div().appendTo(posting).floatRight()
                     .text(postValue.timestamp),
-                contents : div().appendTo(posting)
+                contents : div().appendTo(posting).overflow('hidden')
+                    .textOverflow('ellipsis')
                     .text(postValue.content)
+                    .html(postValue.content)
+                    .maxHeight(200)
                     .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
                     .minWidth('100%')
                     .borderRadius(5)
@@ -221,11 +191,11 @@ define([],function () {
                     .color('#EBE8E7')
             };
 
+
             posting.hoverColor('#7DCEA0','white').click(function () {
                 pTitle.text(postValue.title);
                 pTimestamp.text(postValue.timestamp);
-                pContent.text(postValue.content);
-
+                pContent.$.html(postValue.content);
                 vParent.displayInlineBlock();
                 parent.displayNone();
             });
@@ -233,8 +203,6 @@ define([],function () {
 
         var posting = new postManager();
         posting.getPost();
-        //init();
-
     };
     return Module;
 });

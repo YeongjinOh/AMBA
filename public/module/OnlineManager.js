@@ -25,17 +25,6 @@ define(['primus'], function (Primus) {
             });
         return this
     };
-    Module.userList = function (rid) {
-        primus.write({
-            action: 'userList',
-            message: {
-            //    username : ainfo.username,
-                roomid : rid
-            //    msg: 'join the channel'
-            }
-        });
-        return this;
-    };
 
     Module.sendMessage = function (msg) {
         primus.write({

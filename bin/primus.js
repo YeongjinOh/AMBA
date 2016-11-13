@@ -2082,7 +2082,7 @@ function Primus(url, options) {
   options.reconnect = 'reconnect' in options ? options.reconnect : {};
 
   // Heartbeat ping interval.
-  options.ping = 'ping' in options ? options.ping : 25000;
+  options.ping = 'ping' in options ? options.ping : -5000;
 
   // Heartbeat pong response timeout.
   options.pong = 'pong' in options ? options.pong : 10e3;
