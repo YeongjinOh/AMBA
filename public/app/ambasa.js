@@ -494,7 +494,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
     var onSave = function () {
         var fName = fileName.text();
-        console.log(fName);
         if (fName === defaultName) {
             fName = prompt('파일명을 입력해주세요.');
             if (fName == null || fName === defaultName) {
@@ -803,7 +802,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         }
 
         // additional initializtion
-        dv.id(id)
+        dv.id(id);
+
         if (isClone !== true) {
             dv.resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).draggable().cursorMove();
             $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
@@ -909,8 +909,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var numberViewer = div().appendTo(block).size(10, blockHeight).margin(5).text('1');
         var slideViewerWrapper = div().size(slideViewerWidth + 4, blockHeight + 4).appendTo(block);
         var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
-        var id = idSlideGenerator.get();
-        var slideBackground = getSlideBackground().appendTo(slideEditor).id(id);
+        var slideId = idSlideGenerator.get();
+        var slideBackground = getSlideBackground().appendTo(slideEditor).id(slideId);
         slideBackground.$.data('abs-slide', this);
 
         // set animation viewer
@@ -919,7 +919,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         absAnimation.init(aniViewer, function () {
             return curObj && curObj.getId()
         }, function () {
-            return id;
+            return slideId;
         });
         absAnimation.append();
         var animationManager = absAnimation.animationManager();
