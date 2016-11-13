@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = true, useLocalStorage = false;
+    var useOnline = false, useLocalStorage = true;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -203,6 +203,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         var add = function (action) {
             if (!lockAction) {
+                console.log(action);
                 actions[++cur] = action;
                 length = cur + 1;
                 if (useOnline && roomid) {
@@ -255,7 +256,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text':
+                                case 'text', 'html', 'ace':
                                     abs.div().text(actionObj.prev);
                                     break;
                                 case 'image':
@@ -266,9 +267,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.prev);
-                                    break;
-                                case 'html':
-                                    abs.div().text(actionObj.prev);
                                     break;
                             }
                             abs.setParams();
@@ -320,7 +318,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text':
+                                case 'text', 'html', 'ace':
                                     abs.div().text(actionObj.cur);
                                     break;
                                 case 'image':
@@ -331,9 +329,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.cur);
-                                    break;
-                                case 'html':
-                                    abs.div().text(actionObj.cur);
                                     break;
                             }
                             abs.setParams();
@@ -798,7 +793,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         dv.audio(id, params.media);
                         break;
                     case 'html':
-
                         if (isClone)
                             dv.html(params.media);
                         else {
@@ -815,6 +809,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                             });
                             dv.text(params.media);
                         }
+                        break;
+                    case 'ace':
+                        dv.$ace = div().aceEditor().text(params.media).size('100%','100%')
+                            .focusin(function () {
+                                lockDel();
+                            }).focusout(function () {
+                                unlockDel();
+                                console.log('ace')
+                                actionManager.onMedia(that, 'ace');
+                            });
+                        dv.text = function (txt) {
+                            return dv.$ace.text(txt)
+                        };
                         break;
                 }
             }
@@ -847,6 +854,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             });
             dv.setContextMenu(id);
         }
+        if (dv.$ace)
+            dv.$ace.appendTo(dv);
 
         this.focus = function () {
             if (curObj)
@@ -862,7 +871,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             objStatus.text('id : ' + id);
         };
         this.deactive = function () {
-            dv.$.children().css('border', 'none').css('background-color', 'initial');
+            dv.$.children('.ui-resizable-handle:lt(9)').css('border', 'none').css('background-color', 'initial');
             objStatus.text('');
         };
         this.remove = function () {
@@ -880,8 +889,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             var dvParam = getParams(dv);
             params.id = dvParam.id;
             params.style = dvParam.style;
+            console.log(dvParam);
             switch (params.type) {
-                case 'text':
+                case 'text', 'html', 'ace':
                     params.media = dvParam.text;
                     break;
                 case 'image':
@@ -895,9 +905,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 case 'audio':
                     if (dv.$audio && dv.$audio.attr('src'))
                         params.media = dv.$audio.attr('src');
-                    break;
-                case 'html':
-                    params.media = dvParam.text;
                     break;
             }
         };
@@ -1472,6 +1479,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Audio').click(function () {
         if (curSlide) {
             var obj = absObject({type: 'audio', media: ''});
+            obj.focus();
+            curSlide.append(obj);
+        }
+    });
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('Ace').click(function () {
+        if (curSlide) {
+            var obj = absObject({type: 'ace', media: '', style:{
+                width:'300px',
+                height:'120px'
+            },});
             obj.focus();
             curSlide.append(obj);
         }
