@@ -669,6 +669,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     // 다른 곳 클릭시 context-menu hide
     $(document).bind("mousedown", function (e) {
+        if (isFullscreen) {
+            slideManager.next();
+            return;
+        }
         if (!$(e.target).parents("#abs-slide-context-menu").length > 0) {
             $("#abs-slide-context-menu").hide(100);
         }
@@ -726,24 +730,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
-        // remove icon and resize ui-resizable-se
-        if (isClone !== true) {
-            dv.resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).draggable().cursorMove();
-            $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
-            dv.mousedown(function (e) {
-                if (!isFullscreen)
-                    that.focus();
-            }).mouseup(function () {
-                var style1 = getParams(dv).style, style2 = params.style;
-                if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
-                    actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
-                    syncBlock();
-                }
-            });
-        } else {
-            console.log(_params)
-        }
-
         var id;
         if (_params) {
             params = $.extend({}, _params);
@@ -775,8 +761,23 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             id = idGenerator.get();
             params.id = id;
         }
-        dv.id(id).setContextMenu(id);
 
+        // additional initializtion
+        if (isClone !== true) {
+            dv.resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).draggable().cursorMove();
+            $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
+            dv.mousedown(function (e) {
+                if (!isFullscreen)
+                    that.focus();
+            }).mouseup(function () {
+                var style1 = getParams(dv).style, style2 = params.style;
+                if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
+                    actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
+                    syncBlock();
+                }
+            });
+            dv.id(id).setContextMenu(id);
+        }
 
         this.focus = function () {
             if (curObj)
