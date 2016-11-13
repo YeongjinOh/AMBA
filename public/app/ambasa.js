@@ -728,10 +728,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     /** id generator **/
 
-    var idGenerator = (function () {
+    var IdGenerator = function (prefix) {
         var id = 0;
         this.get = function () {
-            return 'ABS-' + id++;
+            return prefix + id++;
         };
         this.set = function (_id) {
             _id = parseInt(_id.slice(4, _id.length));
@@ -739,7 +739,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 id = _id + 1;
         };
         return this;
-    })();
+    };
+    var idGenerator = IdGenerator('ABS-');
+    var idSlideGenerator = IdGenerator('ABS-Slide');
 
 
     /** ABS Object **/
@@ -895,7 +897,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var numberViewer = div().appendTo(block).size(10, blockHeight).margin(5).text('1');
         var slideViewerWrapper = div().size(slideViewerWidth + 4, blockHeight + 4).appendTo(block);
         var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
-        var slideBackground = getSlideBackground().appendTo(slideEditor);
+        var id = idSlideGenerator.get();
+        var slideBackground = getSlideBackground().appendTo(slideEditor).id(id).data('abs-slide', this);
 
         // set animation viewer
         var aniViewer = div().size('100%', '100%').appendTo(animationViewer).color('gray');
@@ -960,6 +963,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         this.getIdx = function () {
             return parseInt(numberViewer.text());
+        };
+        this.getId = function () {
+            return id;
         };
         // 중간에 slide를 insert한 경우 순서를 맞춰 보여주기 위해서 detach와 attach를 한다.
         this.detach = function () {
