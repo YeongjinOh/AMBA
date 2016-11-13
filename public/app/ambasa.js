@@ -788,12 +788,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         }
 
         // additional initializtion
+        dv.id(id)
         if (isClone !== true) {
             dv.resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).draggable().cursorMove();
             $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
             dv.mousedown(function (e) {
-                if (!isFullscreen)
-                    that.focus();
+                that.focus();
             }).mouseup(function () {
                 var style1 = getParams(dv).style, style2 = params.style;
                 if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
@@ -801,7 +801,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     syncBlock();
                 }
             });
-            dv.id(id).setContextMenu(id);
+            dv.setContextMenu(id);
         }
 
         this.focus = function () {
@@ -809,7 +809,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 curObj.deactive();
             curObj = that;
             curDiv = curObj.div();
-            curObj.active();
+            if (!isFullscreen)
+                curObj.active();
         };
         this.active = function () {
             dv.$.children('.ui-resizable-handle:lt(4)').css('border', '1px dotted gray');
