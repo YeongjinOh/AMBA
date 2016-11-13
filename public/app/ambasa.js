@@ -257,6 +257,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.prev);
                                     break;
+                                case 'html':
+                                    abs.div().text(actionObj.prev);
+                                    break;
                             }
                             abs.setParams();
                             syncBlockbyId(actionObj.slide);
@@ -318,6 +321,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.cur);
+                                    break;
+                                case 'html':
+                                    abs.div().text(actionObj.cur);
                                     break;
                             }
                             abs.setParams();
@@ -746,10 +752,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         dv.$.data('ambasa', this);
 
         var id;
+
         if (_params) {
             params = $.extend({}, _params);
             setAllStyles(dv, params.style);
-            if (params.media) {
+            if (params.media !== undefined) {
                 switch (params.type) {
                     case 'text':
                         dv.text(params.media);
@@ -762,6 +769,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         break;
                     case 'audio':
                         dv.audio(id, params.media);
+                        break;
+                    case 'html':
+                        dv.text(params.media);
                         break;
                 }
             }
@@ -840,6 +850,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 case 'audio':
                     if (dv.$audio && dv.$audio.attr('src'))
                         params.media = dv.$audio.attr('src');
+                    break;
+                case 'html':
+                    params.media = dvParam.text;
                     break;
             }
         };
@@ -1371,8 +1384,22 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Text').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'text'});
+            var obj = absObject({
+                type: 'html',
+                style:{
+                    width:'200px',
+                    height:'120px'
+                },
+                media:''
+            });
             obj.focus();
+            // tinymce option과 콜백 함수 전달
+            obj.div().tinymce({
+                inline: true,
+                width:'100%',
+            }, function () {
+                actionManager.onMedia(obj,'html');
+            });
             curSlide.append(obj);
         }
     });

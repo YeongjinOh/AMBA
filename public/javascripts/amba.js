@@ -885,6 +885,10 @@ Div.prototype.focus = function() {
     this.$.focus();
     return this;
 };
+Div.prototype.focusout = function(fn) {
+    this.$.focusout(fn);
+    return this;
+};
 
 /**
  * @desc    stop animation
@@ -1187,15 +1191,16 @@ Div.prototype.aceEditor = function (opt) {
     return this;
 };
 
-Div.prototype.tinymce = function (opt) {
+Div.prototype.tinymce = function (opt, fn) {
     var that = this;
-    var child = div().id('ab_tm'+AB.random(99999)).size('100%','100%').appendTo(this);
+    var id = 'ab_tm'+AB.random(99999);
+    var child = div().id(id).size('100%','100%').appendTo(this);
 
     if (opt === undefined) {
-        opt = {target: child.$.get(0)};
+        opt = {selector: '#'+id};
     }
     else {
-        opt.target = child.$.get(0);
+        opt.selector = '#'+id;
     }
     var tmpText = this.text();
     that.textInterceptor(function(txt) {
@@ -1205,13 +1210,17 @@ Div.prototype.tinymce = function (opt) {
         return that;
     });
 
+    if (typeof fn === 'function') {
+        child.focusout(fn);
+    }
+
     require(['//cdn.tinymce.com/4/tinymce.min.js'], function () {
         tinymce.init(opt);
-        tinymce.get(child.id()).setContent(tmpText);
+        tinymce.get(id).setContent(tmpText);
         that.textInterceptor(function(txt) {
             if (txt === undefined)
-                return tinymce.get(child.id()).getContent();
-            tinymce.get(child.id()).setContent(txt);
+                return tinymce.get(id).getContent();
+            tinymce.get(id).setContent(txt);
             return that;
         });
     });
