@@ -622,15 +622,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
          slideManager.new();
          }*/
         // up or left key
-        else if ((event.which === 38 || event.which === 37) && !curObj && curSlide) {
+        else if ((event.which === 38 || event.which === 37) && isFullscreen) {
             event.preventDefault();
             slideManager.prev();
         }
         // down or right key or space bar
-        else if ((event.which === 40 || event.which === 39 || event.which === 32) && !curObj && curSlide) {
+        else if ((event.which === 40 || event.which === 39 || event.which === 32) && isFullscreen) {
             event.preventDefault();
             slideManager.next();
         }
+        /** Ctrl Key **/
         else if (event.ctrlKey) {
             // Ctrl + Shift + Z
             if (event.shiftKey && event.which === 90) {
@@ -661,6 +662,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             else if (event.which === 86) {
                 event.preventDefault();
                 onPaste();
+            }
+        }
+        /** Alt key **/
+        else if (event.altKey) {
+            // Cmd + up
+            if (event.which === 38 && !isFullscreen && curObj) {
+                event.preventDefault();
+                curObj.incZidx();
+            }
+            // Cmd + down
+            else if (event.which === 40 && !isFullscreen && curObj) {
+                event.preventDefault();
+                curObj.decZidx();
             }
         }
     });
@@ -726,7 +740,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     var ABSObject = function (_params, isClone) {
         var that = this, params = {};
-        var dv = div().class('abs-object').size(100, 100).position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
+        var dv = div().class('abs-object').size(100, 100).zIndex(10)
+            .position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
@@ -833,6 +848,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         this.getId = function () {
             return id;
+        };
+        this.incZidx = function () {
+            dv.zIndex(parseInt(dv.zIndex())+1);
+        };
+        this.decZidx = function () {
+            dv.zIndex(parseInt(dv.zIndex())-1);
         };
         return this;
     };
