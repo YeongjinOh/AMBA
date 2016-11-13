@@ -7,12 +7,12 @@ define ([], function() {
         getInstance: function() {
             var animationQueue = [], showtimeQueue, previewQueue;
             var index = -1;
-            var target, curId, curSlide;
+            var target, curId, curSlideId;
             var module = {
-                init: function (dv, getId, getSlide) {
+                init: function (dv, getId, getSlideId) {
                     target = dv;
                     curId = getId;
-                    curSlide = getSlide;
+                    curSlideId = getSlideId;
                 },
                 import: function (aq) {
                     if (aq === undefined || typeof aq !== 'object') {
@@ -126,76 +126,76 @@ define ([], function() {
                                 var ify = seq++;
 
                                 dv.detach();
-                                var menu = div().id('abs-ani-menu-'+curSlide().getIdx()+'-'+ify).deco(decoMenu).fontBold().click(function (dv, e) {
+                                var menu = div().id('abs-ani-menu-'+curSlideId()+'-'+ify).deco(decoMenu).fontBold().click(function (dv, e) {
                                     e.stopPropagation();
                                     e.preventDefault();
 
-                                    focus(curSlide().getIdx()+'-'+ify);
+                                    focus(curSlideId()+'-'+ify);
 
-                                    if (AB.find('abs-ani-con-'+curSlide().getIdx()+'-'+ify)) {
-                                        $('#abs-ani-con-'+curSlide().getIdx()+'-'+ify).remove();
+                                    if (AB.find('abs-ani-con-'+curSlideId()+'-'+ify)) {
+                                        $('#abs-ani-con-'+curSlideId()+'-'+ify).remove();
                                     }
                                     else {
-                                        var content = div().id('abs-ani-con-'+curSlide().getIdx()+'-'+ify).deco(decoContent).appendTo(menu).click(function (dv, e) {
+                                        var content = div().id('abs-ani-con-'+curSlideId()+'-'+ify).deco(decoContent).appendTo(menu).click(function (dv, e) {
                                             e.stopPropagation();
                                             e.preventDefault();
                                         });
 
-                                        var conEffect = div().id('abs-ani-sel-ani'+curSlide().getIdx()+'-'+ify).deco(decoSelector)
-                                            .appendTo(content).text($('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).data('div').text())
+                                        var conEffect = div().id('abs-ani-sel-ani'+curSlideId()+'-'+ify).deco(decoSelector)
+                                            .appendTo(content).text($('#abs-ani-menu-effect-'+curSlideId()+'-'+ify).data('div').text())
                                             .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                                 e.stopPropagation();
                                                 e.preventDefault();
 
-                                                focus(curSlide().getIdx()+'-'+ify);
+                                                focus(curSlideId()+'-'+ify);
 
-                                                if (AB.find('abs-ani-sel-'+curSlide().getIdx()+'-'+ify)) {
-                                                    $('#abs-ani-sel-'+curSlide().getIdx()+'-'+ify).remove();
+                                                if (AB.find('abs-ani-sel-'+curSlideId()+'-'+ify)) {
+                                                    $('#abs-ani-sel-'+curSlideId()+'-'+ify).remove();
                                                 }
                                                 else {
-                                                    var selEffect = div().id('abs-ani-sel-'+curSlide().getIdx()+'-'+ify).deco(decoSelectMenu).appendTo(conEffect).click(function (dv, e) {
+                                                    var selEffect = div().id('abs-ani-sel-'+curSlideId()+'-'+ify).deco(decoSelectMenu).appendTo(conEffect).click(function (dv, e) {
                                                         e.stopPropagation();
                                                         e.preventDefault();
 
-                                                        focus(curSlide().getIdx()+'-'+ify);
+                                                        focus(curSlideId()+'-'+ify);
                                                     });
 
                                                     for (i = 0; i < effect.length; i++) {
                                                         div().appendTo(selEffect).size('100%', 20).color('#eeeeee').text(effect[i]).fontBold()
                                                             .hoverTextColor('blue', 'black').click(function (dv) {
                                                             conEffect.text(dv.text());
-                                                            $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+menu.id().split('-')[4]).data('div').text(dv.text());
-                                                            packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), durationValue.text());
+                                                            $('#abs-ani-menu-effect-'+curSlideId()+'-'+menu.id().split('-')[4]).data('div').text(dv.text());
+                                                            packaging(curSlideId()+'-'+ify, $('#abs-ani-menu-effect-'+curSlideId()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).text(), durationValue.text());
                                                             selEffect.detach();
                                                         });
                                                     }
                                                 }
                                             });
 
-                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).data('div').text().slice(1, length - 1))
+                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).data('div').text().slice(1, length - 1))
                                             .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                                 e.stopPropagation();
                                                 e.preventDefault();
 
-                                                focus(curSlide().getIdx()+'-'+ify);
+                                                focus(curSlideId()+'-'+ify);
 
-                                                if (AB.find('abs-ani-sel-'+curSlide().getIdx()+'-'+ify)) {
-                                                    $('#abs-ani-sel-'+curSlide().getIdx()+'-'+ify).remove();
+                                                if (AB.find('abs-ani-sel-'+curSlideId()+'-'+ify)) {
+                                                    $('#abs-ani-sel-'+curSlideId()+'-'+ify).remove();
                                                 }
                                                 else {
-                                                    var selTiming = div().id('abs-ani-sel-'+curSlide().getIdx()+'-'+ify).deco(decoSelectMenu).appendTo(conTiming).click(function (dv, e) {
+                                                    var selTiming = div().id('abs-ani-sel-'+curSlideId()+'-'+ify).deco(decoSelectMenu).appendTo(conTiming).click(function (dv, e) {
                                                         e.stopPropagation();
                                                         e.preventDefault();
 
-                                                        focus(curSlide().getIdx()+'-'+ify);
+                                                        focus(curSlideId()+'-'+ify);
                                                     });
 
                                                     for (i = 0; i < timing.length; i++) {
                                                         div().appendTo(selTiming).size('100%', 20).color('#eeeeee').text(timing[i]).fontBold()
                                                             .hoverTextColor('blue', 'black').click(function (dv) {
                                                             conTiming.text(dv.text());
-                                                            $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+menu.id().split('-')[4]).data('div').text('(' + dv.text() + ')');
-                                                            packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), durationValue.text());
+                                                            $('#abs-ani-menu-timing-'+curSlideId()+'-'+menu.id().split('-')[4]).data('div').text('(' + dv.text() + ')');
+                                                            packaging(curSlideId()+'-'+ify, $('#abs-ani-menu-effect-'+curSlideId()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).text(), durationValue.text());
                                                             selTiming.detach();
                                                         });
                                                     }
@@ -219,22 +219,22 @@ define ([], function() {
                                         var durationValue = div().appendTo(conDuration).size('80%', '100%').text('1000').editable().textAlignCenter().cursorText().fontBold().hoverTextColor('blue', 'black');
                                         var durationOK = div().appendTo(conDuration).size('20%', '100%').text('OK').fontBold().textAlignCenter().cursorPointer()
                                             .hoverTextColor('blue', 'black').click(function () {
-                                                packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), durationValue.text());
+                                                packaging(curSlideId()+'-'+ify, $('#abs-ani-menu-effect-'+curSlideId()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).text(), durationValue.text());
                                             });
                                     }
                                 });
 
-                                div().id('abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).appendTo(menu).size('90%', 'auto').text(effect[0]).fontBold();
+                                div().id('abs-ani-menu-effect-'+curSlideId()+'-'+ify).appendTo(menu).size('90%', 'auto').text(effect[0]).fontBold();
                                 div().appendTo(menu).size('auto', 'auto').text('×').fontBold().hoverTextColor('blue', 'black').click(function (dv, e) {
                                     e.stopPropagation();
                                     e.preventDefault();
 
                                     menu.remove();
-                                    manager.remove(curSlide().getIdx()+'-'+ify);
+                                    manager.remove(curSlideId()+'-'+ify);
                                 });
-                                div().id('abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + timing[0] + ')').fontSize(12).fontBold();
+                                div().id('abs-ani-menu-timing-'+curSlideId()+'-'+ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + timing[0] + ')').fontSize(12).fontBold();
 
-                                packaging(curSlide().getIdx()+'-'+ify, $('#abs-ani-menu-effect-'+curSlide().getIdx()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlide().getIdx()+'-'+ify).text(), 1000);
+                                packaging(curSlideId()+'-'+ify, $('#abs-ani-menu-effect-'+curSlideId()+'-'+ify).text(), $('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).text(), 1000);
 
                                 dv.appendTo(body);
 
