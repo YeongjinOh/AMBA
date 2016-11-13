@@ -494,6 +494,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
     var onSave = function () {
         var fName = fileName.text();
+        console.log(fName);
         if (fName === defaultName) {
             fName = prompt('파일명을 입력해주세요.');
             if (fName == null || fName === defaultName) {
@@ -740,8 +741,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         return this;
     };
-    var idGenerator = IdGenerator('ABS-');
-    var idSlideGenerator = IdGenerator('ABS-Slide');
+    var idGenerator = new IdGenerator('ABS-');
+    var idSlideGenerator = new IdGenerator('ABSlide');
 
 
     /** ABS Object **/
