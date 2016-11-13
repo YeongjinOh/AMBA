@@ -730,7 +730,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         // remove icon and resize ui-resizable-se
         $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
         dv.mousedown(function (e) {
-            that.focus();
+            if (!isFullscreen)
+                that.focus();
         }).mouseup(function () {
             var style1 = getParams(dv).style, style2 = params.style;
             if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
