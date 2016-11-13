@@ -884,6 +884,10 @@ Div.prototype.focus = function () {
     this.$.focus();
     return this;
 };
+Div.prototype.focusin = function (fn) {
+    this.$.focusin(fn);
+    return this;
+};
 Div.prototype.focusout = function (fn) {
     this.$.focusout(fn);
     return this;
@@ -1214,7 +1218,7 @@ Div.prototype.tinymce = function (opt, fn) {
     });
 
     if (typeof fn === 'function') {
-        child.focusout(fn);
+        fn(child);
     }
 
     require(['//cdn.tinymce.com/4/tinymce.min.js'], function () {

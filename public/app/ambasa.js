@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     window.ambasa = {};
     var useOnline = true, useLocalStorage = false;
-    var isServer = true, isJoining = true;
+    var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
     /** set user authentication **/
@@ -144,6 +144,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         if (curSlide)
             return curSlide.getIdx();
     };
+    var lock = function () {
+        lockAction = true;
+    };
+    var unlock = function () {
+        lockAction = false;
+    };
+    var lockDel = function () {
+        isEdit = true;
+    };
+    var unlockDel = function () {
+        isEdit = false;
+    };
 
 
     /////////////////////////////////////////////////////////////////
@@ -155,12 +167,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     /** ambasa actions protocol **/
 
-    var lock = function () {
-        lockAction = true;
-    };
-    var unlock = function () {
-        lockAction = false;
-    };
     var filterProp = function (obj, props) {
         var res = {};
         for (var i = 0; i < props.length; i++) {
@@ -590,12 +596,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         // localStorage.removeItem("ambasa");
     };
     var onDelete = function () {
-        if (curObj) {
+        if (curObj && !isEdit) {
             curSlide.removeObj(curObj.getId());
         }
-        else if (curSlide) {
-            slideManager.del()
-        }
+        // else if (curSlide) {
+        //     slideManager.del()
+        // }
     };
     var onCopy = function () {
         if (curObj) {
@@ -623,7 +629,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
 
     /** key-event binding **/
-
     $(window).keydown(function (event) {
         // delete
         if (event.which === 8) {
@@ -800,8 +805,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                             dv.tinymce({
                                 inline: true,
                                 width:'100%',
-                            }, function () {
-                                actionManager.onMedia(that,'html');
+                            }, function (child) {
+                                child.focusin(function () {
+                                    lockDel();
+                                }).focusout(function () {
+                                    unlockDel();
+                                    actionManager.onMedia(that,'html');
+                                })
                             });
                             dv.text(params.media);
                         }
