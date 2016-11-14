@@ -210,6 +210,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var length = 0;
 
         var add = function (action) {
+            console.log(action);
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
@@ -276,6 +277,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.prev);
                                     break;
+                                case 'module':
+                                    abs.loadModule(actionObj.prev);
+                                    break;
                             }
                             abs.setParams();
                             syncBlockbyId(actionObj.slide);
@@ -336,6 +340,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.cur);
+                                    break;
+                                case 'module':
+                                    abs.loadModule(actionObj.cur);
                                     break;
                             }
                             abs.setParams();
@@ -787,6 +794,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         dv.$.data('ambasa', this);
 
         var id;
+        var moduleName = '';
 
         // initialize if params given
         if (_params) {
@@ -812,7 +820,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         else {
                             dv.tinymce({
                                 inline: true,
-                                width:'100%',
+                                width:'100%'
                             }, function (child) {
                                 child.focusin(function () {
                                     lockDel();
@@ -835,6 +843,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         dv.text = function (txt) {
                             return dv.$ace.text(txt)
                         };
+                        break;
+                    case 'module':
+                        moduleName = params.media;
+                        if (moduleName !== '') {
+                            require(['/jsloader/module/'+moduleName], function (module) {
+                                if (module && module.appendTo)
+                                    module.appendTo(dv);
+                            });
+                        }
                         break;
                 }
             }
@@ -898,6 +915,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.div = function () {
             return dv;
         };
+
         this.setParams = function () {
             var dvParam = getParams(dv);
             params.id = dvParam.id;
@@ -918,6 +936,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     if (dv.$audio && dv.$audio.attr('src'))
                         params.media = dv.$audio.attr('src');
                     break;
+                case 'module':
+                    params.media = moduleName;
+                    break;
             }
         };
         this.getParams = function () {
@@ -933,6 +954,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.decZidx = function () {
             dv.zIndex(parseInt(dv.zIndex())-1);
             actionManager.onStyle(this, ['z-index']);
+        };
+        this.loadModule = function (name) {
+            moduleName = name;
+            if (name == '') {
+                dv.$.children(':gt(7)').remove();
+            }
+            else {
+                require(['/jsloader/module/'+name], function (module) {
+                    if (module && module.appendTo)
+                        module.appendTo(dv);
+                });
+            }
         };
         return this;
     };
@@ -1500,7 +1533,17 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             var obj = absObject({type: 'ace', media: '', style:{
                 width:'300px',
                 height:'120px'
-            },});
+            }});
+            obj.focus();
+            curSlide.append(obj);
+        }
+    });
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('Module').click(function () {
+        if (curSlide) {
+            var obj = absObject({type: 'module', media: '', style:{
+                width:'300px',
+                height:'400px'
+            }});
             obj.focus();
             curSlide.append(obj);
         }
