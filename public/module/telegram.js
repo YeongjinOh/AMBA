@@ -1,3 +1,7 @@
+/**
+ * Created by Lightsoo on 2016. 10. 28..
+ */
+
 define(['OnlineManager'], function (online) {
 
     var addZeroIfNeeded = function (num) {
@@ -29,27 +33,27 @@ define(['OnlineManager'], function (online) {
             v.displayBlock();
         };
 
-        // var online = AB.module.OnlineManager;
         online.connect();
-
 
         var ainfo = JSON.parse(localStorage.getItem('ainfo'));
         var currentRoomid;
         var userList =[];
 
-        var parent = div().appendTo(target).size(300, 590);
-        var vParent = div().appendTo(target).size(300,590).displayNone()
+        var parent = div().appendTo(target).size('100%', '100%')
+            .minWidth(300)
+            //.minHeight(590)
+
+
+        /*var vParent = div().appendTo(target).size(300,590).displayNone()
             .position('absolute').left(0).top(0);
 
-        // var parent = div().append().size(300, 590);
-        //  var vParent = div().append().size(300,590).displayNone()
-        //  .position('absolute').left(0).top(0);
 
-
-        var popupWrapper = div().appendTo(vParent).size(300, 398).color('white')
+        var popupWrapper = div().appendTo(vParent).size('100%', '100%').color('white')
+            .minWidth(300).minHeight(398)
             .borderOption(1).borderOption('#EBE8E7', 'color');
 
-        var popupHeader = div().appendTo(popupWrapper).size(300,50)
+        var popupHeader = div().appendTo(popupWrapper).size('100%', '100%')
+            .minWidth(300).minHeight(50)
             .padding(6)
             .text('CHATTING ROOM').fontSize(27).fontColor('green').fontBold()
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7');
@@ -102,7 +106,7 @@ define(['OnlineManager'], function (online) {
             .marginTop(160);
 
         var newRoomHeader = div().appendTo(newRoomWrapper).size(300,52)
-        //.maxHeight(60)
+            //.maxHeight(60)
             .padding(6).overflow('scroll').textOverflow('clip').whiteSpace('nowrap')
             .fontSize(27).fontColor('green')//.fontBold()
             .borderBottom('solid 2px').borderBottomColor('#99A3A4');
@@ -131,9 +135,7 @@ define(['OnlineManager'], function (online) {
                         type: 'post',
                         dataType: "json",
                         data: {
-                            //roomid: randomRoomid,
                             roomid: newRoomContentRoomName.text(),
-
                             userList : userList
                         },
                         success: function(msg){
@@ -165,58 +167,89 @@ define(['OnlineManager'], function (online) {
                 userList = [];
                 newRoomView.displayNone();
                 vParent.displayNone();
-            });
+            });*/
 
-
-        var sideView = div().appendTo(parent).size(300,590);
-        var sideTop = div().appendTo(sideView).size(300, 50)
+        /*divTop UI*/
+        var divTop = div().appendTo(parent).size('auto', '50')
+            .minWidth(300).minHeight(50)
             .borderOption(1).borderOption('#EBE8E7', 'color')
             .color('white').displayBlock();
-        var sideTop1 = div().appendTo(sideTop).size(248,50);
-        var sideTop1Title = div().appendTo(sideTop1).size('100%','100%')
+        var divTop1 = div().appendTo(divTop).size('auto', 'auto')
+            .minWidth(248).minHeight(50);
+        //for title
+        div().appendTo(divTop1).size('100%','100%')
             .padding(1).marginLeft(3)
             .text('AMBATA').fontSize(33).fontColor('green').fontBold();
 
-        var sideTop2 = div().appendTo(sideTop).size(50,50);
-        var sideTop2Btn = div().appendTo(sideTop2).size('100%','100%')
+        var divTop2 = div().appendTo(divTop).size('auto',50).floatRight()
+            .minWidth(50).minHeight(50);
+        //for btn
+        div().appendTo(divTop2).size('100%','100%')
             .padding(9).image('../images/write.png').cursorPointer()
             .hoverColor('#F4F6F6','transparent')
             .click(function () {
                 vParent.displayBlock();
             });
 
+        /*content */
+        var listView = div().appendTo(parent).size('100%', 'auto');//.displayBlock();
 
-        var listView = div().appendTo(sideView).size(300, 470).displayBlock();
-        //.borderOption(1).borderOption('#EBE8E7', 'color');
-        var freindList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayBlock();
-        var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
-        var chatView = div().appendTo(listView).size('300','100%').displayNone();
+        var freindList = div().appendTo(listView).size('100%','auto')
+            .minWidth(300)
+            .minHeight(170)
+            .maxHeight(370)
+            .overflow('scroll');
+
+        var friendView = function (dv) {
+            dv.size('100%','50').color('white')
+                .borderOption(1).borderOption('#EBE8E7', 'color').displayBlock();
+        };
+
+        //var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
+        //var chatView = div().appendTo(listView).size('300','100%').displayNone();
+        //[].sort()
+        /*bottom UI*/
+        var divBottom =div().appendTo(parent).size('auto', 'auto').displayBlock()
+            .minWidth(300).minHeight(55)
+            .color('#EBE8E7');
+
+        //var divBottom1 = div().appendTo(divBottom).size('100%', '100%')
+        //    .minWidth(100).minHeight(55)
+        //    //.size(100,55)
+        //    .hoverColor('#F4F6F6','transparent')
+        //    .click(function () {
+        //        setCurrentView(freindList);
+        //    });
+
+        /*freinds icon*/
+        div().appendTo(divBottom).size('auto','auto').margin('auto').image('../images/profile.png').cursorPointer()
+            .maxWidth('100%').maxHeight('100%');
+
+        //var divBottom2 = div().appendTo(divBottom).size('100%', '100%')
+        //    .minWidth(100).minHeight(55)
+        //    //.size(100,55)
+        //    .hoverColor('#F4F6F6','transparent').cursorPointer()
+        //    .click(function () {
+        //        setCurrentView(roomList);
+        //    });
+        /*room icon*/
+        div().appendTo(divBottom).size('auto','auto').image('../images/chat.png').margin('auto').cursorPointer()
+            .maxWidth('100%').maxHeight('100%');
+
+        //var divBottom3 = div().appendTo(divBottom).size('100%', '100%')
+        //    .minWidth(100).minHeight(55)
+        //    //.size(100,55)
+        //    .hoverColor('#F4F6F6','transparent').cursorPointer()
+        //    .click(function () {
+        //        setCurrentView(chatView);
+        //    });
+
+        /*currendRoom icon*/
+        div().appendTo(divBottom).size('auto','auto').image('../images/1chat.png').margin('auto').cursorPointer()
+            .maxWidth('100%').maxHeight('100%');
 
 
-        var sideBottom =div().appendTo(sideView).size(300,55).color('#EBE8E7');
-        var sideBottom1 = div().appendTo(sideBottom).size(100,55)
-            .hoverColor('#F4F6F6','transparent')
-            .click(function () {
-                setCurrentView(freindList);
-            });
-        var sideFreinds = div().appendTo(sideBottom1).size(55,55).displayBlock().margin('auto')
-            .image('../images/profile.png').cursorPointer();
-        var sideBottom2 = div().appendTo(sideBottom).size(100,55)
-            .hoverColor('#F4F6F6','transparent').cursorPointer()
-            .click(function () {
-                setCurrentView(roomList);
-            });
-        var sideRooms = div().appendTo(sideBottom2).size(55,55).image('../images/chat.png').displayBlock().margin('auto');
-
-        var sideBottom3 = div().appendTo(sideBottom).size(100,55)
-            .hoverColor('#F4F6F6','transparent').cursorPointer()
-            .click(function () {
-                setCurrentView(chatView);
-            });
-
-        var currentRoom = div().appendTo(sideBottom3).size(55,55).image('../images/1chat.png').displayBlock().margin('auto');
-
-        var chatListView = div().id('abc1').appendTo(chatView).size(300,420).overflow('scroll')
+        /*var chatListView = div().id('abc1').appendTo(chatView).size(300,420).overflow('scroll')
             .padding(3)
             .borderOption(1).borderOption('#EBE8E7', 'color').opacity(0.9)
             .linearGradient('0deg', '#148F77', '#76D7C4');
@@ -272,6 +305,7 @@ define(['OnlineManager'], function (online) {
             });
 
         online.onRecieve(function (data) {
+            console.log(data);
             var action = data.action;
             var message = data.message;
             if ('new' === action) {
@@ -279,42 +313,37 @@ define(['OnlineManager'], function (online) {
             }
 
             if ('broadcast_msg' == action) {
-                if(currentRoomid == message.roomid) {
-                    console.log(message);
-                    var username = message.username;
-                    var msg = message.msg;
-                    var receivedMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
+                console.log('broadcast_msg : ',message);
+                var username = message.username;
+                var msg = message.msg;
+                var receivedMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
 
-                    var profile = div().appendTo(receivedMsg).size(38, 38)
-                        .borderOption(1).borderOption('#EBE8E7', 'color')
-                        .borderRadius('50%')
-                        .padding(6)
-                        .image('../images/person.png').floatLeft();
-                    var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
+                var profile = div().appendTo(receivedMsg).size(38, 38)
+                    .borderOption(1).borderOption('#EBE8E7', 'color')
+                    .borderRadius('50%')
+                    .padding(6)
+                    .image('../images/person.png').floatLeft();
+                var txtArea = div().appendTo(receivedMsg).size('auto', 'auto').marginLeft(4).floatLeft();
 
-                    var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
-                        .fontSize(12).textAlign('left');
+                var name = div().appendTo(txtArea).size('auto', 'auto').text(username).displayBlock()
+                    .fontSize(12).textAlign('left');
 
-                    var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(msg).maxWidth(200)
-                        .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
-                        .whiteSpace('pre-line').fontSize(15).textAlign('left').floatLeft().wordBreak('break-all')
-                        .fontFamily('Meiryo');;
+                var txt = div().appendTo(txtArea).size('auto', 'auto').color('white').text(msg).maxWidth(200)
+                    .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
+                    .whiteSpace('pre-line').fontSize(15).textAlign('left').floatLeft().wordBreak('break-all')
+                    .fontFamily('Meiryo');
 
-                    var recievdTime = div().appendTo(receivedMsg).size('auto', '13').floatLeft()
-                        .fontSize(11)
-                        .text(getTime()).marginLeft(5);
-                    receivedMsg.appendTo(chatListView);
-                    chatListView.setScrollTop();
-                }
+                var recievdTime = div().appendTo(receivedMsg).size('auto', '13').floatLeft()
+                    .fontSize(11)
+                    .text(getTime()).marginLeft(5);
+                receivedMsg.appendTo(chatListView);
+                chatListView.setScrollTop();
             }
-        });
+        });*/
 
         //for listView
         //using div.deco()
-        var friendView = function (dv) {
-            dv.size('100%','50').color('white')
-                .borderOption(1).borderOption('#EBE8E7', 'color').displayBlock();
-        };
+
 
         var setFriend = function (friendData, targetList) {
             friendData.selected = false;
@@ -331,7 +360,8 @@ define(['OnlineManager'], function (online) {
             //console.log('targetList : ', friend.selected);
             if(targetList === freindList){
                 friend.hoverColor('#D5DBDB','white');
-            }else if(targetList === popupContent){
+            }
+            /*else if(targetList === popupContent){
                 var onClickFried = function () {
                     friendData.selected =! friendData.selected;
                     if(friendData.selected)
@@ -350,7 +380,7 @@ define(['OnlineManager'], function (online) {
                         friend.color('white')
                 };
                 friend.hover(onHover, offHover).click(onClickFried);
-            }
+            }*/
         };
 
         //data
@@ -394,7 +424,7 @@ define(['OnlineManager'], function (online) {
                     chatListView.empty();
                     currentRoomid = roomData.roomid;
                     online.join(roomData.roomid);
-                    networkManager.getMsg(currentRoomid);
+                    networkManager.loadMessage(currentRoomid);
                     setCurrentView(chatView);
                 });
         };
@@ -414,28 +444,26 @@ define(['OnlineManager'], function (online) {
                         friendAdapter = results.data.map(friendData);
                         for(var i=0;i<friendAdapter.length;i++){
                             setFriend(friendAdapter[i], freindList);
-                            setFriend(friendAdapter[i], popupContent);
+                            /*setFriend(friendAdapter[i], popupContent);*/
                         }
                     });
                 return this;
             };
             this.getRooms = function () {
                 $.get('/online/rooms',{
-                        username : ainfo.username
+                    username : ainfo.username
+                }, function(results) {
+                    //console.log('getRooms : ', results);
+                    //array
+                    var rooms = results.data.map(roomData);
+                    for(var i=0;i<rooms.length;i++){
+                        setRoom(rooms[i]);
                     }
-                    , function(results) {
-                        //console.log('getRooms : ', results);
-                        //array
-                        var rooms = results.data.map(roomData);
-                        for(var i=0;i<rooms.length;i++){
-                            setRoom(rooms[i]);
-                        }
-                    });
+                });
                 return this;
             };
-            this.getMsg = function (roomid) {
-                // $.get('/online/hisory',{
-                $.get('/online/msg',{
+            this.loadMessage = function (roomid) {
+                $.get('/online/hisory',{
                     roomid : roomid
                 }, function (results) {
                     var msgs = results.data.map(msgData);
@@ -500,11 +528,11 @@ define(['OnlineManager'], function (online) {
 
         var networkManager = new NetworkManager();
         networkManager.getFreinds();
-        networkManager.getRooms();
+        //networkManager.getRooms();
 
         //networkManager.getMsg(11);
         //setCurrentView(chatView);
-    }
+        };
 
-    return Module;
+        return Module;
 });

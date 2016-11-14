@@ -3,7 +3,6 @@
  */
 
   requirejs(['OnlineManager'], function (online) {
-//define(['OnlineManager'], function (online) {
 
     var addZeroIfNeeded = function (num) {
         num = parseInt(num);
@@ -435,7 +434,7 @@
                 return this;
             };
             this.loadMessage = function (roomid) {
-                 $.get('/online/hisory',{
+                 $.get('/online/history',{
                     roomid : roomid
                 }, function (results) {
                     var msgs = results.data.map(msgData);
