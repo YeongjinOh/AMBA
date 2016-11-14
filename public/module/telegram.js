@@ -39,21 +39,15 @@ define(['OnlineManager'], function (online) {
         var currentRoomid;
         var userList =[];
 
-        var parent = div().appendTo(target).size('100%', '100%')
-            .minWidth(300)
-            //.minHeight(590)
-
-
-        /*var vParent = div().appendTo(target).size(300,590).displayNone()
+        var parent = div().appendTo(target).size(300, 'auto').borderOption(1).borderOption('#EBE8E7', 'color');
+        var vParent = div().appendTo(target).size(300,'auto').displayNone()
             .position('absolute').left(0).top(0);
 
 
-        var popupWrapper = div().appendTo(vParent).size('100%', '100%').color('white')
-            .minWidth(300).minHeight(398)
+        var popupWrapper = div().appendTo(vParent).size(300, 398).color('white')
             .borderOption(1).borderOption('#EBE8E7', 'color');
 
-        var popupHeader = div().appendTo(popupWrapper).size('100%', '100%')
-            .minWidth(300).minHeight(50)
+        var popupHeader = div().appendTo(popupWrapper).size(300,50)
             .padding(6)
             .text('CHATTING ROOM').fontSize(27).fontColor('green').fontBold()
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7');
@@ -135,7 +129,9 @@ define(['OnlineManager'], function (online) {
                         type: 'post',
                         dataType: "json",
                         data: {
+                            //roomid: randomRoomid,
                             roomid: newRoomContentRoomName.text(),
+
                             userList : userList
                         },
                         success: function(msg){
@@ -167,23 +163,16 @@ define(['OnlineManager'], function (online) {
                 userList = [];
                 newRoomView.displayNone();
                 vParent.displayNone();
-            });*/
+            });
 
-        /*divTop UI*/
-        var divTop = div().appendTo(parent).size('auto', '50')
-            .minWidth(300).minHeight(50)
+        var divTop = div().appendTo(parent).size(300, 50)
             .borderOption(1).borderOption('#EBE8E7', 'color')
             .color('white').displayBlock();
-        var divTop1 = div().appendTo(divTop).size('auto', 'auto')
-            .minWidth(248).minHeight(50);
-        //for title
-        div().appendTo(divTop1).size('100%','100%')
-            .padding(1).marginLeft(3)
+        var divTop1 = div().appendTo(divTop).size(248,50);
+        div().appendTo(divTop1).size('100%','100%').padding(1).marginLeft(3)
             .text('AMBATA').fontSize(33).fontColor('green').fontBold();
 
-        var divTop2 = div().appendTo(divTop).size('auto',50).floatRight()
-            .minWidth(50).minHeight(50);
-        //for btn
+        var divTop2 = div().appendTo(divTop).size(50,50);
         div().appendTo(divTop2).size('100%','100%')
             .padding(9).image('../images/write.png').cursorPointer()
             .hoverColor('#F4F6F6','transparent')
@@ -191,65 +180,41 @@ define(['OnlineManager'], function (online) {
                 vParent.displayBlock();
             });
 
-        /*content */
-        var listView = div().appendTo(parent).size('100%', 'auto');//.displayBlock();
+        var listView = div().appendTo(parent).size(300, 470).displayBlock();
+        var freindList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayBlock();
+        var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
+        var chatView = div().appendTo(listView).size('300','100%').displayNone();
 
-        var freindList = div().appendTo(listView).size('100%','auto')
-            .minWidth(300)
-            .minHeight(170)
-            .maxHeight(370)
-            .overflow('scroll');
 
-        var friendView = function (dv) {
-            dv.size('100%','50').color('white')
-                .borderOption(1).borderOption('#EBE8E7', 'color').displayBlock();
-        };
+        var divBottom =div().appendTo(parent).size('auto','auto')
+            .borderOption(1).borderOption('#EBE8E7', 'color');
 
-        //var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
-        //var chatView = div().appendTo(listView).size('300','100%').displayNone();
-        //[].sort()
-        /*bottom UI*/
-        var divBottom =div().appendTo(parent).size('auto', 'auto').displayBlock()
-            .minWidth(300).minHeight(55)
-            .color('#EBE8E7');
+        var divBottom1 = div().appendTo(divBottom).size(99,50)
+            .hoverColor('#F4F6F6','transparent')
+            .click(function () {
+                setCurrentView(freindList);
+            });
+        /*friend icon*/
+        div().appendTo(divBottom1).size(35,35).displayBlock().margin('9px auto')
+            .image('../images/profile.png').cursorPointer();
 
-        //var divBottom1 = div().appendTo(divBottom).size('100%', '100%')
-        //    .minWidth(100).minHeight(55)
-        //    //.size(100,55)
-        //    .hoverColor('#F4F6F6','transparent')
-        //    .click(function () {
-        //        setCurrentView(freindList);
-        //    });
-
-        /*freinds icon*/
-        div().appendTo(divBottom).size('auto','auto').margin('auto').image('../images/profile.png').cursorPointer()
-            .maxWidth('100%').maxHeight('100%');
-
-        //var divBottom2 = div().appendTo(divBottom).size('100%', '100%')
-        //    .minWidth(100).minHeight(55)
-        //    //.size(100,55)
-        //    .hoverColor('#F4F6F6','transparent').cursorPointer()
-        //    .click(function () {
-        //        setCurrentView(roomList);
-        //    });
+        var divBottom2 = div().appendTo(divBottom).size(99,50)
+            .hoverColor('#F4F6F6','transparent').cursorPointer()
+            .click(function () {
+                setCurrentView(roomList);
+            });
         /*room icon*/
-        div().appendTo(divBottom).size('auto','auto').image('../images/chat.png').margin('auto').cursorPointer()
-            .maxWidth('100%').maxHeight('100%');
+        div().appendTo(divBottom2).size(35,35).image('../images/chat.png').displayBlock().margin('9px auto');
 
-        //var divBottom3 = div().appendTo(divBottom).size('100%', '100%')
-        //    .minWidth(100).minHeight(55)
-        //    //.size(100,55)
-        //    .hoverColor('#F4F6F6','transparent').cursorPointer()
-        //    .click(function () {
-        //        setCurrentView(chatView);
-        //    });
+        var divBottom3 = div().appendTo(divBottom).size(98,50)
+            .hoverColor('#F4F6F6','transparent').cursorPointer()
+            .click(function () {
+                setCurrentView(chatView);
+            });
+        /*currentRoom icon*/
+        div().appendTo(divBottom3).size(35,35).image('../images/1chat.png').displayBlock().margin('9px auto');
 
-        /*currendRoom icon*/
-        div().appendTo(divBottom).size('auto','auto').image('../images/1chat.png').margin('auto').cursorPointer()
-            .maxWidth('100%').maxHeight('100%');
-
-
-        /*var chatListView = div().id('abc1').appendTo(chatView).size(300,420).overflow('scroll')
+        var chatListView = div().id('abc1').appendTo(chatView).size(300,420).overflow('scroll')
             .padding(3)
             .borderOption(1).borderOption('#EBE8E7', 'color').opacity(0.9)
             .linearGradient('0deg', '#148F77', '#76D7C4');
@@ -339,11 +304,14 @@ define(['OnlineManager'], function (online) {
                 receivedMsg.appendTo(chatListView);
                 chatListView.setScrollTop();
             }
-        });*/
+        });
 
         //for listView
         //using div.deco()
-
+        var friendView = function (dv) {
+            dv.size('100%','50').color('white')
+                .borderOption(1).borderOption('#EBE8E7', 'color').displayBlock();
+        };
 
         var setFriend = function (friendData, targetList) {
             friendData.selected = false;
@@ -360,8 +328,7 @@ define(['OnlineManager'], function (online) {
             //console.log('targetList : ', friend.selected);
             if(targetList === freindList){
                 friend.hoverColor('#D5DBDB','white');
-            }
-            /*else if(targetList === popupContent){
+            }else if(targetList === popupContent){
                 var onClickFried = function () {
                     friendData.selected =! friendData.selected;
                     if(friendData.selected)
@@ -380,7 +347,7 @@ define(['OnlineManager'], function (online) {
                         friend.color('white')
                 };
                 friend.hover(onHover, offHover).click(onClickFried);
-            }*/
+            }
         };
 
         //data
@@ -401,7 +368,7 @@ define(['OnlineManager'], function (online) {
             var room = div().appendTo(roomList).deco(roomView);
             var profileWrapper = div().appendTo(room).size(50, 50).padding(3);
             var profile = div().appendTo(profileWrapper).size('100%','100%')
-                .image('../images/rooms.png')
+                .image('../images/rooms.png');
             //.color('red');
             var roomid = div().appendTo(room)
                 .text(roomData.roomid);
@@ -444,7 +411,7 @@ define(['OnlineManager'], function (online) {
                         friendAdapter = results.data.map(friendData);
                         for(var i=0;i<friendAdapter.length;i++){
                             setFriend(friendAdapter[i], freindList);
-                            /*setFriend(friendAdapter[i], popupContent);*/
+                            setFriend(friendAdapter[i], popupContent);
                         }
                     });
                 return this;
@@ -463,7 +430,7 @@ define(['OnlineManager'], function (online) {
                 return this;
             };
             this.loadMessage = function (roomid) {
-                $.get('/online/hisory',{
+                $.get('/online/history',{
                     roomid : roomid
                 }, function (results) {
                     var msgs = results.data.map(msgData);
@@ -528,11 +495,11 @@ define(['OnlineManager'], function (online) {
 
         var networkManager = new NetworkManager();
         networkManager.getFreinds();
-        //networkManager.getRooms();
+        networkManager.getRooms();
 
         //networkManager.getMsg(11);
         //setCurrentView(chatView);
-        };
+    };
 
-        return Module;
+    return Module;
 });
