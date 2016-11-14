@@ -180,13 +180,13 @@ define(['OnlineManager'], function (online) {
                 vParent.displayBlock();
             });
 
-        var listView = div().appendTo(parent).size(300, 470).displayBlock();
+        var listView = div().appendTo(parent).size(300, 470).displayBlock().color('white');
         var freindList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayBlock();
         var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
         var chatView = div().appendTo(listView).size('300','100%').displayNone();
 
 
-        var divBottom =div().appendTo(parent).size('auto','auto')
+        var divBottom =div().appendTo(parent).size('auto','auto').color('white')
             .borderOption(1).borderOption('#EBE8E7', 'color');
 
         var divBottom1 = div().appendTo(divBottom).size(99,50)
