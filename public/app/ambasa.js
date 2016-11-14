@@ -210,7 +210,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var length = 0;
 
         var add = function (action) {
-            console.log(action);
+            // console.log(action);
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
@@ -256,7 +256,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
                         case 'style':
-                            // TODO: Uncaught TypeError: Cannot read property 'div' of
                             var abs = getABSbyId(actionObj.id);
                             setAllStyles(abs.div(), actionObj.prev);
                             abs.setParams();
@@ -265,7 +264,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text', 'html', 'ace':
+                                case 'text':
+                                case 'html':
+                                case 'ace':
                                     abs.div().text(actionObj.prev);
                                     break;
                                 case 'image':
@@ -332,7 +333,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text', 'html', 'ace':
+                                case 'text':
+                                case 'html':
+                                case 'ace':
                                     abs.div().text(actionObj.cur);
                                     break;
                                 case 'image':
@@ -931,7 +934,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             params.id = dvParam.id;
             params.style = dvParam.style;
             switch (params.type) {
-                case 'text', 'html', 'ace':
+                case 'text':
+                case 'html':
+                case 'ace':
                     params.media = dvParam.text;
                     break;
                 case 'image':
