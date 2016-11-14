@@ -1039,7 +1039,7 @@ require(['ABSdecoration', 'ABSanimation',
         var that = this;
 
         // style slide block
-        var blockWrapperHeight = 130, blockHeight = blockWrapperHeight * 0.85, slideViewerWidth = blockHeight * w / h;
+        var blockWrapperHeight = 130, blockHeight = blockWrapperHeight * 0.85, slideViewerWidth = blockHeight * dw / dh;
         var blockWrapper = div().appendTo(slideList).size('100%', blockWrapperHeight).paddingTop(blockWrapperHeight / 10)
             .setSlideContextMenu(this);
         var block = div().appendTo(blockWrapper);
@@ -1358,8 +1358,7 @@ require(['ABSdecoration', 'ABSanimation',
 
     /** basic setting for layout **/
 
-        // var w = window.outerWidth, h = window.outerHeight;
-    var w = 1280, h = 800;
+    var w = window.outerWidth, h = window.outerHeight;
     var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
         slideListWidth = 220, slideListHeight = h - menuBarHeight - statusBarHeight,
         slideEditorWidth = w - slideListWidth, slideEditorHeight = slideListHeight;
@@ -1386,13 +1385,14 @@ require(['ABSdecoration', 'ABSanimation',
     /** set slide background **/
 
         // calculate sbg width and height
+    var dw = 1280, dh = 1300;
     var sbgMargin = slideEditorWidth / 8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
     var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
-    if (h * sbgMaxWidth < w * sbgMaxHeight)
-        ratio = w / sbgMaxWidth;
+    if (dh * sbgMaxWidth < dw * sbgMaxHeight)
+        ratio = dw / sbgMaxWidth;
     else
-        ratio = h / sbgMaxHeight;
-    var sbgWidth = w / ratio, sbgHeight = h / ratio;
+        ratio = dh / sbgMaxHeight;
+    var sbgWidth = dw / ratio, sbgHeight = dh / ratio;
     var sbgMarginLeft = (slideEditorWidth - sbgWidth) / 2, sbgMarginTop = (slideEditorHeight - sbgHeight) / 2;
     var slideEditorWidthAni = slideEditorWidth - animationViewerWidth, sbgMaringLeftAni = (slideEditorWidthAni - sbgWidth) / 2; // animationViewer가 나왔을 때의 width와 margin
     var getSlideBackground = function () {
