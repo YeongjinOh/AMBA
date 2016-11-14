@@ -489,6 +489,20 @@ define ([], function() {
                     }
                 });
             });
+
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('iframe').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperTextAuto(4, dv, function(txt) {
+                    var type = 'iframe';
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    if (curObj.getParams().type === type) {
+                        curObj.loadIframe(txt);
+                        actionManager.onMedia(curObj, type);
+                    }
+                });
+            });
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('event').click(function(dv) {

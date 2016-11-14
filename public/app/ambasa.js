@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = true, useLocalStorage = false;
+    var useOnline = true, useLocalStorage = true;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -280,6 +280,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                 case 'module':
                                     abs.loadModule(actionObj.prev);
                                     break;
+                                case 'iframe':
+                                    abs.div().iframe(actionObj.prev);
+                                    break;
                             }
                             abs.setParams();
                             syncBlockbyId(actionObj.slide);
@@ -343,6 +346,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'module':
                                     abs.loadModule(actionObj.cur);
+                                    break;
+                                case 'iframe':
+                                    abs.div().iframe(actionObj.cur);
                                     break;
                             }
                             abs.setParams();
@@ -793,8 +799,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
-        var id;
-        var moduleName = '';
+        var id, moduleName, iframeUrl;
 
         // initialize if params given
         if (_params) {
@@ -853,6 +858,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                             });
                         }
                         break;
+                    case 'iframe':
+                        iframeUrl = params.media;
+                        if (iframeUrl !== '') {
+                            dv.iframe(iframeUrl);
+                        }
                 }
             }
         }
@@ -939,6 +949,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 case 'module':
                     params.media = moduleName;
                     break;
+                case 'iframe':
+                    params.media = iframeUrl;
+                    break;
             }
         };
         this.getParams = function () {
@@ -966,6 +979,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         module.appendTo(dv);
                 });
             }
+        };
+        this.loadIframe = function (url) {
+            iframeUrl = url;
+            dv.iframe(url);
         };
         return this;
     };
@@ -1543,6 +1560,17 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             var obj = absObject({type: 'module', media: '', style:{
                 width:'300px',
                 height:'400px'
+            }});
+            obj.focus();
+            curSlide.append(obj);
+        }
+    });
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('Iframe').click(function () {
+        if (curSlide) {
+            var obj = absObject({type: 'iframe', media: '', style:{
+                width:'300px',
+                height:'400px',
+                border:'10px ridge white'
             }});
             obj.focus();
             curSlide.append(obj);
