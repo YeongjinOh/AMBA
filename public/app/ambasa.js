@@ -53,14 +53,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
                     else if (isServer && action.target === 'server' && action.action === 'join') {
                         var members = memberManager.getMembers();
-                        var actions = actionManager.export();
+                        var actionPramss = actionManager.export();
                         online.sendMessage({
                             roomid: roomid,
                             msg: {
                                 target: 'client',
                                 action: 'join',
                                 members: members,
-                                actions: actions
+                                actionParams: actionParams
                             },
                             username: username
                         });
@@ -68,8 +68,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     }
                     else if (action.target === 'client' && action.action === 'join') {
                         if (isJoining) {
-                            var actions = action.actions;
-                            actionManager.syncActions(actions);
+                            var actionParams = action.actionParams;
+                            actionManager.syncActions(actionParams);
                             isServer = false;
                             isJoining = false;
                         }
@@ -364,10 +364,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             }
         };
         this.export = function () {
-            return actions;
+            var actionParams = {
+                actions: actions,
+                cur:cur,
+                length:length
+            };
+            console.log(actionParams);
+            return actionParams;
         };
-        this.syncActions = function (_actions) {
-            actions = _actions;
+        this.syncActions = function (actionParams) {
+            console.log(actionParams);
+            actions = actionParams.actions;
+            cur = actionParams.cur;
+            length = actionParams.length;
             lock();
             for (var i=0; i<actions.length; i++) {
                 cur=-1;
