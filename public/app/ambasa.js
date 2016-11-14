@@ -1,4 +1,9 @@
-require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online, tele) {
+require(['ABSdecoration', 'ABSanimation',
+    'OnlineManager', 'telegram',
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'],
+    function (ABSdeco, ABSanimation
+        , online, tele
+    ) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -9,7 +14,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = true, useLocalStorage = true;
+    var useOnline = false, useLocalStorage = true;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -841,6 +846,35 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         }
                         break;
                     case 'ace':
+
+                        var viewerWrapper = div().border('10px ridge white').position('absolute').resizable().draggable().zIndex(15);
+                        var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().color('white');
+                        // ace run button
+                        div().appendTo(dv).size(20,20).image('../images/abs-play.png')
+                            .position('absolute').top(-20).right(40).cursorPointer()
+                            .click(function () {
+                                var ctext = '(function(){' + dv.text() + '\n})();';
+                                var acode = {ctext: ctext, deps: [], cid: 'none'};
+                                localStorage.setItem('acode', JSON.stringify(acode));
+                                // set viewer
+                                viewerWrapper.size(dv.widthPixel(),dv.heightPixel()).top(0).left(0).appendTo(dv).displayInlineBlock();
+                                viewer.empty().iframe('/?app=viewer');
+                                viewer.$iframe.appendTo(viewer.$);
+                            });
+                        div().appendTo(dv).size(20,20).padding(3).image('../images/abs-stop.png')
+                            .position('absolute').top(-23).right(20).cursorPointer()
+                            .click(function () {
+                               viewerWrapper.displayNone();
+                            });
+                        // ace full button
+                        div().appendTo(dv).size(20,20).padding(3).image('../images/abs-fullscreen2.png')
+                            .position('absolute').top(-23).right(0).cursorPointer()
+                            .click(function () {
+                                var ctext = '(function(){' + dv.text() + '\n})();';
+                                var acode = {ctext: ctext, deps: [], cid: 'none'};
+                                localStorage.setItem('acode', JSON.stringify(acode));
+                                window.open('/?app=viewer')
+                            });
                         dv.$ace = div().aceEditor().text(params.media).size('100%','100%')
                             .focusin(function () {
                                 lockDel();
@@ -1596,7 +1630,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             teleWrapper.fadeIn(300);
         showTelegram = !showTelegram;
     };
-    var teleWrapper = div().appendTo(parent).border('2px solid gray').position('absolute').draggable().resizable().top(100).left(30).displayNone();
+    var teleWrapper = div().appendTo(parent).border('2px solid gray').position('absolute').draggable().resizable().top(100).left(30).displayNone().color('white');
     if (useOnline)
         tele.appendTo(teleWrapper);
 
