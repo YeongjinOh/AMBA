@@ -1366,6 +1366,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     // for ABS Object
     ABSdeco.initContextMenu(actionManager);
+    ABSdeco.setKeyLocker({
+        lock:lockDel,
+        unlock:unlockDel
+    })
 
     Div.prototype.setSlideContextMenu = function (slide) {
         this.$.bind("contextmenu", function (event) {

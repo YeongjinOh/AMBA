@@ -1,9 +1,12 @@
 define ([], function() {
     var i, j;
     var module = {};
-
+    var lock, unlock;
     module.value = {};
-
+    module.setKeyLocker = function (param) {
+        lock = param.lock;
+        unlock = param.unlock;
+    };
     module.initContextMenu = function (actionManager) {
         var idContainer = {id: ''};
 
@@ -60,7 +63,8 @@ define ([], function() {
                     e.preventDefault();
                 });
 
-            var value = div().appendTo(root).size('65%', '100%').color('white').text('').editable().cursorText();
+            var value = div().appendTo(root).size('65%', '100%').color('white').text('').editable().cursorText()
+                .focusin(lock).focusout(unlock);
             div().id('papernum-ok').appendTo(root).size('35%', '100%').color('#cccccc').text('OK').fontBold().fontSize(11)
                 .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
                 var v = parseFloat(value.text()) || undefined;
@@ -84,7 +88,8 @@ define ([], function() {
                     e.preventDefault();
                 });
 
-            var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText();
+            var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText()
+                .focusin(lock).focusout(unlock);
             div().id('papertext-ok').appendTo(root).size('20%', '100%').minHeight(25).color('#cccccc').text('OK').fontBold().fontSize(11)
                 .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
                 fn(value.text());
@@ -108,7 +113,8 @@ define ([], function() {
                     e.preventDefault();
                 });
 
-            var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText();
+            var value = div().appendTo(root).size('80%', '100%').color('white').text('').editable().cursorText()
+                .focusin(lock).focusout(unlock);
             div().id('papertext-ok').appendTo(root).size('20%', '100%').minHeight(25).color('#cccccc').text('OK').fontBold().fontSize(11)
                 .textAlignCenter().cursorPointer().hoverColor('gray', '#cccccc').click(function() {
                 fn(value.text());
