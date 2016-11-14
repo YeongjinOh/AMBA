@@ -9,8 +9,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false;
-    var isServer = true, isJoining = true;
+    var useOnline = false, useLocalStorage = true;
+    var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
     /** set user authentication **/
@@ -45,6 +45,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             online.onRecieve(function (data) {
                 if (data.action === 'broadcast_msg') {
                     var action = data.message.msg;
+                    console.log(action);
                     if (action.target === 'obj' || action.target === 'slide') {
                         console.log('onRecieve');
                         actionManager.get(action);
@@ -143,6 +144,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         if (curSlide)
             return curSlide.getIdx();
     };
+    var lock = function () {
+        lockAction = true;
+    };
+    var unlock = function () {
+        lockAction = false;
+    };
+    var lockDel = function () {
+        isEdit = true;
+    };
+    var unlockDel = function () {
+        isEdit = false;
+    };
 
 
     /////////////////////////////////////////////////////////////////
@@ -154,12 +167,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     /** ambasa actions protocol **/
 
-    var lock = function () {
-        lockAction = true;
-    };
-    var unlock = function () {
-        lockAction = false;
-    };
     var filterProp = function (obj, props) {
         var res = {};
         for (var i = 0; i < props.length; i++) {
@@ -179,11 +186,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             curObj.deactive();
         }
         var slide = slideManager.get(id);
-        slide.syncBlock(function () {
-            if (curObj) {
-                curObj.active();
-            }
-        });
+        if (slide)
+            slide.syncBlock(function () {
+                if (curObj) {
+                    curObj.active();
+                }
+            });
+        else
+            console.log('can not find slide by id');
     };
 
     var ActionManager = function () {
@@ -193,6 +203,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         var add = function (action) {
             if (!lockAction) {
+                console.log(action);
                 actions[++cur] = action;
                 length = cur + 1;
                 if (useOnline && roomid) {
@@ -245,7 +256,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text':
+                                case 'text', 'html', 'ace':
                                     abs.div().text(actionObj.prev);
                                     break;
                                 case 'image':
@@ -307,7 +318,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text':
+                                case 'text', 'html', 'ace':
                                     abs.div().text(actionObj.cur);
                                     break;
                                 case 'image':
@@ -341,7 +352,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                             slideManager.new();
                             break;
                         case 'delete':
-                            curSlide.deactive();
+                            if (curSlide)
+                                curSlide.deactive();
                             curSlide = slideManager.get(actionObj.slide);
                             slideManager.del();
                             break;
@@ -489,7 +501,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     var onSave = function () {
         var fName = fileName.text();
         if (fName === defaultName) {
-            var fName = prompt('파일명을 입력해주세요.');
+            fName = prompt('파일명을 입력해주세요.');
             if (fName == null || fName === defaultName) {
                 alert('올바르지 않은 파일명입니다.')
                 return;
@@ -498,23 +510,28 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             joinOnline(fName);
         }
 
-        // localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
-        var param = {
-            cid: 'ambasa',
-            token: token,
-            key: fName,
-            value: JSON.stringify(slideManager.export())
-        };
-        $.get("/hashstore/put", param)
-            .done(function (data) {
-                if (data.resultCode == 0) {
-                    alert('저장하였습니다.');
-                }
-                else {
-                    console.log(data.msg);
-                    alert('실패하였습니다.');
-                }
-            });
+        if (useLocalStorage) {
+            localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+            alert('저장하였습니다.');
+        }
+        else {
+            var param = {
+                cid: 'ambasa',
+                token: token,
+                key: fName,
+                value: JSON.stringify(slideManager.export())
+            };
+            $.get("/hashstore/put", param)
+                .done(function (data) {
+                    if (data.resultCode == 0) {
+                        alert('저장하였습니다.');
+                    }
+                    else {
+                        console.log(data.msg);
+                        alert('실패하였습니다.');
+                    }
+                });
+        }
     };
     var onLoad = function (fName) {
         if (typeof fName !== 'string') {
@@ -522,25 +539,34 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             if (fName == null)
                 return;
         }
-        var param = {
-            cid: 'ambasa',
-            token: token,
-            key: fName,
-        };
-        // var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-        $.get("/hashstore/get", param)
-            .done(function (data) {
-                if (data.info.length > 0) {
-                    lock();
-                    var params = JSON.parse(data.info[0].value);
-                    fileName.text(fName);
-                    slideManager.load(params);
-                    actionManager.clear();
-                    unlock();
-                } else {
-                    alert('해당 파일을 불러올 수 없습니다.');
-                }
-            });
+        if (useLocalStorage) {
+            var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+            lock();
+            fileName.text(fName);
+            slideManager.load(params);
+            actionManager.clear();
+            unlock();
+        }
+        else {
+            var param = {
+                cid: 'ambasa',
+                token: token,
+                key: fName,
+            };
+            $.get("/hashstore/get", param)
+                .done(function (data) {
+                    if (data.info.length > 0) {
+                        lock();
+                        var params = JSON.parse(data.info[0].value);
+                        fileName.text(fName);
+                        slideManager.load(params);
+                        actionManager.clear();
+                        unlock();
+                    } else {
+                        alert('해당 파일을 불러올 수 없습니다.');
+                    }
+                });
+        }
     };
     var onEnter = function (fName, userId) {
         var param = {
@@ -565,12 +591,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         // localStorage.removeItem("ambasa");
     };
     var onDelete = function () {
-        if (curObj) {
+        if (curObj && !isEdit) {
             curSlide.removeObj(curObj.getId());
         }
-        else if (curSlide) {
-            slideManager.del()
-        }
+        // else if (curSlide) {
+        //     slideManager.del()
+        // }
     };
     var onCopy = function () {
         if (curObj) {
@@ -598,7 +624,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
 
     /** key-event binding **/
-
     $(window).keydown(function (event) {
         // delete
         if (event.which === 8) {
@@ -622,15 +647,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
          slideManager.new();
          }*/
         // up or left key
-        else if ((event.which === 38 || event.which === 37) && !curObj && curSlide) {
+        else if ((event.which === 38 || event.which === 37) && isFullscreen) {
             event.preventDefault();
             slideManager.prev();
         }
         // down or right key or space bar
-        else if ((event.which === 40 || event.which === 39 || event.which === 32) && !curObj && curSlide) {
+        else if ((event.which === 40 || event.which === 39 || event.which === 32) && isFullscreen) {
             event.preventDefault();
             slideManager.next();
         }
+        /** Ctrl Key **/
         else if (event.ctrlKey) {
             // Ctrl + Shift + Z
             if (event.shiftKey && event.which === 90) {
@@ -663,12 +689,29 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 onPaste();
             }
         }
+        /** Alt key **/
+        else if (event.altKey) {
+            // Cmd + up
+            if (event.which === 38 && !isFullscreen && curObj) {
+                event.preventDefault();
+                curObj.incZidx();
+            }
+            // Cmd + down
+            else if (event.which === 40 && !isFullscreen && curObj) {
+                event.preventDefault();
+                curObj.decZidx();
+            }
+        }
     });
 
     /** mouse-evnet binding **/
 
     // 다른 곳 클릭시 context-menu hide
     $(document).bind("mousedown", function (e) {
+        if (isFullscreen) {
+            slideManager.next();
+            return;
+        }
         if (!$(e.target).parents("#abs-slide-context-menu").length > 0) {
             $("#abs-slide-context-menu").hide(100);
         }
@@ -704,10 +747,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     /** id generator **/
 
-    var idGenerator = (function () {
+    var IdGenerator = function (prefix) {
         var id = 0;
         this.get = function () {
-            return 'ABS-' + id++;
+            return prefix + id++;
         };
         this.set = function (_id) {
             _id = parseInt(_id.slice(4, _id.length));
@@ -715,35 +758,27 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 id = _id + 1;
         };
         return this;
-    })();
+    };
+    var idGenerator = new IdGenerator('ABS-');
+    var idSlideGenerator = new IdGenerator('ABSlide');
 
 
     /** ABS Object **/
 
-    var ABSObject = function (_params) {
+    var ABSObject = function (_params, isClone) {
         var that = this, params = {};
-        var dv = div().class('abs-object').size(100, 100).draggable().resizable({handles: 'n, s, e, w, ne, se, nw, sw'})
-            .cursorMove().position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
+        var dv = div().class('abs-object').size(100, 100).zIndex(10)
+            .position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
-        // remove icon and resize ui-resizable-se
-        $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
-        dv.mousedown(function (e) {
-            that.focus();
-        }).mouseup(function () {
-            var style1 = getParams(dv).style, style2 = params.style;
-            if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
-                actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
-                syncBlock();
-            }
-        });
-
         var id;
+
+        // initialize if params given
         if (_params) {
             params = $.extend({}, _params);
             setAllStyles(dv, params.style);
-            if (params.media) {
+            if (params.media !== undefined) {
                 switch (params.type) {
                     case 'text':
                         dv.text(params.media);
@@ -756,6 +791,37 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         break;
                     case 'audio':
                         dv.audio(id, params.media);
+                        break;
+                    case 'html':
+                        if (isClone)
+                            dv.html(params.media);
+                        else {
+                            dv.tinymce({
+                                inline: true,
+                                width:'100%',
+                            }, function (child) {
+                                child.focusin(function () {
+                                    lockDel();
+                                }).focusout(function () {
+                                    unlockDel();
+                                    actionManager.onMedia(that,'html');
+                                })
+                            });
+                            dv.text(params.media);
+                        }
+                        break;
+                    case 'ace':
+                        dv.$ace = div().aceEditor().text(params.media).size('100%','100%')
+                            .focusin(function () {
+                                lockDel();
+                            }).focusout(function () {
+                                unlockDel();
+                                console.log('ace')
+                                actionManager.onMedia(that, 'ace');
+                            });
+                        dv.text = function (txt) {
+                            return dv.$ace.text(txt)
+                        };
                         break;
                 }
             }
@@ -770,15 +836,34 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             id = idGenerator.get();
             params.id = id;
         }
-        dv.id(id).setContextMenu(id);
 
+        // additional initializtion
+        dv.id(id);
+
+        if (isClone !== true) {
+            dv.resizable({handles: 'n, s, e, w, ne, se, nw, sw'}).draggable().cursorMove();
+            $(dv.$.children().removeClass('ui-icon')[5]).css('width', '9px').css('height', '9px').css('right', '-5px').css('bottom', '-5px');
+            dv.mousedown(function (e) {
+                that.focus();
+            }).mouseup(function () {
+                var style1 = getParams(dv).style, style2 = params.style;
+                if (style1.top !== style2.top || style1.left !== style2.left || style1.width !== style2.width || style1.height !== style2.height) {
+                    actionManager.onStyle(that, ['top', 'left', 'width', 'height']);
+                    syncBlock();
+                }
+            });
+            dv.setContextMenu(id);
+        }
+        if (dv.$ace)
+            dv.$ace.appendTo(dv);
 
         this.focus = function () {
             if (curObj)
                 curObj.deactive();
             curObj = that;
             curDiv = curObj.div();
-            curObj.active();
+            if (!isFullscreen)
+                curObj.active();
         };
         this.active = function () {
             dv.$.children('.ui-resizable-handle:lt(4)').css('border', '1px dotted gray');
@@ -786,7 +871,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             objStatus.text('id : ' + id);
         };
         this.deactive = function () {
-            dv.$.children().css('border', 'none').css('background-color', 'initial');
+            dv.$.children('.ui-resizable-handle:lt(9)').css('border', 'none').css('background-color', 'initial');
             objStatus.text('');
         };
         this.remove = function () {
@@ -804,8 +889,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             var dvParam = getParams(dv);
             params.id = dvParam.id;
             params.style = dvParam.style;
+            console.log(dvParam);
             switch (params.type) {
-                case 'text':
+                case 'text', 'html', 'ace':
                     params.media = dvParam.text;
                     break;
                 case 'image':
@@ -828,11 +914,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.getId = function () {
             return id;
         };
+        this.incZidx = function () {
+            dv.zIndex(parseInt(dv.zIndex())+1);
+            actionManager.onStyle(this, ['z-index']);
+        };
+        this.decZidx = function () {
+            dv.zIndex(parseInt(dv.zIndex())-1);
+            actionManager.onStyle(this, ['z-index']);
+        };
         return this;
     };
 
-    var absObject = function (params) {
-        var obj = new ABSObject(params);
+    var absObject = function (params, isClone) {
+        var obj = new ABSObject(params, isClone);
         actionManager.onNewObj(obj);
         return obj;
     };
@@ -851,7 +945,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var numberViewer = div().appendTo(block).size(10, blockHeight).margin(5).text('1');
         var slideViewerWrapper = div().size(slideViewerWidth + 4, blockHeight + 4).appendTo(block);
         var slideViewer = div().appendTo(slideViewerWrapper).size(slideViewerWidth, blockHeight).color('white').overflowAuto();
-        var slideBackground = getSlideBackground().appendTo(slideEditor);
+        var slideId = idSlideGenerator.get();
+        var slideBackground = getSlideBackground().appendTo(slideEditor).id(slideId);
+        slideBackground.$.data('abs-slide', this);
 
         // set animation viewer
         var aniViewer = div().size('100%', '100%').appendTo(animationViewer).color('gray');
@@ -859,7 +955,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         absAnimation.init(aniViewer, function () {
             return curObj && curObj.getId()
         }, function () {
-            return curSlide;
+            return slideId;
         });
         absAnimation.append();
         var animationManager = absAnimation.animationManager();
@@ -870,6 +966,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         blockWrapper.click(function () {
             that.focus();
+            that.syncBlock();
         });
 
         this.get = function (id) {
@@ -908,7 +1005,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 curObj.deactive();
             curObj = undefined;
             curDiv = undefined;
-            slideShowManager.play(this.export());
+            slideShowManager.play(that.export().params);
             absAnimation.initShowtime();
         };
         this.setIdx = function (idx) {
@@ -938,7 +1035,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 onrendered: function (canvas) {
                     slideViewer.image(canvas.toDataURL("image/png"));
                     slideViewer.$image.load(function () {
-                        callback();
+                        if (typeof callback === 'function')
+                            callback();
                         that.displayNone();
                         if (curSlide)
                             curSlide.display();
@@ -956,9 +1054,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             for (var id in objs) {
                 params[id] = objs[id].getParams();
             }
-            return params;
+            var animationQueue = absAnimation.export();
+            return {
+                params:params,
+                aniQueue:animationQueue
+            };
         };
-        this.load = function (params) {
+        this.load = function (slideParam) {
+            var params = slideParam.params;
+            var aniQueue = slideParam.aniQueue;
+            absAnimation.import(aniQueue);
             for (var id in params) {
                 var obj = absObject(params[id]);
                 this.append(obj);
@@ -1132,7 +1237,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             for (var id in params) {
                 var param = $.extend({}, params[id]);
                 param.id = param.id + '-clone';
-                absObject(param).div().appendTo(slideBackground);
+                absObject(param, true).div().appendTo(slideBackground).cursorDefault();
             }
             fullscreenViewer.displayInlineBlock();
             unlock();
@@ -1344,8 +1449,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     };
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Text').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'text'});
+            var obj = absObject({
+                type: 'html',
+                style:{
+                    width:'200px',
+                    height:'120px'
+                },
+                media:''
+            });
             obj.focus();
+            // tinymce option과 콜백 함수 전달
             curSlide.append(obj);
         }
     });
@@ -1366,6 +1479,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Audio').click(function () {
         if (curSlide) {
             var obj = absObject({type: 'audio', media: ''});
+            obj.focus();
+            curSlide.append(obj);
+        }
+    });
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('Ace').click(function () {
+        if (curSlide) {
+            var obj = absObject({type: 'ace', media: '', style:{
+                width:'300px',
+                height:'120px'
+            },});
             obj.focus();
             curSlide.append(obj);
         }

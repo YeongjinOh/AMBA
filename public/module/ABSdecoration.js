@@ -14,6 +14,10 @@ define ([], function() {
                 // 기존의 context-menu 제거
                 event.preventDefault();
 
+                // tinymce인 경우 처리
+                if (event.target.classList.contains('mce-content-body')) {
+                    return;
+                }
                 // 현재 div의 id 전달
                 idContainer.id = id;
                 // set ambasa context-menu

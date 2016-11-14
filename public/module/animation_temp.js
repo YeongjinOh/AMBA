@@ -3,17 +3,13 @@
  */
 
 // 글자 겹치는 문제 zIndex이용해도 해결 못함
-// Animation 재생, 중지 문제... (타이밍의 문제가 생긴다!!)
-// 한꺼번에 진행 할 경우, 다시 되살리는 문제 -> 반복문 돌려서 다시 원위치로!? -> 이렇게 구현은 가능할거 같음
-// 쇼타임의 경우, fadeIn,  애들은 그냥 초기에 다 displayNone? 그럼 시작될 때를 내가 알아야 한다.
-// Timing의 문제... 어떻게 시작시켜야할까?
 // id : 의미 - slide - sequence
 // Obj focus 시키기! -> 영진이 형
 
 define ([], function() {
     var ABSAnimation = {
         getInstance: function() {
-            var animationQueue = [];
+            var animationQueue = [], showtimeQueue, previewQueue;
             var target, curId, curSlide;
             var module = {
                 init: function (dv, getId, getSlide) {
@@ -43,7 +39,7 @@ define ([], function() {
                     };
 
                     var decoSelector = function (dv) {
-                        dv.displayBlock().size('80%', 23).color('#eeeeee').fontBold().marginLeft(16).marginTop(20).borderRadius(3).boxShadow('1px 1px 1px 1px black');
+                        dv.displayBlock().size('80%', 23).color('#eeeeee').fontBold().marginLeft(16).marginTop(20).borderRadius(3).boxShadow('1px 1px 1px 1px black').paddingTop(2);
                     };
 
                     var decoContent = function (dv) {
@@ -99,24 +95,14 @@ define ([], function() {
                     var body = div().appendTo(root).size('100%', '95%');
 
                     var preview = div().appendTo(body).size('100%', 50).color('white');
-                    var previewPlay = div().displayBlock().appendTo(preview).size('60%', 23).color('#eeeeee').margin('auto').marginTop(12).text('재생')
-                        .fontBold().textAlignCenter().borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function (dv, e) {
-                            //TODO 여기서 Queue를 꺼내는 작업을 한다.
-                            dv.detach();
-
-                            manager.preview();
-
-                            previewStop.appendTo(preview);
+                    var previewPlay = div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(30).marginTop(12).text('▶').fontBold().textAlignCenter()
+                        .paddingTop(2).borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function () {
+                            manager.preview(true);
                         });
 
-                    var previewStop = div().displayBlock().size('60%', 23).color('#eeeeee').margin('auto').marginTop(12).text('정지')
-                        .fontBold().textAlignCenter().borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function (dv, e) {
-                            //TODO Animation Stop
-                            dv.detach();
-
-                            //TODO: Preview animation 만들어서 비우기
-
-                            previewPlay.appendTo(preview);
+                    var previewStop = div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(10).marginTop(12).text('■').fontBold().textAlignCenter()
+                        .paddingTop(2).borderRadius(3).boxShadow('1px 1px 1px 1px black').cursorPointer().hoverTextColor('blue', 'black').click(function () {
+                            manager.preview(false);
                         });
 
                     var addAnimation = div().deco(decoAddAnimation).click(function (dv, e) {
@@ -141,12 +127,10 @@ define ([], function() {
                                         e.preventDefault();
                                     });
 
-                                    var conEffect = div().id('abs-ani-sel-ani' + ify).deco(decoSelector).appendTo(content)
-                                        .text($('#abs-ani-menu-effect-' + ify).data('div').text()).textAlignCenter().click(function (dv, e) {
+                                    var conEffect = div().id('abs-ani-sel-ani' + ify).deco(decoSelector).appendTo(content).text($('#abs-ani-menu-effect-' + ify).data('div').text())
+                                        .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                             e.stopPropagation();
                                             e.preventDefault();
-
-                                            // selMenu1.trigger('click');
 
                                             if (AB.find('abs-ani-sel-' + ify)) {
                                                 $('#abs-ani-sel-' + ify).remove();
@@ -170,11 +154,9 @@ define ([], function() {
                                         });
 
                                     var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-' + ify).data('div').text().slice(1, length - 1))
-                                        .textAlignCenter().click(function (dv, e) {
+                                        .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                             e.stopPropagation();
                                             e.preventDefault();
-
-                                            // selMenu2.trigger('click');
 
                                             if (AB.find('abs-ani-sel-' + ify)) {
                                                 $('#abs-ani-sel-' + ify).remove();
@@ -210,16 +192,12 @@ define ([], function() {
                                         durationValue.$text.focus();
                                     });
 
-                                    var durationValue = div().appendTo(conDuration).size('80%', '100%').text('1000').editable().cursorText();
+                                    var durationValue = div().appendTo(conDuration).size('80%', '100%').text('1000').editable().textAlignCenter().cursorText().fontBold().hoverTextColor('blue', 'black');
                                     var durationOK = div().appendTo(conDuration).size('20%', '100%').text('OK').fontBold().textAlignCenter().cursorPointer()
                                         .hoverTextColor('blue', 'black').click(function () {
                                             packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
-
-                                            // menu.trigger('click');
                                         });
                                 }
-
-                                // $('#abs-ani-con-'+dv.id().split('-')[3]).trigger('click');
                             });
 
                             div().id('abs-ani-menu-effect-' + ify).appendTo(menu).size('90%', 'auto').text(effect[0]).fontBold();
@@ -230,7 +208,6 @@ define ([], function() {
                                 menu.remove();
                                 for (i = 0; i < animationQueue.length; i++) {
                                     if (animationQueue[i].ify === ify) {
-                                        //&& animationQueue[i].effect === $('#abs-ani-menu-effect-'+ify).data('div').text()
                                         animationQueue.splice(i, 1);
                                     }
                                 }
@@ -244,45 +221,81 @@ define ([], function() {
                         }
                     });
                 },
-                animator: function (index, mode) {
+                initShowtime: function() {
+                    var i;
+                    showtimeQueue = animationQueue.slice(0);
+                    for(i=0; i<showtimeQueue.length; i++) {
+                        if(showtimeQueue[i].effect === 'fadeIn' || showtimeQueue[i].effect === 'slideDown') {
+                            $('#' + showtimeQueue[i].id+'-clone').data('div').displayNone();
+                        }
+                    }
+                },
+                animator: function (mode) {
+                    var manager = this.animationManager();
                     var target;
-                    var waiting = 0, tempWaiting;
-                    // var ani_package = animationQueue[index];
-                    var preview_queue = animationQueue.slice(0);
+                    var playqueue;
+                    var waiting = 0;
 
                     function backup(obj, e) {
+                        switch(e) {
+                            case 'fadeOut':
+                                obj.fadeToggle(1);
+                                break;
+                            case 'slideUp':
+                                obj.slideToggle(1);
+                                break;
+                        }
                     }
 
-                    setTimeout(function play() {
+                    (function play() {
+                        if (mode === 'preview') {
+                            playqueue = previewQueue;
+                        }
+                        else {
+                            playqueue = showtimeQueue;
+                        }
 
-                        if (preview_queue.length === 0)
-                            return;
-
-                        var temp = preview_queue.splice(0, 1)[0];
-                        var next_temp = preview_queue.slice(0,1)[0];
-
-                        if (temp.timing === '클릭시') {
+                        if (playqueue.length === 0) {
+                            previewQueue = undefined;
+                            showtimeQueue = undefined;
                             return;
                         }
 
-                        // $('#abs-ani-menu-'+temp.ify).data('div').border('2px solid blue');
-                        // $('#abs-ani-menu-'+temp.ify).data('div').border('2px solid blue');
+                        var temp = playqueue.splice(0, 1)[0];
+                        var next_temp = playqueue.slice(0,1)[0];
 
-                        target = $('#' + temp.id).data('div');
+                        var curAni = $('#abs-ani-menu-'+temp.ify).data('div');
+                        curAni.border('3px dotted blue');
+
+                        if (mode === 'preview') {
+                            target = $('#' + temp.id).data('div');
+                        }
+                        else {
+                            target = $('#' + temp.id + '-clone').data('div');
+                        }
+
                         if (temp.effect === 'fadeIn') {
                             target.displayNone();
                         }
                         else if (temp.effect === 'slideDown') {
                             target.displayNone();
                         }
-                        console.log(temp);
-                        eval("$('#" + temp.id + "').data('div')." + temp.effect + "(" + temp.duration + ");");
 
-                        /*setTimeout(function() {
-                         // $('#abs-ani-menu-'+temp.ify).data('div').border('');
-                         }, temp.duration);*/
+                        if (mode === 'preview') {
+                            eval("$('#" + temp.id + "').data('div')." + temp.effect + "(" + temp.duration + ");");
+                        }
+                        else {
+                            eval("$('#" + temp.id + '-clone' + "').data('div')." + temp.effect + "(" + temp.duration + ");");
+                        }
+
+                        setTimeout(function() {
+                            curAni.border('');
+                        }, temp.duration);
 
                         if (next_temp) {
+                            if (next_temp.timing === '클릭시') {
+                                return;
+                            }
                             if (next_temp.timing === '이전 애니메이션 시작 시') {
                                 waiting = 0;
                             }
@@ -291,162 +304,115 @@ define ([], function() {
                             }
                         }
 
-                        console.log(waiting);
-                        return setTimeout(play(), waiting * 10);
+                        if (mode === 'preview') {
+                            backup(target, temp.effect);
+                        }
 
-                        /*if (!that.hasNext('preview')) {
-                         return;
-                         }
-                         else if (ani_package.timing === '클릭시') {
-                         return;
-                         }
+                        setTimeout(play, waiting);
+                    })();
 
-                         $('#abs-ani-menu-'+ani_package.ify).data('div').border('2px solid blue');
+                    /*                    (function showtime() {
+                     var temp = animationQueue.slice(index, 1)[0];
+                     if (mode === 1) {
+                     var next_temp = animationQueue.slice(index + 1, 1)[0];
+                     }
+                     else if (mode === -1) {
+                     var next_temp = animationQueue.slice(index - 1, 1)[0];
+                     }
 
-                         if (mode === 'preview') {
-                         target = $('#' + ani_package.id).data('div');
-                         if (ani_package.effect === 'fadeIn') {
-                         target.displayNone();
-                         }
-                         else if (ani_package.effect === 'slideDown') {
-                         target.displayNone();
-                         }
+                     eval("$('#" + temp.id + '-clone' + "').data('div')." + temp.effect + "(" + temp.duration + ");");
 
-                         eval("$('#" + ani_package.id + "').data('div')." + ani_package.effect + "(" + ani_package.duration + ");");
-                         }
-                         else {
-                         target = $('#' + ani_package.id+'-clone').data('div');
-                         if (ani_package.effect === 'fadeIn') {
-                         target.displayNone();
-                         }
-                         else if (ani_package.effect === 'slideDown') {
-                         target.displayNone();
-                         }
+                     if (next_temp) {
+                     if (next_temp.timing === '클릭시') {
+                     return;
+                     }
+                     else {
+                     waiting = 0;
+                     }
+                     /!*if (next_temp.timing === '이전 애니메이션 시작 시') {
+                     waiting = 0;
+                     }
+                     else if (next_temp.timing === '이전 애니메이션 완료 후') {
+                     waiting = next_temp.duration;
+                     }*!/
+                     }
 
-                         eval("$('#" + ani_package.id + '-clone' + "').data('div')." + ani_package.effect + "(" + ani_package.duration + ");");
-                         }
-
-                         setTimeout(function() {
-                         $('#abs-ani-menu-'+ani_package.ify).data('div').border('');
-                         }, ani_package.duration);
-
-                         if (ani_package.timing === '이전 애니메이션 시작 시') {
-                         waiting = 0;
-                         }
-                         else if (ani_package.timing === '이전 애니메이션 완료 후') {
-                         waiting = ani_package.duration;
-                         }
-
-                         play();*/
-                    },waiting);
+                     if (mode === 1) {
+                     if (manager.hasNext()) {
+                     setTimeout(manager.next(), waiting);
+                     }
+                     }
+                     else if (mode === -1) {
+                     if (manager.hasBack()) {
+                     setTimeout(manager.back(), waiting);
+                     }
+                     }
+                     })();*/
                 },
                 animationManager: function () {
                     var that = this;
-                    var index = -1, pre_index = -1;
+                    var index = -1;
                     var manager = {
-                        initSlide: function() {
-                            var i;
-                            for(i=0; i<animationQueue.length; i++) {
-                                if(animationQueue[i].effect === 'fadeIn' || animationQueue[i].effect === 'slideDown') {
-                                    $('#' + animationQueue[i].id+'-clone').data('div').displayNone();
-                                }
-                            }
-                        },
-                        preview: function() {
-                            that.animator(0, 'preview');
-                        },
-                        next: function(mode) {
-                            if (this.hasNext(mode)) {
-                                if (mode === 'preview') {
-                                    that.animator(++pre_index, mode);
-                                    return pre_index;
-                                }
-                                else {
-                                    that.animator(++index);
-                                    return index;
-                                }
-                            }
-                        },
-                        hasNext: function(mode) {
-                            if (mode === 'preview') {
-                                if (pre_index >= animationQueue.length - 1) {
-                                    return false;
-                                }
+                        preview: function (cmd) {
+                            if (cmd) {
+                                if (!previewQueue)
+                                    previewQueue = animationQueue.slice(0);
+                                that.animator('preview');
                             }
                             else {
-                                if (index >= animationQueue.length - 1) {
-                                    return false;
-                                }
+                                previewQueue = [];
                             }
+                        },
+                        next: function() {
+                            if (this.hasNext())
+                                that.animator();
 
+                            // if (this.hasNext()) {
+                            //     ++index;
+                            //     that.animator(1);
+                            // }
+                        },
+                        hasNext: function() {
+                            if (!showtimeQueue || showtimeQueue.length === 0) {
+                                return false
+                            }
+                            return true;
+
+                            // if (index >= animationQueue.length - 1) {
+                            //     return false;
+                            // }
+                            // return true;
+                        },
+                        back: function() {
+                            if (this.hasBack()) {
+                                --index;
+                                that.animator(-1);
+                            }
+                        },
+                        hasBack: function() {
+                            if (index <= 0) {
+                                return false;
+                            }
                             return true;
                         },
-                        back: function(mode) {
-                            if (this.hasBack(mode)) {
-                                if (mode === 'preview') {
-                                    that.animator(--pre_index, mode);
-                                    return pre_index;
-                                }
-                                else {
-                                    that.animator(--index);
-                                    return index;
-                                }
-                            }
+                        goFirst: function() {
+                            index = -1;
+                            return index;
                         },
-                        hasBack: function(mode) {
-                            if (mode === 'preview') {
-                                if (pre_index <= 0) {
-                                    return false;
-                                }
-                            }
-                            else {
-                                if (index <= 0) {
-                                    return false;
-                                }
-                            }
-
-                            return true;
-                        },
-                        goFirst: function(mode) {
-                            if (mode === 'preview') {
-                                pre_index = -1;
-                                return pre_index;
-                            }
-                            else {
-                                index = -1;
-                                return index;
-                            }
-                        },
-                        goLast: function(mode) {
-                            if (mode === 'preview') {
-                                pre_index = animationQueue.length;
-                                return pre_index;
-                            }
-                            else {
-                                index = animationQueue.length;
-                                return index;
-                            }
+                        goLast: function() {
+                            index = animationQueue.length;
+                            return index;
                         },
                         isEmpty: function() {
                             if (animationQueue.length === 0)
                                 return true;
                             return false;
                         },
-                        getIndex: function(mode) {
-                            if (mode === 'preview') {
-                                return pre_index;
-                            }
-                            else {
-                                return index;
-                            }
+                        getIndex: function() {
+                            return index;
                         },
-                        setIndex: function(idx, mode) {
-                            if (mode === 'preview') {
-                                pre_index = idx;
-                            }
-                            else {
-                                index = idx;
-                            }
+                        setIndex: function(idx) {
+                            index = idx;
                         }
                     };
 
@@ -460,99 +426,3 @@ define ([], function() {
 
     return ABSAnimation;
 });
-
-/*if (curId()) {
- dv.detach();
- var menu = div().id('abs-ani-menu-' + ify).deco(decoMenu).fontBold().click(function(dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- $('#'+curId()).data('ambasa').focus();
- $('#abs-ani-con-'+dv.id().split('-')[3]).trigger('click');
- });
- div().id('abs-ani-menu-effect-' + ify).appendTo(menu).size('90%', 'auto').text(effect[0]).fontBold();
- div().appendTo(menu).size('auto', 'auto').text('×').fontBold().hoverTextColor('blue', 'black').click(function (dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- menu.remove();
- for (i = 0; i < animationQueue.length; i++) {
- if (animationQueue[i].ify === ify) {
- animationQueue.splice(i, 1);
- }
- }
- });
- div().id('abs-ani-menu-timing-' + ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + timing[0] + ')').fontSize(12).fontBold();
- var content = div().id('abs-ani-con-' + ify).deco(decoContent).appendTo(menu).click(function(dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- dv.slideToggle(100);
- });
-
- var selAni = div().id('abs-ani-sel-ani' + ify).deco(decoSelector).appendTo(content).text(effect[0]).textAlignCenter().click(function (dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- selMenu1.trigger('click');
- });
-
- var selMenu1 = div().deco(decoSelectMenu).appendTo(selAni).click(function (dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- dv.slideToggle(100);
- });
-
-
- for (i = 0; i < effect.length; i++) {
- div().appendTo(selMenu1).size('100%', 20).color('#eeeeee').text(effect[i]).fontBold()
- .hoverTextColor('blue', 'black').click(function (dv) {
- selAni.text(dv.text());
- $('#abs-ani-menu-effect-' + menu.id().split('-')[3]).data('div').text(dv.text());
- });
- }
-
- var selTiming = div().deco(decoSelector).appendTo(content).text(timing[0]).textAlignCenter().click(function (dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- selMenu2.trigger('click');
- });
-
- var selMenu2 = div().deco(decoSelectMenu).appendTo(selTiming).click(function (dv, e) {
- e.stopPropagation();
- e.preventDefault();
-
- dv.slideToggle(100);
- });
-
- for (i = 0; i < timing.length; i++) {
- div().appendTo(selMenu2).size('100%', 20).color('#eeeeee').text(timing[i]).fontBold()
- .hoverTextColor('blue', 'black').click(function (dv) {
- selTiming.text(dv.text());
- $('#abs-ani-menu-timing-' + menu.id().split('-')[3]).data('div').text('(' + dv.text() + ')');
- });
- }
-
- var duration = div().deco(decoSelector).appendTo(content).zIndex(1).keypress(function (dv, e) {
- if (e.which == 13) {
- durationOK.trigger('click');
- e.preventDefault();
- return false;
- }
- }).click(function (dv, e) {
- e.stopPropagation();
- e.preventDefault();
- });
-
- var durationValue = div().appendTo(duration).size('80%', '100%').text('3000').editable().cursorText();
- var durationOK = div().appendTo(duration).size('20%', '100%').text('OK').fontBold().textAlignCenter().cursorPointer()
- .hoverTextColor('blue', 'black').click(function () {
- packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
- menu.trigger('click');
- });
- packaging(ify, $('#abs-ani-menu-effect-' + ify).text(), $('#abs-ani-menu-timing-' + ify).text(), durationValue.text());
- seq++;
- dv.appendTo(body);
- }*/
