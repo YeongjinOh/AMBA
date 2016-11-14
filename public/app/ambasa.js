@@ -27,7 +27,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             }
         };
     }();
-    var username = authFactory.getUsername();
+
+    // local에서 client 2개 띄우기 위해 랜덤값 부여
+    var username = Math.random();
+    // var username = authFactory.getUsername();
     var token = authFactory.getToken();
     if (!username || !token) {
         $(location).attr('href', '/?app=signin');
@@ -45,7 +48,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             online.onRecieve(function (data) {
                 if (data.action === 'broadcast_msg') {
                     var action = data.message.msg;
-                    console.log(action);
                     if (action.target === 'obj' || action.target === 'slide') {
                         console.log('onRecieve');
                         actionManager.get(action);
@@ -75,6 +77,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         }
                         var members = action.members;
                         memberManager.setMembers(members);
+                    }
+                    else if (action.target === 'undo') {
+                        actionManager.prev();
+                    }
+                    else if (action.target === 'redo') {
+                        actionManager.next();
                     }
                 }
             });
@@ -368,16 +376,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 actions: actions,
                 cur:cur
             };
-            console.log(actionParams);
             return actionParams;
         };
         this.syncActions = function (actionParams) {
-            console.log(actionParams);
             actions = actionParams.actions;
             length = actions.length;
             lock();
             console.log('prev : ' + cur);
-            for (var cur=0; cur<actionParams.cur; cur++) {
+            for (var cur=-1; cur<actionParams.cur; cur++) {
                 this.next();
             }
             console.log('next : '+cur);
