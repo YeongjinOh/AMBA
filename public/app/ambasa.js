@@ -53,7 +53,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
                     else if (isServer && action.target === 'server' && action.action === 'join') {
                         var members = memberManager.getMembers();
-                        var actionPramss = actionManager.export();
+                        var actionParams = actionManager.export();
                         online.sendMessage({
                             roomid: roomid,
                             msg: {
@@ -366,8 +366,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.export = function () {
             var actionParams = {
                 actions: actions,
-                cur:cur,
-                length:length
+                cur:cur
             };
             console.log(actionParams);
             return actionParams;
@@ -375,14 +374,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.syncActions = function (actionParams) {
             console.log(actionParams);
             actions = actionParams.actions;
-            cur = actionParams.cur;
-            length = actionParams.length;
+            length = actions.length;
             lock();
-            for (var i=0; i<actions.length; i++) {
-                cur=-1;
-                length = actions.length;
+            console.log('prev : ' + cur);
+            for (var cur=0; cur<actionParams.cur; cur++) {
                 this.next();
             }
+            console.log('next : '+cur);
 
             unlock();
         };
