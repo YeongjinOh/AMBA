@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false, useLocalStorage = true;
+    var useOnline = true, useLocalStorage = true;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -27,7 +27,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             }
         };
     }();
-    var username = authFactory.getUsername();
+
+    // local에서 client 2개 띄우기 위해 랜덤값 부여
+    var username = Math.random();
+    // var username = authFactory.getUsername();
     var token = authFactory.getToken();
     if (!username || !token) {
         $(location).attr('href', '/?app=signin');
@@ -45,7 +48,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             online.onRecieve(function (data) {
                 if (data.action === 'broadcast_msg') {
                     var action = data.message.msg;
-                    console.log(action);
                     if (action.target === 'obj' || action.target === 'slide') {
                         console.log('onRecieve');
                         actionManager.get(action);
@@ -53,14 +55,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
                     else if (isServer && action.target === 'server' && action.action === 'join') {
                         var members = memberManager.getMembers();
-                        var actions = actionManager.export();
+                        var actionParams = actionManager.export();
                         online.sendMessage({
                             roomid: roomid,
                             msg: {
                                 target: 'client',
                                 action: 'join',
                                 members: members,
-                                actions: actions
+                                actionParams: actionParams
                             },
                             username: username
                         });
@@ -68,13 +70,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                     }
                     else if (action.target === 'client' && action.action === 'join') {
                         if (isJoining) {
-                            var actions = action.actions;
-                            actionManager.syncActions(actions);
+                            var actionParams = action.actionParams;
+                            actionManager.syncActions(actionParams);
                             isServer = false;
                             isJoining = false;
                         }
                         var members = action.members;
                         memberManager.setMembers(members);
+                    }
+                    else if (action.target === 'undo') {
+                        actionManager.prev();
+                    }
+                    else if (action.target === 'redo') {
+                        actionManager.next();
                     }
                 }
             });
@@ -202,11 +210,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         var length = 0;
 
         var add = function (action) {
+            // console.log(action);
             if (!lockAction) {
-                console.log(action);
                 actions[++cur] = action;
                 length = cur + 1;
                 if (useOnline && roomid) {
+                    console.log('sendMessage');
+                    console.log(action);
                     online.sendMessage({
                         roomid: roomid,
                         msg: action,
@@ -241,13 +251,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
-                sendUndo();
                 lock();
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
                     switch (actionObj.action) {
                         case 'style':
-                            // TODO: Uncaught TypeError: Cannot read property 'div' of
                             var abs = getABSbyId(actionObj.id);
                             setAllStyles(abs.div(), actionObj.prev);
                             abs.setParams();
@@ -256,7 +264,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text', 'html', 'ace':
+                                case 'text':
+                                case 'html':
+                                case 'ace':
                                     abs.div().text(actionObj.prev);
                                     break;
                                 case 'image':
@@ -267,6 +277,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.prev);
+                                    break;
+                                case 'module':
+                                    abs.loadModule(actionObj.prev);
+                                    break;
+                                case 'iframe':
+                                    abs.div().iframe(actionObj.prev);
                                     break;
                             }
                             abs.setParams();
@@ -304,7 +320,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         this.next = function () {
             if (cur < length - 1) {
-                sendRedo();
                 lock();
                 var actionObj = actions[++cur];
                 if (actionObj.target === 'obj') {
@@ -318,7 +333,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         case 'media':
                             var abs = getABSbyId(actionObj.id);
                             switch (actionObj.type) {
-                                case 'text', 'html', 'ace':
+                                case 'text':
+                                case 'html':
+                                case 'ace':
                                     abs.div().text(actionObj.cur);
                                     break;
                                 case 'image':
@@ -329,6 +346,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                     break;
                                 case 'audio':
                                     abs.div().audio(actionObj.id, actionObj.cur);
+                                    break;
+                                case 'module':
+                                    abs.loadModule(actionObj.cur);
+                                    break;
+                                case 'iframe':
+                                    abs.div().iframe(actionObj.cur);
                                     break;
                             }
                             abs.setParams();
@@ -365,16 +388,21 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             }
         };
         this.export = function () {
-            return actions;
+            var actionParams = {
+                actions: actions,
+                cur:cur
+            };
+            return actionParams;
         };
-        this.syncActions = function (_actions) {
-            actions = _actions;
+        this.syncActions = function (actionParams) {
+            actions = actionParams.actions;
+            length = actions.length;
             lock();
-            for (var i=0; i<actions.length; i++) {
-                cur=-1;
-                length = actions.length;
+            console.log('prev : ' + cur);
+            for (var cur=-1; cur<actionParams.cur; cur++) {
                 this.next();
             }
+            console.log('next : '+cur);
 
             unlock();
         };
@@ -444,8 +472,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             })
         };
         // action을 추가하진 않고, undo message를 보냄.
-        var sendUndo = function () {
-            if (useOnline && !lockAction && roomid) {
+        this.sendUndo = function () {
+            if (cur >= 0 && length > 0 && useOnline && !lockAction && roomid) {
                 var action = {
                     target: 'undo'
                 };
@@ -456,8 +484,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 });
             }
         };
-        var sendRedo = function () {
-            if (useOnline && !lockAction && roomid) {
+        this.sendRedo = function () {
+            if (cur < length - 1 && useOnline && !lockAction && roomid) {
                 var action = {
                     target: 'redo'
                 };
@@ -493,9 +521,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         }
     };
     var onUndo = function () {
+        actionManager.sendUndo();
         actionManager.prev();
     };
     var onRedo = function () {
+        actionManager.sendRedo();
         actionManager.next();
     };
     var onSave = function () {
@@ -772,7 +802,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
-        var id;
+        var id, moduleName, iframeUrl;
 
         // initialize if params given
         if (_params) {
@@ -798,7 +828,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                         else {
                             dv.tinymce({
                                 inline: true,
-                                width:'100%',
+                                width:'100%'
                             }, function (child) {
                                 child.focusin(function () {
                                     lockDel();
@@ -816,13 +846,26 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                 lockDel();
                             }).focusout(function () {
                                 unlockDel();
-                                console.log('ace')
                                 actionManager.onMedia(that, 'ace');
                             });
                         dv.text = function (txt) {
                             return dv.$ace.text(txt)
                         };
                         break;
+                    case 'module':
+                        moduleName = params.media;
+                        if (moduleName !== '') {
+                            require(['/jsloader/module/'+moduleName], function (module) {
+                                if (module && module.appendTo)
+                                    module.appendTo(dv);
+                            });
+                        }
+                        break;
+                    case 'iframe':
+                        iframeUrl = params.media;
+                        if (iframeUrl !== '') {
+                            dv.iframe(iframeUrl);
+                        }
                 }
             }
         }
@@ -885,13 +928,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.div = function () {
             return dv;
         };
+
         this.setParams = function () {
             var dvParam = getParams(dv);
             params.id = dvParam.id;
             params.style = dvParam.style;
-            console.log(dvParam);
             switch (params.type) {
-                case 'text', 'html', 'ace':
+                case 'text':
+                case 'html':
+                case 'ace':
                     params.media = dvParam.text;
                     break;
                 case 'image':
@@ -905,6 +950,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 case 'audio':
                     if (dv.$audio && dv.$audio.attr('src'))
                         params.media = dv.$audio.attr('src');
+                    break;
+                case 'module':
+                    params.media = moduleName;
+                    break;
+                case 'iframe':
+                    params.media = iframeUrl;
                     break;
             }
         };
@@ -921,6 +972,22 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         this.decZidx = function () {
             dv.zIndex(parseInt(dv.zIndex())-1);
             actionManager.onStyle(this, ['z-index']);
+        };
+        this.loadModule = function (name) {
+            moduleName = name;
+            if (name == '') {
+                dv.$.children(':gt(7)').remove();
+            }
+            else {
+                require(['/jsloader/module/'+name], function (module) {
+                    if (module && module.appendTo)
+                        module.appendTo(dv);
+                });
+            }
+        };
+        this.loadIframe = function (url) {
+            iframeUrl = url;
+            dv.iframe(url);
         };
         return this;
     };
@@ -1304,6 +1371,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
     // for ABS Object
     ABSdeco.initContextMenu(actionManager);
+    ABSdeco.setKeyLocker({
+        lock:lockDel,
+        unlock:unlockDel
+    })
 
     Div.prototype.setSlideContextMenu = function (slide) {
         this.$.bind("contextmenu", function (event) {
@@ -1488,7 +1559,28 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             var obj = absObject({type: 'ace', media: '', style:{
                 width:'300px',
                 height:'120px'
-            },});
+            }});
+            obj.focus();
+            curSlide.append(obj);
+        }
+    });
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('Module').click(function () {
+        if (curSlide) {
+            var obj = absObject({type: 'module', media: '', style:{
+                width:'300px',
+                height:'400px'
+            }});
+            obj.focus();
+            curSlide.append(obj);
+        }
+    });
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('Iframe').click(function () {
+        if (curSlide) {
+            var obj = absObject({type: 'iframe', media: '', style:{
+                width:'300px',
+                height:'400px',
+                border:'10px ridge white'
+            }});
             obj.focus();
             curSlide.append(obj);
         }
