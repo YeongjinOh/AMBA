@@ -19,7 +19,7 @@ define ([], function() {
                         animationQueue = [];
                         return;
                     }
-                    animationQueue = aq;
+                    animationQueue = aq.slice(0);
                 },
                 export: function () {
                     return animationQueue;
