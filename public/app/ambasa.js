@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false, useLocalStorage = true;
+    var useOnline = true, useLocalStorage = false;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -203,10 +203,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         var add = function (action) {
             if (!lockAction) {
-                console.log(action);
                 actions[++cur] = action;
                 length = cur + 1;
                 if (useOnline && roomid) {
+                    console.log('sendMessage');
+                    console.log(action);
                     online.sendMessage({
                         roomid: roomid,
                         msg: action,
@@ -241,7 +242,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
 
         this.prev = function () {
             if (cur >= 0 && length > 0) {
-                sendUndo();
                 lock();
                 var actionObj = actions[cur--];
                 if (actionObj.target === 'obj') {
@@ -304,7 +304,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         };
         this.next = function () {
             if (cur < length - 1) {
-                sendRedo();
                 lock();
                 var actionObj = actions[++cur];
                 if (actionObj.target === 'obj') {
@@ -444,8 +443,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             })
         };
         // action을 추가하진 않고, undo message를 보냄.
-        var sendUndo = function () {
-            if (useOnline && !lockAction && roomid) {
+        this.sendUndo = function () {
+            if (cur >= 0 && length > 0 && useOnline && !lockAction && roomid) {
                 var action = {
                     target: 'undo'
                 };
@@ -456,8 +455,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                 });
             }
         };
-        var sendRedo = function () {
-            if (useOnline && !lockAction && roomid) {
+        this.sendRedo = function () {
+            if (cur < length - 1 && useOnline && !lockAction && roomid) {
                 var action = {
                     target: 'redo'
                 };
@@ -493,9 +492,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
         }
     };
     var onUndo = function () {
+        actionManager.sendUndo();
         actionManager.prev();
     };
     var onRedo = function () {
+        actionManager.sendRedo();
         actionManager.next();
     };
     var onSave = function () {
@@ -816,7 +817,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
                                 lockDel();
                             }).focusout(function () {
                                 unlockDel();
-                                console.log('ace')
                                 actionManager.onMedia(that, 'ace');
                             });
                         dv.text = function (txt) {
@@ -889,7 +889,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram','https://c
             var dvParam = getParams(dv);
             params.id = dvParam.id;
             params.style = dvParam.style;
-            console.log(dvParam);
             switch (params.type) {
                 case 'text', 'html', 'ace':
                     params.media = dvParam.text;
