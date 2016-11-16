@@ -833,6 +833,7 @@ require(['ABSdecoration', 'ABSanimation',
                         else {
                             dv.tinymce({
                                 inline: true,
+                                toolbar: "styleselect fontselect fontsizeselect | forecolor backcolor",
                                 width:'100%'
                             }, function (child) {
                                 child.focusin(function () {
