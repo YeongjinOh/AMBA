@@ -41,6 +41,16 @@ Div.prototype.class = function (value) {
     return this.attr('class', value);
 };
 
+
+Div.prototype.hasClass = function (value) {
+    return this.$.hasClass(value);
+};
+
+Div.prototype.remove = function (value) {
+    return this.$.removeClass(value);
+};
+
+
 Div.prototype.addClass = function (value) {
     this.$.addClass(value);
     return this;
@@ -666,6 +676,7 @@ Div.prototype.mouseup = function (fn) {
 };
 
 Div.prototype.draggable = function (opt) {
+    this.$.addClass('noclick');
     this.$.draggable(opt);
     return this;
 };
