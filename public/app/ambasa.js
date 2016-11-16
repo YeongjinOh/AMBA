@@ -520,6 +520,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
             isFullscreen = false;
         }
     };
+    var onNewSlide = function () {
+        slideManager.new();
+    };
+    var onDelSlide = function () {
+        slideManager.del();
+    };
+    var onUpSlide = function () {
+        slideManager.up();
+    };
+    var onDownSlide = function () {
+        slideManager.down();
+    };
     var onUndo = function () {
         actionManager.sendUndo();
         actionManager.prev();
@@ -1116,6 +1128,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
         this.getIdx = function () {
             return parseInt(numberViewer.text());
         };
+        this.getBlockWrapper = function () {
+            return blockWrapper;
+        };
         // 중간에 slide를 insert한 경우 순서를 맞춰 보여주기 위해서 detach와 attach를 한다.
         this.detach = function () {
             blockWrapper.detach();
@@ -1237,6 +1252,42 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
                 curSlide = undefined;
                 pageCur.text(0);
                 pageTotal.text(slides.length);
+            }
+        };
+        this.up = function () {
+            if (curSlide && curSlide.getIdx()>1) {
+                // change block order in block list
+                var idx = curSlide.getIdx();
+                var prev = slides[idx-2].getBlockWrapper();
+                prev.$.insertAfter(curSlide.getBlockWrapper().$);
+
+                // change order in array slides
+                var tmp = slides[idx-1];
+                slides[idx-1] = slides[idx-2];
+                slides[idx-2] = tmp;
+
+                // change index order in block list
+                slides[idx-1].setIdx(idx);
+                slides[idx-2].setIdx(idx-1);
+            }
+        };
+        this.down = function () {
+            console.log(curSlide.getIdx());
+            console.log(slides.length);
+            if (curSlide && curSlide.getIdx() < slides.length) {
+                // change block order in block list
+                var idx = curSlide.getIdx();
+                var next = slides[idx].getBlockWrapper();
+                curSlide.getBlockWrapper().$.insertAfter(next.$);
+
+                // change order in array slides
+                var tmp = slides[idx-1];
+                slides[idx-1] = slides[idx];
+                slides[idx] = tmp;
+
+                // change index order in block list
+                slides[idx-1].setIdx(idx);
+                slides[idx].setIdx(idx+1);
             }
         };
         this.next = function () {
@@ -1454,22 +1505,25 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
 
     var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%', 40);
     var decoSlideMenuButton = function (div) {
-        div.size(20, 20).marginLeft(15).cursorPointer();
+        div.size(25, 25).marginLeft(15).cursorPointer();
     };
-    var newSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/newslide.png').marginLeft(30)
-        .click(function () {
-            slideManager.new();
-        });
-    var delSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/delslide.png')
-        .click(function () {
-            slideManager.del();
-        });
+    var decoSlideListButton = function (div) {
+        div.size(20, 20).marginLeft(10).cursorPointer();
+    };
+
     var localSaveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/localSave.png').click(onLocalSave);
     var localLoadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/localLoad.png').click(onLocalLoad);
     var saveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/save.png').click(onSave);
     var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/load.png').click(onLoad);
     var undoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/undo.png').click(onUndo);
     var redoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/redo.png').click(onRedo);
+
+    // slidelist buttons
+    var slideListButtons = div().appendTo(slideList).color('white').size('100%', 40).borderBottom(borderGray).padding(10);
+    var newSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/newslide.png').click(onNewSlide);
+    var delSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/delslide.png').click(onDelSlide);
+    var upSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/arrowUp.png').click(onUpSlide);
+    var downSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/arrowDown.png').click(onDownSlide);
 
     // object menu bar
     var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
