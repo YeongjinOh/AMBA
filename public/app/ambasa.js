@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false, useLocalStorage = true;
+    var useOnline = false;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -311,6 +311,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
                         case 'delete':
                             slideManager.insert(actionObj.slide, actionObj.params);
                             break;
+                        case 'copy':
+                            slideManager.del(actionObj.slide);
+                            break;
                         case 'load':
                             break;
                     }
@@ -379,6 +382,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
                                 curSlide.deactive();
                             curSlide = slideManager.get(actionObj.slide);
                             slideManager.del();
+                            break;
+                        case 'copy':
+                            console.log(actionObj)
+                            slideManager.copy(actionObj.params);
                             break;
                         case 'load':
                             break;
@@ -469,6 +476,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
                 action: 'delete',
                 slide: slide.getIdx(),
                 params: slide.export()
+            })
+        };
+        this.onCopySlide = function (slide, params) {
+            add({
+                target:'slide',
+                action:'copy',
+                slide: slide.getIdx(),
+                params: params
             })
         };
         // action을 추가하진 않고, undo message를 보냄.
@@ -647,19 +662,35 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
     };
     var onCopy = function () {
         if (curObj) {
-            copyParam = curObj.getParams();
+            copyParam = {
+                type:'object',
+                param:curObj.getParams()
+            };
         } else if (curSlide) {
-            // TODO
+            copyParam = {
+                type:'slide',
+                param:curSlide.export()
+            }
         }
     };
     var onPaste = function () {
-        copyParam.id = idGenerator.get();
-        copyParam.style.left = parseInt(copyParam.style.left) + 5;
-        copyParam.style.top = parseInt(copyParam.style.top) + 5;
-        var obj = absObject(copyParam);
-        obj.focus();
-        curSlide.append(obj);
-        syncBlock();
+        if (typeof copyParam !== 'object')
+            return;
+        if (copyParam.type === 'object') {
+            var param = copyParam.param;
+            param.id = idGenerator.get();
+            param.style.left = parseInt(param.style.left) + 5;
+            param.style.top = parseInt(param.style.top) + 5;
+            var obj = absObject(param);
+            obj.focus();
+            curSlide.append(obj);
+            syncBlock();
+        }
+        else if (copyParam.type === 'slide') {
+            var params = copyParam.param;
+            slideManager.copy(params);
+        }
+
     };
     var onAnimationViewer = function () {
         slideEditor.width(slideEditorWidthAni).paddingLeft(sbgMaringLeftAni);
@@ -1221,6 +1252,25 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
             actionManager.onNewSlide(slides.length);
             pageTotal.text(slides.length);
         };
+        this.copy = function (slideParam) {
+            var slide = new Slide();
+            slide.focus();
+            curSlide = slide;
+            slide.setIdx(slides.push(slide));
+
+            // 새로운 id의 오브젝트들을 생성
+            var params = {};
+            for (var id in slideParam.params) {
+                var newId = idGenerator.get();
+                params[newId] = slideParam.params[id];
+                params[newId].id = newId;
+            }
+            slideParam.params = params;
+            slide.load(slideParam);
+            syncBlock();
+            actionManager.onCopySlide(slide, slideParam);
+            pageTotal.text(slides.length);
+        };
         this.insert = function (idx, params) {
             // push back
             for (var i = slides.length - 1; i >= idx - 1; i--) {
@@ -1240,7 +1290,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
         };
 
         // curSlide을 지운다.
-        this.del = function () {
+        this.del = function (idx) {
+            if (idx !== undefined) {
+                var slide = slides.splice(idx-1, 1)[0];
+                slide.remove();
+                for (var i = idx; i < slides.length; i++) {
+                    slides[i].setIdx(i + 1);
+                }
+                curSlide = undefined;
+                pageCur.text(0);
+                pageTotal.text(slides.length);
+                return;
+            }
             if (curSlide) {
                 actionManager.onDelSlide(curSlide);
                 var idx = curSlide.getIdx() - 1;
