@@ -1,9 +1,4 @@
-require(['ABSdecoration', 'ABSanimation',
-    'OnlineManager', 'telegram',
-    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'],
-    function (ABSdeco, ABSanimation
-        , online, tele
-    ) {
+require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online, tele) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -395,7 +390,7 @@ require(['ABSdecoration', 'ABSanimation',
         this.export = function () {
             var actionParams = {
                 actions: actions,
-                cur:cur
+                cur: cur
             };
             return actionParams;
         };
@@ -404,10 +399,10 @@ require(['ABSdecoration', 'ABSanimation',
             length = actions.length;
             lock();
             console.log('prev : ' + cur);
-            for (var cur=-1; cur<actionParams.cur; cur++) {
+            for (var cur = -1; cur < actionParams.cur; cur++) {
                 this.next();
             }
-            console.log('next : '+cur);
+            console.log('next : ' + cur);
 
             unlock();
         };
@@ -534,39 +529,37 @@ require(['ABSdecoration', 'ABSanimation',
         actionManager.next();
     };
     var onSave = function () {
-        var fName = fileName.text();
-        if (fName === defaultName) {
-            fName = prompt('파일명을 입력해주세요.');
-            if (fName == null || fName === defaultName) {
-                alert('올바르지 않은 파일명입니다.')
-                return;
-            }
-            fileName.text(fName);
-            joinOnline(fName);
+        var fName = prompt('파일명을 입력해주세요.');
+        if (fName == null || fName === defaultName) {
+            alert('올바르지 않은 파일명입니다.')
+            return;
         }
-
-        if (useLocalStorage) {
-            localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
-            alert('저장하였습니다.');
+        fileName.text(fName);
+        var param = {
+            cid: 'ambasa',
+            token: token,
+            key: fName,
+            value: JSON.stringify(slideManager.export())
+        };
+        $.get("/hashstore/put", param)
+            .done(function (data) {
+                if (data.resultCode == 0) {
+                    alert('저장하였습니다.');
+                }
+                else {
+                    console.log(data.msg);
+                    alert('실패하였습니다.');
+                }
+            });
+    };
+    var onLocalSave = function () {
+        var fName = prompt('파일명을 입력해주세요.');
+        if (fName == null || fName === defaultName) {
+            alert('올바르지 않은 파일명입니다.');
+            return;
         }
-        else {
-            var param = {
-                cid: 'ambasa',
-                token: token,
-                key: fName,
-                value: JSON.stringify(slideManager.export())
-            };
-            $.get("/hashstore/put", param)
-                .done(function (data) {
-                    if (data.resultCode == 0) {
-                        alert('저장하였습니다.');
-                    }
-                    else {
-                        console.log(data.msg);
-                        alert('실패하였습니다.');
-                    }
-                });
-        }
+        localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+        alert('저장하였습니다.');
     };
     var onLoad = function (fName) {
         if (typeof fName !== 'string') {
@@ -574,34 +567,41 @@ require(['ABSdecoration', 'ABSanimation',
             if (fName == null)
                 return;
         }
-        if (useLocalStorage) {
-            var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-            lock();
-            fileName.text(fName);
-            slideManager.load(params);
-            actionManager.clear();
-            unlock();
+        var param = {
+            cid: 'ambasa',
+            token: token,
+            key: fName,
+        };
+        $.get("/hashstore/get", param)
+            .done(function (data) {
+                if (data.info.length > 0) {
+                    lock();
+                    var params = JSON.parse(data.info[0].value);
+                    fileName.text(fName);
+                    slideManager.load(params);
+                    actionManager.clear();
+                    unlock();
+                } else {
+                    alert('해당 파일을 불러올 수 없습니다.');
+                }
+            });
+    };
+    var onLocalLoad = function (fName) {
+        if (typeof fName !== 'string') {
+            var fName = prompt('파일명을 입력해주세요.');
+            if (fName == null)
+                return;
         }
-        else {
-            var param = {
-                cid: 'ambasa',
-                token: token,
-                key: fName,
-            };
-            $.get("/hashstore/get", param)
-                .done(function (data) {
-                    if (data.info.length > 0) {
-                        lock();
-                        var params = JSON.parse(data.info[0].value);
-                        fileName.text(fName);
-                        slideManager.load(params);
-                        actionManager.clear();
-                        unlock();
-                    } else {
-                        alert('해당 파일을 불러올 수 없습니다.');
-                    }
-                });
+        var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+        if (params == undefined) {
+            alert('파일을 찾을 수 없습니다.');
+            return;
         }
+        lock();
+        fileName.text(fName);
+        slideManager.load(params);
+        actionManager.clear();
+        unlock();
     };
     var onEnter = function (fName, userId) {
         var param = {
@@ -834,13 +834,13 @@ require(['ABSdecoration', 'ABSanimation',
                             dv.tinymce({
                                 inline: true,
                                 toolbar: "styleselect fontselect fontsizeselect | forecolor backcolor",
-                                width:'100%'
+                                width: '100%'
                             }, function (child) {
                                 child.focusin(function () {
                                     lockDel();
                                 }).focusout(function () {
                                     unlockDel();
-                                    actionManager.onMedia(that,'html');
+                                    actionManager.onMedia(that, 'html');
                                 })
                             });
                             dv.text(params.media);
@@ -849,26 +849,26 @@ require(['ABSdecoration', 'ABSanimation',
                     case 'ace':
 
                         var viewerWrapper = div().border('10px ridge white').position('absolute').resizable().draggable().zIndex(15);
-                        var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().color('white');
+                        var viewer = div().appendTo(viewerWrapper).size('100%', '100%').overflowAuto().color('white');
                         // ace run button
-                        div().appendTo(dv).size(20,20).image('../images/abs-play.png')
+                        div().appendTo(dv).size(20, 20).image('../images/abs-play.png')
                             .position('absolute').top(-20).right(40).cursorPointer()
                             .click(function () {
                                 var ctext = '(function(){' + dv.text() + '\n})();';
                                 var acode = {ctext: ctext, deps: [], cid: 'none'};
                                 localStorage.setItem('acode', JSON.stringify(acode));
                                 // set viewer
-                                viewerWrapper.size(dv.widthPixel(),dv.heightPixel()).top(0).left(0).appendTo(dv).displayInlineBlock();
+                                viewerWrapper.size(dv.widthPixel(), dv.heightPixel()).top(0).left(0).appendTo(dv).displayInlineBlock();
                                 viewer.empty().iframe('/?app=viewer');
                                 viewer.$iframe.appendTo(viewer.$);
                             });
-                        div().appendTo(dv).size(20,20).padding(3).image('../images/abs-stop.png')
+                        div().appendTo(dv).size(20, 20).padding(3).image('../images/abs-stop.png')
                             .position('absolute').top(-23).right(20).cursorPointer()
                             .click(function () {
-                               viewerWrapper.displayNone();
+                                viewerWrapper.displayNone();
                             });
                         // ace full button
-                        div().appendTo(dv).size(20,20).padding(3).image('../images/abs-fullscreen2.png')
+                        div().appendTo(dv).size(20, 20).padding(3).image('../images/abs-fullscreen2.png')
                             .position('absolute').top(-23).right(0).cursorPointer()
                             .click(function () {
                                 var ctext = '(function(){' + dv.text() + '\n})();';
@@ -876,7 +876,7 @@ require(['ABSdecoration', 'ABSanimation',
                                 localStorage.setItem('acode', JSON.stringify(acode));
                                 window.open('/?app=viewer')
                             });
-                        dv.$ace = div().aceEditor().text(params.media).size('100%','100%')
+                        dv.$ace = div().aceEditor().text(params.media).size('100%', '100%')
                             .focusin(function () {
                                 lockDel();
                             }).focusout(function () {
@@ -890,7 +890,7 @@ require(['ABSdecoration', 'ABSanimation',
                     case 'module':
                         moduleName = params.media;
                         if (moduleName !== '') {
-                            require(['/jsloader/module/'+moduleName], function (module) {
+                            require(['/jsloader/module/' + moduleName], function (module) {
                                 if (module && module.appendTo)
                                     module.appendTo(dv);
                             });
@@ -1001,11 +1001,11 @@ require(['ABSdecoration', 'ABSanimation',
             return id;
         };
         this.incZidx = function () {
-            dv.zIndex(parseInt(dv.zIndex())+1);
+            dv.zIndex(parseInt(dv.zIndex()) + 1);
             actionManager.onStyle(this, ['z-index']);
         };
         this.decZidx = function () {
-            dv.zIndex(parseInt(dv.zIndex())-1);
+            dv.zIndex(parseInt(dv.zIndex()) - 1);
             actionManager.onStyle(this, ['z-index']);
         };
         this.loadModule = function (name) {
@@ -1014,7 +1014,7 @@ require(['ABSdecoration', 'ABSanimation',
                 dv.$.children(':gt(7)').remove();
             }
             else {
-                require(['/jsloader/module/'+name], function (module) {
+                require(['/jsloader/module/' + name], function (module) {
                     if (module && module.appendTo)
                         module.appendTo(dv);
                 });
@@ -1158,8 +1158,8 @@ require(['ABSdecoration', 'ABSanimation',
             }
             var animationQueue = absAnimation.export();
             return {
-                params:params,
-                aniQueue:animationQueue
+                params: params,
+                aniQueue: animationQueue
             };
         };
         this.load = function (slideParam) {
@@ -1388,15 +1388,15 @@ require(['ABSdecoration', 'ABSanimation',
 
         // calculate sbg width and height
 
-    // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
-    // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
+        // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
+        // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
     var sbgWidth = 1280 * 0.6, sbgHeight = 800 * 0.6, ratio;
-        if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
-            ratio = sbgWidth / slideEditorWidth;
-        else
-            ratio = sbgHeight / slideEditorHeight;
-        // var dw = 1280, dh = 800;
-        // var sbgWidth = dw, sbgHeight = dh;
+    if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
+        ratio = sbgWidth / slideEditorWidth;
+    else
+        ratio = sbgHeight / slideEditorHeight;
+    // var dw = 1280, dh = 800;
+    // var sbgWidth = dw, sbgHeight = dh;
 
     var sbgMarginLeft = (slideEditorWidth - sbgWidth) / 2, sbgMarginTop = (slideEditorHeight - sbgHeight) / 2;
     var slideEditorWidthAni = slideEditorWidth - animationViewerWidth, sbgMaringLeftAni = (slideEditorWidthAni - sbgWidth) / 2; // animationViewer가 나왔을 때의 width와 margin
@@ -1411,8 +1411,8 @@ require(['ABSdecoration', 'ABSanimation',
     // for ABS Object
     ABSdeco.initContextMenu(actionManager);
     ABSdeco.setKeyLocker({
-        lock:lockDel,
-        unlock:unlockDel
+        lock: lockDel,
+        unlock: unlockDel
     })
 
     Div.prototype.setSlideContextMenu = function (slide) {
@@ -1454,7 +1454,7 @@ require(['ABSdecoration', 'ABSanimation',
 
     var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%', 40);
     var decoSlideMenuButton = function (div) {
-        div.size(25, 25).marginLeft(20).cursorPointer();
+        div.size(20, 20).marginLeft(15).cursorPointer();
     };
     var newSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/newslide.png').marginLeft(30)
         .click(function () {
@@ -1464,6 +1464,8 @@ require(['ABSdecoration', 'ABSanimation',
         .click(function () {
             slideManager.del();
         });
+    var localSaveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/localSave.png').click(onLocalSave);
+    var localLoadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/localLoad.png').click(onLocalLoad);
     var saveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/save.png').click(onSave);
     var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/load.png').click(onLoad);
     var undoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/undo.png').click(onUndo);
@@ -1561,11 +1563,11 @@ require(['ABSdecoration', 'ABSanimation',
         if (curSlide) {
             var obj = absObject({
                 type: 'html',
-                style:{
-                    width:'200px',
-                    height:'120px'
+                style: {
+                    width: '200px',
+                    height: '120px'
                 },
-                media:''
+                media: ''
             });
             obj.focus();
             // tinymce option과 콜백 함수 전달
@@ -1595,31 +1597,37 @@ require(['ABSdecoration', 'ABSanimation',
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Ace').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'ace', media: '', style:{
-                width:'300px',
-                height:'120px'
-            }});
+            var obj = absObject({
+                type: 'ace', media: '', style: {
+                    width: '300px',
+                    height: '120px'
+                }
+            });
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Module').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'module', media: '', style:{
-                width:'300px',
-                height:'400px'
-            }});
+            var obj = absObject({
+                type: 'module', media: '', style: {
+                    width: '300px',
+                    height: '400px'
+                }
+            });
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Iframe').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'iframe', media: '', style:{
-                width:'300px',
-                height:'400px',
-                border:'10px ridge white'
-            }});
+            var obj = absObject({
+                type: 'iframe', media: '', style: {
+                    width: '300px',
+                    height: '400px',
+                    border: '10px ridge white'
+                }
+            });
             obj.focus();
             curSlide.append(obj);
         }
@@ -1649,7 +1657,7 @@ require(['ABSdecoration', 'ABSanimation',
             onAnimationViewer();
         isAniViewerOn = !isAniViewerOn;
     };
-    var buttonTelegram =div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
+    var buttonTelegram = div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
         .text('Telegram').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee', 'white')
         .click(onTelegram);
 
@@ -1667,7 +1675,7 @@ require(['ABSdecoration', 'ABSanimation',
         var cntMember = 0;
         var members = [];
         this.insertMember = function (name) {
-            for (var i=0; i<members.length; i++) {
+            for (var i = 0; i < members.length; i++) {
                 if (members[i] === name)
                     return;
             }
@@ -1677,7 +1685,7 @@ require(['ABSdecoration', 'ABSanimation',
             div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
         };
         this.setMembers = function (members) {
-            for (var i=0; i<members.length; i++) {
+            for (var i = 0; i < members.length; i++) {
                 this.insertMember(members[i]);
             }
         };
@@ -1685,7 +1693,6 @@ require(['ABSdecoration', 'ABSanimation',
             return members;
         }
     };
-
 
 
     /** status bar **/
