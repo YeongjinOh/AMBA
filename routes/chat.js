@@ -10,10 +10,10 @@ var options = {
     transformer: "engine.io"
 };
 
-var sub = redis.createClient();
-var pub = redis.createClient();
 
 module.exports = function (server) {
+    var sub = redis.createClient();
+    var pub = redis.createClient();
     var primus = new Primus(server, options);
     primus.plugin('rooms', Rooms);
 
