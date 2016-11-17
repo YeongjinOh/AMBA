@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
 
-    var useOnline = true, useLocalStorage = false;
+    var useOnline = true;
 
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
@@ -36,7 +36,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var token = authFactory.getToken();
     if (!username || !token) {
         $(location).attr('href', '/?app=signin');
-        alert('로그인 페이지로 이동합니다.')
+        alert('로그인 페이지로 이동합니다.');
         return;
     }
 
@@ -1565,8 +1565,20 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var decoMenu = function (dv) {
         dv.size('100%', 25).padding(3).paddingLeft(10).cursorPointer().hoverColor('#999999', '#cccccc');
     };
-    var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
+    div().appendTo(contextMenuBar).deco(decoMenu).text('추가').click(function () {
+        slideManager.new();
+        $("#abs-slide-context-menu").hide(100);
+    });
+    div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
         slideManager.del();
+        $("#abs-slide-context-menu").hide(100);
+    });
+    div().appendTo(contextMenuBar).deco(decoMenu).text('위로').click(function () {
+        slideManager.up();
+        $("#abs-slide-context-menu").hide(100);
+    });
+    div().appendTo(contextMenuBar).deco(decoMenu).text('아래').click(function () {
+        slideManager.down();
         $("#abs-slide-context-menu").hide(100);
     });
 
