@@ -7,3 +7,4 @@ public/dist
 docs/
 datas/
 bin/primus.js
+public/module/primus.js
