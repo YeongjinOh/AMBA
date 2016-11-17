@@ -1,4 +1,4 @@
-require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online, tele) {
+require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false;
+    var useOnline = true;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -1429,7 +1429,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
 
 
     var SlideShowManager = function () {
-        var ww = window.innerWidth, wh = window.innerHeight, zoomRatio = 1;
+        var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
         var fullscreenViewer = div().append().size(ww, wh).displayNone().color('black');
         if (wh * sbgWidth > ww * sbgHeight) {
             zoomRatio = ww / sbgWidth;
@@ -1760,9 +1760,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
             teleWrapper.fadeIn(300);
         showTelegram = !showTelegram;
     };
-    var teleWrapper = div().appendTo(parent).border('2px solid gray').position('absolute').draggable().resizable().top(100).left(30).displayNone().color('white');
+    var teleWrapper = div()
     if (useOnline)
-        tele.appendTo(teleWrapper);
+        teleWrapper.appendTo(parent).iframe('/?app=telegram').border('8px ridge #dddddd').position('absolute')
+            .draggable().resizable().top(100).left(30).displayNone().color('white');
 
 
     // animation viewer switch
