@@ -1,4 +1,4 @@
-require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online, tele) {
+require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -9,8 +9,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
     /** set global module **/
 
     window.ambasa = {};
+
     var useOnline = true, useLocalStorage = false;
-    var useOnline = false;
+
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -1263,11 +1264,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
             var params = {};
             for (var id in slideParam.params) {
                 var newId = idGenerator.get();
-                params[newId] = slideParam.params[id];
+                params[newId] = $.extend({}, slideParam.params[id]);
                 params[newId].id = newId;
             }
-            slideParam.params = params;
-            slide.load(slideParam);
+            var newSlideParam = {
+                params:params,
+                aniQueue:[]
+            };
+            slide.load(newSlideParam);
             syncBlock();
             actionManager.onCopySlide(slide, slideParam);
             pageTotal.text(slides.length);
@@ -1473,7 +1477,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
     /** basic setting for layout **/
 
     //var w = window.outerWidth, h = window.outerHeight;
-var w = 1280, h = 800;
+//var w = 1280, h = 800;
     var w = window.outerWidth, h = window.outerHeight;
     // var w = 1280, h = 800;
     var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
@@ -1533,7 +1537,7 @@ var w = 1280, h = 800;
     ABSdeco.setKeyLocker({
         lock: lockDel,
         unlock: unlockDel
-    })
+    });
 
     Div.prototype.setSlideContextMenu = function (slide) {
         this.$.bind("contextmenu", function (event) {
@@ -1766,9 +1770,10 @@ var w = 1280, h = 800;
             teleWrapper.fadeIn(300);
         showTelegram = !showTelegram;
     };
-    var teleWrapper = div().appendTo(parent).border('2px solid gray').position('absolute').draggable().resizable().top(100).left(30).displayNone().color('white');
+    var teleWrapper = div()
     if (useOnline)
-        tele.appendTo(teleWrapper);
+        teleWrapper.appendTo(parent).iframe('/?app=telegram').border('8px ridge #dddddd').position('absolute')
+            .draggable().resizable().top(100).left(30).displayNone().color('white');
 
 
     // animation viewer switch
