@@ -1,9 +1,4 @@
-require(['ABSdecoration', 'ABSanimation',
-    'OnlineManager', 'telegram',
-    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'],
-    function (ABSdeco, ABSanimation
-        , online, tele
-    ) {
+require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js'], function (ABSdeco, ABSanimation, online, tele) {
 
     /////////////////////////////////////////////////////////////////
     ////
@@ -14,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation',
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false, useLocalStorage = true;
+    var useOnline = false;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -316,6 +311,9 @@ require(['ABSdecoration', 'ABSanimation',
                         case 'delete':
                             slideManager.insert(actionObj.slide, actionObj.params);
                             break;
+                        case 'copy':
+                            slideManager.del(actionObj.slide);
+                            break;
                         case 'load':
                             break;
                     }
@@ -385,6 +383,10 @@ require(['ABSdecoration', 'ABSanimation',
                             curSlide = slideManager.get(actionObj.slide);
                             slideManager.del();
                             break;
+                        case 'copy':
+                            console.log(actionObj)
+                            slideManager.copy(actionObj.params);
+                            break;
                         case 'load':
                             break;
                     }
@@ -395,7 +397,7 @@ require(['ABSdecoration', 'ABSanimation',
         this.export = function () {
             var actionParams = {
                 actions: actions,
-                cur:cur
+                cur: cur
             };
             return actionParams;
         };
@@ -404,10 +406,10 @@ require(['ABSdecoration', 'ABSanimation',
             length = actions.length;
             lock();
             console.log('prev : ' + cur);
-            for (var cur=-1; cur<actionParams.cur; cur++) {
+            for (var cur = -1; cur < actionParams.cur; cur++) {
                 this.next();
             }
-            console.log('next : '+cur);
+            console.log('next : ' + cur);
 
             unlock();
         };
@@ -476,6 +478,14 @@ require(['ABSdecoration', 'ABSanimation',
                 params: slide.export()
             })
         };
+        this.onCopySlide = function (slide, params) {
+            add({
+                target:'slide',
+                action:'copy',
+                slide: slide.getIdx(),
+                params: params
+            })
+        };
         // action을 추가하진 않고, undo message를 보냄.
         this.sendUndo = function () {
             if (cur >= 0 && length > 0 && useOnline && !lockAction && roomid) {
@@ -525,6 +535,18 @@ require(['ABSdecoration', 'ABSanimation',
             isFullscreen = false;
         }
     };
+    var onNewSlide = function () {
+        slideManager.new();
+    };
+    var onDelSlide = function () {
+        slideManager.del();
+    };
+    var onUpSlide = function () {
+        slideManager.up();
+    };
+    var onDownSlide = function () {
+        slideManager.down();
+    };
     var onUndo = function () {
         actionManager.sendUndo();
         actionManager.prev();
@@ -534,39 +556,37 @@ require(['ABSdecoration', 'ABSanimation',
         actionManager.next();
     };
     var onSave = function () {
-        var fName = fileName.text();
-        if (fName === defaultName) {
-            fName = prompt('파일명을 입력해주세요.');
-            if (fName == null || fName === defaultName) {
-                alert('올바르지 않은 파일명입니다.')
-                return;
-            }
-            fileName.text(fName);
-            joinOnline(fName);
+        var fName = prompt('파일명을 입력해주세요.');
+        if (fName == null || fName === defaultName) {
+            alert('올바르지 않은 파일명입니다.')
+            return;
         }
-
-        if (useLocalStorage) {
-            localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
-            alert('저장하였습니다.');
+        fileName.text(fName);
+        var param = {
+            cid: 'ambasa',
+            token: token,
+            key: fName,
+            value: JSON.stringify(slideManager.export())
+        };
+        $.get("/hashstore/put", param)
+            .done(function (data) {
+                if (data.resultCode == 0) {
+                    alert('저장하였습니다.');
+                }
+                else {
+                    console.log(data.msg);
+                    alert('실패하였습니다.');
+                }
+            });
+    };
+    var onLocalSave = function () {
+        var fName = prompt('파일명을 입력해주세요.');
+        if (fName == null || fName === defaultName) {
+            alert('올바르지 않은 파일명입니다.');
+            return;
         }
-        else {
-            var param = {
-                cid: 'ambasa',
-                token: token,
-                key: fName,
-                value: JSON.stringify(slideManager.export())
-            };
-            $.get("/hashstore/put", param)
-                .done(function (data) {
-                    if (data.resultCode == 0) {
-                        alert('저장하였습니다.');
-                    }
-                    else {
-                        console.log(data.msg);
-                        alert('실패하였습니다.');
-                    }
-                });
-        }
+        localStorage.setItem('abs-params-' + fName, JSON.stringify(slideManager.export()));
+        alert('저장하였습니다.');
     };
     var onLoad = function (fName) {
         if (typeof fName !== 'string') {
@@ -574,34 +594,41 @@ require(['ABSdecoration', 'ABSanimation',
             if (fName == null)
                 return;
         }
-        if (useLocalStorage) {
-            var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
-            lock();
-            fileName.text(fName);
-            slideManager.load(params);
-            actionManager.clear();
-            unlock();
+        var param = {
+            cid: 'ambasa',
+            token: token,
+            key: fName,
+        };
+        $.get("/hashstore/get", param)
+            .done(function (data) {
+                if (data.info.length > 0) {
+                    lock();
+                    var params = JSON.parse(data.info[0].value);
+                    fileName.text(fName);
+                    slideManager.load(params);
+                    actionManager.clear();
+                    unlock();
+                } else {
+                    alert('해당 파일을 불러올 수 없습니다.');
+                }
+            });
+    };
+    var onLocalLoad = function (fName) {
+        if (typeof fName !== 'string') {
+            var fName = prompt('파일명을 입력해주세요.');
+            if (fName == null)
+                return;
         }
-        else {
-            var param = {
-                cid: 'ambasa',
-                token: token,
-                key: fName,
-            };
-            $.get("/hashstore/get", param)
-                .done(function (data) {
-                    if (data.info.length > 0) {
-                        lock();
-                        var params = JSON.parse(data.info[0].value);
-                        fileName.text(fName);
-                        slideManager.load(params);
-                        actionManager.clear();
-                        unlock();
-                    } else {
-                        alert('해당 파일을 불러올 수 없습니다.');
-                    }
-                });
+        var params = JSON.parse(localStorage.getItem('abs-params-' + fName));
+        if (params == undefined) {
+            alert('파일을 찾을 수 없습니다.');
+            return;
         }
+        lock();
+        fileName.text(fName);
+        slideManager.load(params);
+        actionManager.clear();
+        unlock();
     };
     var onEnter = function (fName, userId) {
         var param = {
@@ -635,19 +662,35 @@ require(['ABSdecoration', 'ABSanimation',
     };
     var onCopy = function () {
         if (curObj) {
-            copyParam = curObj.getParams();
+            copyParam = {
+                type:'object',
+                param:curObj.getParams()
+            };
         } else if (curSlide) {
-            // TODO
+            copyParam = {
+                type:'slide',
+                param:curSlide.export()
+            }
         }
     };
     var onPaste = function () {
-        copyParam.id = idGenerator.get();
-        copyParam.style.left = parseInt(copyParam.style.left) + 5;
-        copyParam.style.top = parseInt(copyParam.style.top) + 5;
-        var obj = absObject(copyParam);
-        obj.focus();
-        curSlide.append(obj);
-        syncBlock();
+        if (typeof copyParam !== 'object')
+            return;
+        if (copyParam.type === 'object') {
+            var param = copyParam.param;
+            param.id = idGenerator.get();
+            param.style.left = parseInt(param.style.left) + 5;
+            param.style.top = parseInt(param.style.top) + 5;
+            var obj = absObject(param);
+            obj.focus();
+            curSlide.append(obj);
+            syncBlock();
+        }
+        else if (copyParam.type === 'slide') {
+            var params = copyParam.param;
+            slideManager.copy(params);
+        }
+
     };
     var onAnimationViewer = function () {
         slideEditor.width(slideEditorWidthAni).paddingLeft(sbgMaringLeftAni);
@@ -833,13 +876,14 @@ require(['ABSdecoration', 'ABSanimation',
                         else {
                             dv.tinymce({
                                 inline: true,
-                                width:'100%'
+                                toolbar: "styleselect fontselect fontsizeselect | forecolor backcolor",
+                                width: '100%'
                             }, function (child) {
                                 child.focusin(function () {
                                     lockDel();
                                 }).focusout(function () {
                                     unlockDel();
-                                    actionManager.onMedia(that,'html');
+                                    actionManager.onMedia(that, 'html');
                                 })
                             });
                             dv.text(params.media);
@@ -848,26 +892,26 @@ require(['ABSdecoration', 'ABSanimation',
                     case 'ace':
 
                         var viewerWrapper = div().border('10px ridge white').position('absolute').resizable().draggable().zIndex(15);
-                        var viewer = div().appendTo(viewerWrapper).size('100%','100%').overflowAuto().color('white');
+                        var viewer = div().appendTo(viewerWrapper).size('100%', '100%').overflowAuto().color('white');
                         // ace run button
-                        div().appendTo(dv).size(20,20).image('../images/abs-play.png')
+                        div().appendTo(dv).size(20, 20).image('../images/abs-play.png')
                             .position('absolute').top(-20).right(40).cursorPointer()
                             .click(function () {
                                 var ctext = '(function(){' + dv.text() + '\n})();';
                                 var acode = {ctext: ctext, deps: [], cid: 'none'};
                                 localStorage.setItem('acode', JSON.stringify(acode));
                                 // set viewer
-                                viewerWrapper.size(dv.widthPixel(),dv.heightPixel()).top(0).left(0).appendTo(dv).displayInlineBlock();
+                                viewerWrapper.size(dv.widthPixel(), dv.heightPixel()).top(0).left(0).appendTo(dv).displayInlineBlock();
                                 viewer.empty().iframe('/?app=viewer');
                                 viewer.$iframe.appendTo(viewer.$);
                             });
-                        div().appendTo(dv).size(20,20).padding(3).image('../images/abs-stop.png')
+                        div().appendTo(dv).size(20, 20).padding(3).image('../images/abs-stop.png')
                             .position('absolute').top(-23).right(20).cursorPointer()
                             .click(function () {
-                               viewerWrapper.displayNone();
+                                viewerWrapper.displayNone();
                             });
                         // ace full button
-                        div().appendTo(dv).size(20,20).padding(3).image('../images/abs-fullscreen2.png')
+                        div().appendTo(dv).size(20, 20).padding(3).image('../images/abs-fullscreen2.png')
                             .position('absolute').top(-23).right(0).cursorPointer()
                             .click(function () {
                                 var ctext = '(function(){' + dv.text() + '\n})();';
@@ -875,7 +919,7 @@ require(['ABSdecoration', 'ABSanimation',
                                 localStorage.setItem('acode', JSON.stringify(acode));
                                 window.open('/?app=viewer')
                             });
-                        dv.$ace = div().aceEditor().text(params.media).size('100%','100%')
+                        dv.$ace = div().aceEditor().text(params.media).size('100%', '100%')
                             .focusin(function () {
                                 lockDel();
                             }).focusout(function () {
@@ -889,7 +933,7 @@ require(['ABSdecoration', 'ABSanimation',
                     case 'module':
                         moduleName = params.media;
                         if (moduleName !== '') {
-                            require(['/jsloader/module/'+moduleName], function (module) {
+                            require(['/jsloader/module/' + moduleName], function (module) {
                                 if (module && module.appendTo)
                                     module.appendTo(dv);
                             });
@@ -1000,11 +1044,11 @@ require(['ABSdecoration', 'ABSanimation',
             return id;
         };
         this.incZidx = function () {
-            dv.zIndex(parseInt(dv.zIndex())+1);
+            dv.zIndex(parseInt(dv.zIndex()) + 1);
             actionManager.onStyle(this, ['z-index']);
         };
         this.decZidx = function () {
-            dv.zIndex(parseInt(dv.zIndex())-1);
+            dv.zIndex(parseInt(dv.zIndex()) - 1);
             actionManager.onStyle(this, ['z-index']);
         };
         this.loadModule = function (name) {
@@ -1013,7 +1057,7 @@ require(['ABSdecoration', 'ABSanimation',
                 dv.$.children(':gt(7)').remove();
             }
             else {
-                require(['/jsloader/module/'+name], function (module) {
+                require(['/jsloader/module/' + name], function (module) {
                     if (module && module.appendTo)
                         module.appendTo(dv);
                 });
@@ -1115,6 +1159,9 @@ require(['ABSdecoration', 'ABSanimation',
         this.getIdx = function () {
             return parseInt(numberViewer.text());
         };
+        this.getBlockWrapper = function () {
+            return blockWrapper;
+        };
         // 중간에 slide를 insert한 경우 순서를 맞춰 보여주기 위해서 detach와 attach를 한다.
         this.detach = function () {
             blockWrapper.detach();
@@ -1157,8 +1204,8 @@ require(['ABSdecoration', 'ABSanimation',
             }
             var animationQueue = absAnimation.export();
             return {
-                params:params,
-                aniQueue:animationQueue
+                params: params,
+                aniQueue: animationQueue
             };
         };
         this.load = function (slideParam) {
@@ -1205,6 +1252,25 @@ require(['ABSdecoration', 'ABSanimation',
             actionManager.onNewSlide(slides.length);
             pageTotal.text(slides.length);
         };
+        this.copy = function (slideParam) {
+            var slide = new Slide();
+            slide.focus();
+            curSlide = slide;
+            slide.setIdx(slides.push(slide));
+
+            // 새로운 id의 오브젝트들을 생성
+            var params = {};
+            for (var id in slideParam.params) {
+                var newId = idGenerator.get();
+                params[newId] = slideParam.params[id];
+                params[newId].id = newId;
+            }
+            slideParam.params = params;
+            slide.load(slideParam);
+            syncBlock();
+            actionManager.onCopySlide(slide, slideParam);
+            pageTotal.text(slides.length);
+        };
         this.insert = function (idx, params) {
             // push back
             for (var i = slides.length - 1; i >= idx - 1; i--) {
@@ -1224,7 +1290,18 @@ require(['ABSdecoration', 'ABSanimation',
         };
 
         // curSlide을 지운다.
-        this.del = function () {
+        this.del = function (idx) {
+            if (idx !== undefined) {
+                var slide = slides.splice(idx-1, 1)[0];
+                slide.remove();
+                for (var i = idx; i < slides.length; i++) {
+                    slides[i].setIdx(i + 1);
+                }
+                curSlide = undefined;
+                pageCur.text(0);
+                pageTotal.text(slides.length);
+                return;
+            }
             if (curSlide) {
                 actionManager.onDelSlide(curSlide);
                 var idx = curSlide.getIdx() - 1;
@@ -1236,6 +1313,42 @@ require(['ABSdecoration', 'ABSanimation',
                 curSlide = undefined;
                 pageCur.text(0);
                 pageTotal.text(slides.length);
+            }
+        };
+        this.up = function () {
+            if (curSlide && curSlide.getIdx()>1) {
+                // change block order in block list
+                var idx = curSlide.getIdx();
+                var prev = slides[idx-2].getBlockWrapper();
+                prev.$.insertAfter(curSlide.getBlockWrapper().$);
+
+                // change order in array slides
+                var tmp = slides[idx-1];
+                slides[idx-1] = slides[idx-2];
+                slides[idx-2] = tmp;
+
+                // change index order in block list
+                slides[idx-1].setIdx(idx);
+                slides[idx-2].setIdx(idx-1);
+            }
+        };
+        this.down = function () {
+            console.log(curSlide.getIdx());
+            console.log(slides.length);
+            if (curSlide && curSlide.getIdx() < slides.length) {
+                // change block order in block list
+                var idx = curSlide.getIdx();
+                var next = slides[idx].getBlockWrapper();
+                curSlide.getBlockWrapper().$.insertAfter(next.$);
+
+                // change order in array slides
+                var tmp = slides[idx-1];
+                slides[idx-1] = slides[idx];
+                slides[idx] = tmp;
+
+                // change index order in block list
+                slides[idx-1].setIdx(idx);
+                slides[idx].setIdx(idx+1);
             }
         };
         this.next = function () {
@@ -1387,15 +1500,15 @@ require(['ABSdecoration', 'ABSanimation',
 
         // calculate sbg width and height
 
-    // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
-    // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
+        // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
+        // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
     var sbgWidth = 1280 * 0.6, sbgHeight = 800 * 0.6, ratio;
-        if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
-            ratio = sbgWidth / slideEditorWidth;
-        else
-            ratio = sbgHeight / slideEditorHeight;
-        // var dw = 1280, dh = 800;
-        // var sbgWidth = dw, sbgHeight = dh;
+    if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
+        ratio = sbgWidth / slideEditorWidth;
+    else
+        ratio = sbgHeight / slideEditorHeight;
+    // var dw = 1280, dh = 800;
+    // var sbgWidth = dw, sbgHeight = dh;
 
     var sbgMarginLeft = (slideEditorWidth - sbgWidth) / 2, sbgMarginTop = (slideEditorHeight - sbgHeight) / 2;
     var slideEditorWidthAni = slideEditorWidth - animationViewerWidth, sbgMaringLeftAni = (slideEditorWidthAni - sbgWidth) / 2; // animationViewer가 나왔을 때의 width와 margin
@@ -1410,8 +1523,8 @@ require(['ABSdecoration', 'ABSanimation',
     // for ABS Object
     ABSdeco.initContextMenu(actionManager);
     ABSdeco.setKeyLocker({
-        lock:lockDel,
-        unlock:unlockDel
+        lock: lockDel,
+        unlock: unlockDel
     })
 
     Div.prototype.setSlideContextMenu = function (slide) {
@@ -1453,20 +1566,25 @@ require(['ABSdecoration', 'ABSanimation',
 
     var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%', 40);
     var decoSlideMenuButton = function (div) {
-        div.size(25, 25).marginLeft(20).cursorPointer();
+        div.size(25, 25).marginLeft(15).cursorPointer();
     };
-    var newSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/newslide.png').marginLeft(30)
-        .click(function () {
-            slideManager.new();
-        });
-    var delSlideButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/delslide.png')
-        .click(function () {
-            slideManager.del();
-        });
+    var decoSlideListButton = function (div) {
+        div.size(20, 20).marginLeft(10).cursorPointer();
+    };
+
+    var localSaveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/localSave.png').click(onLocalSave);
+    var localLoadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/localLoad.png').click(onLocalLoad);
     var saveButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/save.png').click(onSave);
     var loadButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/load.png').click(onLoad);
     var undoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/undo.png').click(onUndo);
     var redoButton = div().appendTo(slideMenuBar).deco(decoSlideMenuButton).image('../images/redo.png').click(onRedo);
+
+    // slidelist buttons
+    var slideListButtons = div().appendTo(slideList).color('white').size('100%', 40).borderBottom(borderGray).padding(10);
+    var newSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/newslide.png').click(onNewSlide);
+    var delSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/delslide.png').click(onDelSlide);
+    var upSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/arrowUp.png').click(onUpSlide);
+    var downSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/arrowDown.png').click(onDownSlide);
 
     // object menu bar
     var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
@@ -1560,11 +1678,11 @@ require(['ABSdecoration', 'ABSanimation',
         if (curSlide) {
             var obj = absObject({
                 type: 'html',
-                style:{
-                    width:'200px',
-                    height:'120px'
+                style: {
+                    width: '200px',
+                    height: '120px'
                 },
-                media:''
+                media: ''
             });
             obj.focus();
             // tinymce option과 콜백 함수 전달
@@ -1594,31 +1712,37 @@ require(['ABSdecoration', 'ABSanimation',
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Ace').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'ace', media: '', style:{
-                width:'300px',
-                height:'120px'
-            }});
+            var obj = absObject({
+                type: 'ace', media: '', style: {
+                    width: '300px',
+                    height: '120px'
+                }
+            });
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Module').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'module', media: '', style:{
-                width:'300px',
-                height:'400px'
-            }});
+            var obj = absObject({
+                type: 'module', media: '', style: {
+                    width: '300px',
+                    height: '400px'
+                }
+            });
             obj.focus();
             curSlide.append(obj);
         }
     });
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Iframe').click(function () {
         if (curSlide) {
-            var obj = absObject({type: 'iframe', media: '', style:{
-                width:'300px',
-                height:'400px',
-                border:'10px ridge white'
-            }});
+            var obj = absObject({
+                type: 'iframe', media: '', style: {
+                    width: '300px',
+                    height: '400px',
+                    border: '10px ridge white'
+                }
+            });
             obj.focus();
             curSlide.append(obj);
         }
@@ -1648,7 +1772,7 @@ require(['ABSdecoration', 'ABSanimation',
             onAnimationViewer();
         isAniViewerOn = !isAniViewerOn;
     };
-    var buttonTelegram =div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
+    var buttonTelegram = div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
         .text('Telegram').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee', 'white')
         .click(onTelegram);
 
@@ -1666,7 +1790,7 @@ require(['ABSdecoration', 'ABSanimation',
         var cntMember = 0;
         var members = [];
         this.insertMember = function (name) {
-            for (var i=0; i<members.length; i++) {
+            for (var i = 0; i < members.length; i++) {
                 if (members[i] === name)
                     return;
             }
@@ -1676,7 +1800,7 @@ require(['ABSdecoration', 'ABSanimation',
             div().appendTo(member).size('100%', '10%').color(colors[(++cntMember * 11) % 15]);
         };
         this.setMembers = function (members) {
-            for (var i=0; i<members.length; i++) {
+            for (var i = 0; i < members.length; i++) {
                 this.insertMember(members[i]);
             }
         };
@@ -1684,7 +1808,6 @@ require(['ABSdecoration', 'ABSanimation',
             return members;
         }
     };
-
 
 
     /** status bar **/
