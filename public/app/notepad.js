@@ -57,7 +57,6 @@ var addMemo = div().size(90,50).border(1).color('white').borderColor('black').te
             .click(function () {
                 //현재 메모의 클래스를 가져온다.
                 cntMemo = memo.class();
-                //bottomDiv.text(cntMemo);
                 var txt = localStorage.getItem(cntMemo);
                 memoContent.text(txt);
             });
