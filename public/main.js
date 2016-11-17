@@ -25,6 +25,7 @@ requirejs.config({
         amba: '../javascripts/amba',
         ambaMod: '../javascripts/amba-mod',
         ambaUtils: '../javascripts/amba-util'
+        // primus: '../primus/primus'
     }
 
     //require.js가 로딩되기전에 config파일에서 먼저 로딩되야하는 모듈 목록을 배열로 나열
