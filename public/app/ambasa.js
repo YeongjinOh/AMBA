@@ -9,11 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
     /** set global module **/
 
     window.ambasa = {};
-<<<<<<< HEAD
-    var useOnline = true, useLocalStorage = false;
-=======
     var useOnline = false;
->>>>>>> 9c4f37b243a9a9d5a2f8b7bcb4ccdfad4d2e0cf7
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -1478,13 +1474,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
 
     /** basic setting for layout **/
 
-<<<<<<< HEAD
-    //var w = window.outerWidth, h = window.outerHeight;
-var w = 1280, h = 800;
-=======
     var w = window.outerWidth, h = window.outerHeight;
     // var w = 1280, h = 800;
->>>>>>> 9c4f37b243a9a9d5a2f8b7bcb4ccdfad4d2e0cf7
     var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
         slideListWidth = 220, slideListHeight = h - menuBarHeight - statusBarHeight,
         slideEditorWidth = w - slideListWidth, slideEditorHeight = slideListHeight;
@@ -1511,20 +1502,11 @@ var w = 1280, h = 800;
     /** set slide background **/
 
         // calculate sbg width and height
-<<<<<<< HEAD
-    var dw = 1280, dh = 800;
-    var sbgMargin = slideEditorWidth / 8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
-    var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
-    if (dh * sbgMaxWidth < dw * sbgMaxHeight)
-        ratio = dw / sbgMaxWidth;
-=======
-
         // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
         // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
     var sbgWidth = 1280 * 0.6, sbgHeight = 800 * 0.6, ratio;
     if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
         ratio = sbgWidth / slideEditorWidth;
->>>>>>> 9c4f37b243a9a9d5a2f8b7bcb4ccdfad4d2e0cf7
     else
         ratio = sbgHeight / slideEditorHeight;
     // var dw = 1280, dh = 800;
