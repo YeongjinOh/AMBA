@@ -1429,7 +1429,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
 
 
     var SlideShowManager = function () {
-        var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
+        var ww = window.innerWidth, wh = window.innerHeight, zoomRatio = 1;
         var fullscreenViewer = div().append().size(ww, wh).displayNone().color('black');
         if (wh * sbgWidth > ww * sbgHeight) {
             zoomRatio = ww / sbgWidth;
