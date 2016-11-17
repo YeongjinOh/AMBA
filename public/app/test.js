@@ -2,11 +2,11 @@
 
 requirejs(['telegram'], function (tele) {
 
-    //var p = div().append()//.size('100%', '100%');
-    //tele.appendTo(p);
+    var p = div().append()//.size('100%', '100%');
+    tele.appendTo(p);
 
-    var teleWrapper = div().append().border('4px solid gray').position('absolute').draggable().resizable().top(80).left(30);
-        tele.appendTo(teleWrapper);
+    //var teleWrapper = div().append().border('4px solid gray').position('absolute').draggable().resizable().top(80).left(30);
+    //    tele.appendTo(teleWrapper);
 
 
 //    var currentRoomid ;

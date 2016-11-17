@@ -238,6 +238,7 @@ define(['OnlineManager'], function (online) {
         var sendBtn = div().id('sendBtn').appendTo(contentBottom2).size('100%','100%')
             .image('../images/send.png').cursorPointer()
             .click(function () {
+
                 var msg = inputView.text();
                 if(msg !== '' && currentRoomid!==undefined) {
                     online.sendMessage({

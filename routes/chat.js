@@ -42,7 +42,7 @@ module.exports = function (server) {
 
             if('sendMessage' === action){
                 //spark별로 현재 join한 room을 리턴해준다.
-                //console.log('spark.rooms() : ', spark.rooms());
+                console.log('spark.rooms() : ', spark.rooms());
 
                 //spark객체가 조인한 room중에서 특정 room을 포함하고 있으면 0리턴
                 if (~spark.rooms().indexOf(room)) {
@@ -72,13 +72,15 @@ module.exports = function (server) {
 console.log(spark.rooms);
 console.log(spark.room);
             //console.log('spark.rooms() : ', spark.rooms());
-            spark.room(channel).except(spark.id).write({
-                action : 'broadcast_msg',
-                message : {
-                    username : spark.username,
-                    msg : message
-                }
-            });
+            if(spark !==undefined) {
+                spark.room(channel).except(spark.id).write({
+                    action: 'broadcast_msg',
+                    message: {
+                        username: spark.username,
+                        msg: message
+                    }
+                });
+            }
         });
     });
 
