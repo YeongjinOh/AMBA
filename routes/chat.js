@@ -8,6 +8,7 @@ var Primus = require('primus');
 var Rooms = require('primus-rooms');
 var options = {
     transformer: "engine.io"
+    //transformer: 'websockets'
 };
 
 
@@ -37,7 +38,7 @@ module.exports = function (server) {
                     spark.room(room).except(spark.id).write(spark.username + ' joined room ' + room);
                 });
                 //채널(채팅방)등록
-                sub.subscribe(room);
+                //sub.subscribe(room);
             }
 
             if('sendMessage' === action){
@@ -46,19 +47,26 @@ module.exports = function (server) {
 
                 //spark객체가 조인한 room중에서 특정 room을 포함하고 있으면 0리턴
                 if (~spark.rooms().indexOf(room)) {
-                    pub.publish(room, msg);
+                    //pub.publish(room, msg);
+                    spark.room(room).except(spark.id).write({
+                        action : 'broadcast_msg',
+                        message : {
+                            username : spark.username,
+                            msg : msg
+                        }
+                    });
                 } else {
                     // join the room
                     spark.join(room, function(){
-                        pub.publish(room,msg);
-                        /*//id를 통해 본인을 제외하고 room(room)에 접속한 spark에 메시지를 전송
+                        //pub.publish(room,msg);
+                        //id를 통해 본인을 제외하고 room(room)에 접속한 spark에 메시지를 전송
                         spark.room(room).except(spark.id).write({
                             action : 'broadcast_msg',
                             message : {
                                 username : spark.username,
                                 msg : msg
                             }
-                        });*/
+                        });
                     });
                 }
             }
@@ -68,11 +76,9 @@ module.exports = function (server) {
         sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
             console.log("sub channel " + channel + " : " + message);
             //spark별로 현재 join한 room을 리턴해준다.
-         //console.log('spark : ', spark);
-        //console.log(spark.rooms);
-        //console.log(spark.room);
-            //console.log('spark.rooms() : ', spark.rooms());
+            console.log('spark : ', spark);
             if(spark !==undefined) {
+                console.log('spark.rooms() : ', spark.rooms());
                 spark.room(channel).except(spark.id).write({
                     action: 'broadcast_msg',
                     message: {
@@ -89,3 +95,84 @@ module.exports = function (server) {
         spark.end();
     });
 };
+
+
+//spark :  Sparky {
+//    domain: null,
+//        _events:
+//    { 'outgoing::end': [Function],
+//        'outgoing::data': [Function],
+//        data: [Function] },
+//    _eventsCount: 3,
+//        _maxListeners: undefined,
+//        username: 'lightsoo',
+//        __readyState: 2 }
+
+
+/*spark :  Sparky {
+    domain: null,
+        _events:
+    { 'incoming::data': { [Function: message] __ultron: 1 },
+        'incoming::ping': { [Function: ping] __ultron: 1 },
+        'incoming::end': { [Function: disconnect] __ultron: 1 },
+        'incoming::error': { [Function: error] __ultron: 1 },
+        end: [ [Object], [Object] ],
+            'outgoing::end': [Function],
+        'outgoing::data': [Function],
+        data: [Function] },
+    _eventsCount: 8,
+        _maxListeners: undefined,
+        _rooms:
+    Rooms {
+        ctx: [Circular],
+            id: 'Y_tLxDsUjTOhloY_AAAA',
+            primus:
+        Primus {
+            _events: [Object],
+                _eventsCount: 2,
+                auth: null,
+                connections: [Object],
+                ark: [Object],
+                layers: [Object],
+                transformer: [Object],
+                encoder: [Function: encoder],
+            decoder: [Function: decoder],
+            connected: 1,
+                whitelist: [],
+                options: [Object],
+                transformers: [Object],
+                server: [Object],
+                pathname: '/primus',
+                spec: [Object],
+                Spark: [Object],
+                parser: [Object],
+                '$': [Object],
+                _adapter: [Object],
+                _rooms: [Object],
+                join: [Function: join],
+            leave: [Function: leave],
+            rooms: [Function: rooms],
+            clients: [Function],
+                empty: [Function],
+                except: [Function],
+        in: [Function],
+                isRoomEmpty: [Function],
+                room: [Function] },
+        adapter:
+            Adapter {
+            rooms: [Object],
+                sids: [Object],
+                wildDelete: false,
+                wildcard: [Object] },
+        __rooms__: [],
+            __except__: [],
+            __transformer: null,
+            onend: [Function: bound onend] },
+    username: 'lightsoo' }*/
+
+
+
+
+
+
+
