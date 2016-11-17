@@ -31,7 +31,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     }();
 
     // local에서 client 2개 띄우기 위해 랜덤값 부여
-    //var username = Math.random();
+    // var username = Math.random();
      var username = authFactory.getUsername();
     var token = authFactory.getToken();
     if (!username || !token) {
@@ -49,9 +49,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             online.join(roomid);
             online.onRecieve(function (data) {
                 if (data.action === 'broadcast_msg') {
-                    var action = data.message.msg;
+                    console.log('onRecieve');
+                    console.log(data);
+                    var action = JSON.parse(data.message.msg);
                     if (action.target === 'obj' || action.target === 'slide') {
-                        console.log('onRecieve');
+
                         actionManager.get(action);
                     }
                     // 내가 서버이고, 새로운 클라이언트가 접속하면 클라이언트임을 알려주고, 접속자 리스트를 보낸다.
@@ -60,12 +62,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                         var actionParams = actionManager.export();
                         online.sendMessage({
                             roomid: roomid,
-                            msg: {
+                            msg: JSON.stringify({
                                 target: 'client',
                                 action: 'join',
                                 members: members,
                                 actionParams: actionParams
-                            },
+                            }),
                             username: username
                         });
                         memberManager.insertMember(data.message.username);
@@ -90,10 +92,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
             online.sendMessage({
                 roomid: roomid,
-                msg: {
+                msg: JSON.stringify({
                     target: 'server',
                     action: 'join'
-                },
+                }),
                 username: username
             });
         }
@@ -221,7 +223,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     console.log(action);
                     online.sendMessage({
                         roomid: roomid,
-                        msg: action,
+                        msg: JSON.stringify(action),
                         username: username
                     });
                 }
@@ -496,7 +498,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 };
                 online.sendMessage({
                     roomid: roomid,
-                    msg: action,
+                    msg: JSON.stringify(action),
                     username: username
                 });
             }
@@ -508,7 +510,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 };
                 online.sendMessage({
                     roomid: roomid,
-                    msg: action,
+                    msg: JSON.stringify(action),
                     username: username
                 });
             }
