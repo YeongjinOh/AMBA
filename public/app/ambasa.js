@@ -14,7 +14,7 @@ require(['ABSdecoration', 'ABSanimation',
     /** set global module **/
 
     window.ambasa = {};
-    var useOnline = false, useLocalStorage = true;
+    var useOnline = true, useLocalStorage = false;
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
 
@@ -34,8 +34,8 @@ require(['ABSdecoration', 'ABSanimation',
     }();
 
     // local에서 client 2개 띄우기 위해 랜덤값 부여
-    var username = Math.random();
-    // var username = authFactory.getUsername();
+    //var username = Math.random();
+     var username = authFactory.getUsername();
     var token = authFactory.getToken();
     if (!username || !token) {
         $(location).attr('href', '/?app=signin');
@@ -1358,7 +1358,8 @@ require(['ABSdecoration', 'ABSanimation',
 
     /** basic setting for layout **/
 
-    var w = window.outerWidth, h = window.outerHeight;
+    //var w = window.outerWidth, h = window.outerHeight;
+var w = 1280, h = 800;
     var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
         slideListWidth = 220, slideListHeight = h - menuBarHeight - statusBarHeight,
         slideEditorWidth = w - slideListWidth, slideEditorHeight = slideListHeight;
@@ -1385,7 +1386,7 @@ require(['ABSdecoration', 'ABSanimation',
     /** set slide background **/
 
         // calculate sbg width and height
-    var dw = 1280, dh = 1300;
+    var dw = 1280, dh = 800;
     var sbgMargin = slideEditorWidth / 8, ratio = 1; // 전체 화면과 Editor 상 background 사이의 비율
     var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
     if (dh * sbgMaxWidth < dw * sbgMaxHeight)

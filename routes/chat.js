@@ -68,6 +68,9 @@ module.exports = function (server) {
         sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
             console.log("sub channel " + channel + " : " + message);
             //spark별로 현재 join한 room을 리턴해준다.
+		console.log('spark : ', spark);
+console.log(spark.rooms);
+console.log(spark.room);
             //console.log('spark.rooms() : ', spark.rooms());
             spark.room(channel).except(spark.id).write({
                 action : 'broadcast_msg',
