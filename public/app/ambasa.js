@@ -1266,11 +1266,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'telegram', 'https://
             var params = {};
             for (var id in slideParam.params) {
                 var newId = idGenerator.get();
-                params[newId] = slideParam.params[id];
+                params[newId] = $.extend({}, slideParam.params[id]);
                 params[newId].id = newId;
             }
-            slideParam.params = params;
-            slide.load(slideParam);
+            var newSlideParam = {
+                params:params,
+                aniQueue:[]
+            };
+            slide.load(newSlideParam);
             syncBlock();
             actionManager.onCopySlide(slide, slideParam);
             pageTotal.text(slides.length);
@@ -1542,7 +1545,7 @@ var w = 1280, h = 800;
     ABSdeco.setKeyLocker({
         lock: lockDel,
         unlock: unlockDel
-    })
+    });
 
     Div.prototype.setSlideContextMenu = function (slide) {
         this.$.bind("contextmenu", function (event) {
