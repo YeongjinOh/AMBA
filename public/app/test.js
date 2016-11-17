@@ -1,8 +1,39 @@
 //div().append().text('This is test application');
 
+
+/**
+ * AB -> AB
+ * AC
+ */
+function solution(arr){
+    arr.split('AB').join('BA');
+    arr.split('AA').join('A');
+    //return arr.split('CC').join('C').split('AB').join('BA').split('AA').join('A');
+    console.log(arr.split('CC').join('C').split('AB').join('BA').split('AA').join('A'));
+    console.log(arr.split('CC').join('C').split('AA').join('A').split('AB').join('BA'));
+
+    //return arr.split('CC').join('C').split('AA').join('A').split('AB').join('BA');
+}
+
+function replaceAll(str, searchStr, replaceStr) {
+    return str.split(searchStr).join(replaceStr);
+}
+
+
+
+
+
 requirejs(['telegram'], function (tele) {
 
-    var p = div().append()//.size('100%', '100%');
+    //var test = "DAABCCAA";
+    //console.log(test);
+    //console.log(solution(test));
+    /*while(true){
+        console.log(solution(test));
+    }*/
+
+
+    var p = div().append();//.size('100%', '100%');
     tele.appendTo(p);
 
     //var teleWrapper = div().append().border('4px solid gray').position('absolute').draggable().resizable().top(80).left(30);

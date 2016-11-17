@@ -15,6 +15,7 @@ define(['primus'], function (Primus) {
     };
 
     Module.join = function (rid) {
+        console.log('join the ' ,rid);
             primus.write({
                 action: 'join',
                 message: {
@@ -27,6 +28,7 @@ define(['primus'], function (Primus) {
     };
 
     Module.sendMessage = function (msg) {
+        console.log('sendMessage : ', msg);
         primus.write({
             action: 'sendMessage',
             message : msg
@@ -36,6 +38,7 @@ define(['primus'], function (Primus) {
 
     Module.onRecieve = function (fn) {
         primus.on('data', function (data) {
+            console.log('recieved msg : ', data);
             if(fn)
                 fn(data);
         });

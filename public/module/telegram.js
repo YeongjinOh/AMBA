@@ -180,7 +180,8 @@ define(['OnlineManager'], function (online) {
                 vParent.displayBlock();
             });
 
-        var listView = div().appendTo(parent).size(300, 470).displayBlock().color('white');
+        var listView = div().appendTo(parent).size(300, 470).displayBlock().color('white')
+            .borderOption(1).borderOption('#EBE8E7', 'color');
         var freindList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayBlock();
         var roomList = div().appendTo(listView).size('100%','100%').overflow('scroll').displayNone();
         var chatView = div().appendTo(listView).size('300','100%').displayNone();
@@ -247,14 +248,7 @@ define(['OnlineManager'], function (online) {
                         msg: msg
                     });
 
-                    $.post("/online/msg",
-                        {
-                            roomid : currentRoomid,
-                            username :  ainfo.username,
-                            time : getTime(),
-                            message : msg
-                        }, function (result) {
-                            var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
+                    var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
                             var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
                                 .marginRight(10).color('white').fontSize(15).maxWidth(200)
                                 .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
@@ -266,7 +260,28 @@ define(['OnlineManager'], function (online) {
                             myMsg.appendTo(chatListView);
                             chatListView.setScrollTop();
                             inputView.text('');
-                        });
+
+                    //여기서 호출하는게 문제야. send에서 콜백받을때 서버에 전송하도록 바꿔보자.
+                    //$.post("/online/msg",
+                    //    {
+                    //        roomid : currentRoomid,
+                    //        username :  ainfo.username,
+                    //        time : getTime(),
+                    //        message : msg
+                    //    }, function (result) {
+                    //        var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
+                    //        var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
+                    //            .marginRight(10).color('white').fontSize(15).maxWidth(200)
+                    //            .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
+                    //            .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
+                    //            .fontFamily('Meiryo');
+                    //        var myTime = div().appendTo(myMsg).size('auto', '13').floatRight()
+                    //            .fontSize(11)
+                    //            .text(getTime()).marginRight(5);
+                    //        myMsg.appendTo(chatListView);
+                    //        chatListView.setScrollTop();
+                    //        inputView.text('');
+                    //    });
                 }
             });
 
@@ -389,9 +404,11 @@ define(['OnlineManager'], function (online) {
 
             room.hover(onHover, offHover)
                 .dblclick(function () {
+
                     chatListView.empty();
                     currentRoomid = roomData.roomid;
                     online.join(roomData.roomid);
+                    console.log('join the ' + currentRoomid);
                     networkManager.loadMessage(currentRoomid);
                     setCurrentView(chatView);
                 });

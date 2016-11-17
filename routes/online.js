@@ -88,7 +88,7 @@ router.get('/history', function (req, res, next) {
 //채팅방에 참여하였을때 + 메시지를 보냈을때
 //Lists의 LPUSH를 이용해서 순차적으로 넣어준다
 //LPUSH KEY VALUE;
-router.post('/msg', function (req,res,next) {
+router.post('/msg', function (req, res, next) {
     //var score = new Date().getTime();
     var body = req.body;
     var roomid = body.roomid;
