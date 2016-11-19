@@ -75,8 +75,12 @@ module.exports = function (server) {
         //pub.publish()를 호출하면 여기로 넘어간다
         sub.on('message', function (channel, message) {//메시지를 수신하면 발생하는 이벤트
             console.log("sub channel " + channel + " : " + message);
+
             //spark별로 현재 join한 room을 리턴해준다.
-            console.log('spark : ', spark);
+            //console.log('spark : ', spark);
+            //여기서 조인을 다시 해준다
+            //spark.join(channel);
+
             if(spark !==undefined) {
                 console.log('spark.rooms() : ', spark.rooms());
                 spark.room(channel).except(spark.id).write({
