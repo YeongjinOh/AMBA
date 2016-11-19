@@ -8,25 +8,243 @@ define ([], function() {
             var animationQueue = [], showtimeQueue, previewQueue;
             var index = -1;
             var target, curId, curSlideId;
+            var seq = 0, pipeBody;
             var module = {
                 init: function (dv, getId, getSlideId) {
                     target = dv;
                     curId = getId;
                     curSlideId = getSlideId;
                 },
+
                 import: function (aq) {
                     if (aq === undefined || typeof aq !== 'object') {
                         animationQueue = [];
                         return;
                     }
                     animationQueue = aq.slice(0);
+
+                    this.initialAnimation();
                 },
                 export: function () {
                     return animationQueue;
                 },
-                append: function () {
+                initialAnimation: function() {
                     var that = this;
-                    var i, seq = 0;
+                    var i;
+                    var manager = that.animationManager();
+                    var effect = ['Show', 'Hide', 'Fade In', 'Fade Out', 'Slide Down', 'Slide Up'];
+                    var timing = ['클릭시', '이전 애니메이션 시작 시', '이전 애니메이션 완료 후'];
+
+                    //TODO Need Refactoring
+                    var decoSelectMenu = function (dv) {
+                        dv.position('relative').size('100%', 'auto').minHeight(20).color('#eeeeee').fontBold().marginTop(5).borderRadius(3).boxShadow('1px 1px 1px 1px black');
+                    };
+
+                    var decoSelector = function (dv) {
+                        dv.displayBlock().size('80%', 23).color('#eeeeee').fontBold().marginLeft(16).marginTop(20).borderRadius(3).boxShadow('1px 1px 1px 1px black').paddingTop(2);
+                    };
+
+                    var decoContent = function (dv) {
+                        dv.size('100%', 160).color('white').cursorPointer();
+                    };
+
+                    var decoMenu = function (dv) {
+                        dv.appendTo(pipeBody).size('100%', 'auto').minHeight(50).color('white').fontBold().fontColor('black')
+                            .paddingTop(3).paddingLeft(10).margin(1).cursorPointer();
+                    };
+
+                    var focus = function(ify) {
+                        if (animationQueue.length != 0) {
+                            for (i = 0; i < animationQueue.length; i++) {
+                                if (ify === animationQueue[i].ify) {
+                                    $('#'+animationQueue[i].id).data('ambasa').focus();
+                                }
+                            }
+                        }
+                    };
+
+                    var packaging = function (ify, eff, tim, dur) {
+                        var aniData = {};
+                        aniData.ify = ify;
+                        aniData.id = curId();
+                        aniData.effect = convertEffect(eff);
+                        aniData.timing = tim.slice(1, tim.length - 1);
+                        aniData.duration = parseInt(dur);
+
+                        for (i = 0; i < animationQueue.length; i++) {
+                            if (animationQueue[i].ify === ify) {
+                                animationQueue[i] = aniData;
+                                // console.log(animationQueue);
+                                return;
+                            }
+                        }
+
+                        animationQueue.push(aniData);
+                        // console.log(animationQueue);
+                    };
+
+                    var convertEffect = function(eff) {
+                        switch (eff) {
+                            case 'Show':
+                                return 'show';
+                            case 'show':
+                                return 'Show';
+                            case 'Hide':
+                                return 'hide';
+                            case 'hide':
+                                return 'Hide';
+                            case 'Fade In':
+                                return 'fadeIn';
+                            case 'fadeIn':
+                                return 'Fade In';
+                            case 'Fade Out':
+                                return 'fadeOut';
+                            case 'fadeOut':
+                                return 'Fade Out';
+                            case 'Slide Down':
+                                return 'slideDown';
+                            case 'slideDown':
+                                return 'Slide Down';
+                            case 'Slide Up':
+                                return 'slideUp';
+                            case 'slideUp':
+                                return 'Slide Up';
+                        }
+                    };
+
+                    if (animationQueue.length != 0) {
+                        var syncStack = animationQueue.slice(0);
+                        var syncBlock;
+
+                        var addAnimation = $('#abs-ani-'+curSlideId()).data('div');
+                        
+                        addAnimation.detach();
+                        
+                        while (syncStack.length !== 0) {
+                            seq++;
+                            syncBlock = syncStack.splice(0, 1)[0];
+                            syncBlock.ify = curSlideId()+'-'+syncBlock.ify.split('-')[1];
+                            // console.log(syncBlock);
+                            // console.log(curSlideId());
+
+                            //TODO 내가 원하는 곳의 ify가 맞을까 ?
+                            var menu = div().id('abs-ani-menu-' + syncBlock.ify).deco(decoMenu).fontBold().click(function (dv, e) {
+                                e.stopPropagation();
+                                e.preventDefault();
+
+                                focus(syncBlock.ify);
+
+                                if (AB.find('abs-ani-con-' + syncBlock.ify)) {
+                                    $('#abs-ani-con-' + syncBlock.ify).remove();
+                                }
+                                else {
+                                    var content = div().id('abs-ani-con-' + syncBlock.ify).deco(decoContent).appendTo(menu).click(function (dv, e) {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                    });
+
+                                    var conEffect = div().id('abs-ani-sel-ani' + syncBlock.ify).deco(decoSelector)
+                                        .appendTo(content).text($('#abs-ani-menu-effect-' + syncBlock.ify).data('div').text())
+                                        .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+
+                                            focus(syncBlock.ify);
+
+                                            if (AB.find('abs-ani-sel-' + syncBlock.ify)) {
+                                                $('#abs-ani-sel-' + syncBlock.ify).remove();
+                                            }
+                                            else {
+                                                var selEffect = div().id('abs-ani-sel-' + syncBlock.ify).deco(decoSelectMenu).appendTo(conEffect).click(function (dv, e) {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+
+                                                    focus(syncBlock.ify);
+                                                });
+
+                                                for (i = 0; i < effect.length; i++) {
+                                                    div().appendTo(selEffect).size('100%', 20).color('#eeeeee').text(effect[i]).fontBold()
+                                                        .hoverTextColor('blue', 'black').click(function (dv) {
+                                                        conEffect.text(dv.text());
+                                                        $('#abs-ani-menu-effect-' + syncBlock.ify.split('-')[0] + '-' + menu.id().split('-')[4]).data('div').text(dv.text());
+                                                        packaging(syncBlock.ify, $('#abs-ani-menu-effect-' + syncBlock.ify).text(), $('#abs-ani-menu-timing-' + syncBlock.ify).text(), durationValue.text());
+                                                        selEffect.detach();
+                                                    });
+                                                }
+                                            }
+                                        });
+
+                                    var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-' + syncBlock.ify).data('div').text().slice(1, length - 2))
+                                        .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+
+                                            focus(syncBlock.ify);
+
+                                            if (AB.find('abs-ani-sel-' + syncBlock.ify)) {
+                                                $('#abs-ani-sel-' + syncBlock.ify).remove();
+                                            }
+                                            else {
+                                                var selTiming = div().id('abs-ani-sel-' + syncBlock.ify).deco(decoSelectMenu).appendTo(conTiming).click(function (dv, e) {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+
+                                                    focus(syncBlock.ify);
+                                                });
+
+                                                for (i = 0; i < timing.length; i++) {
+                                                    div().appendTo(selTiming).size('100%', 20).color('#eeeeee').text(timing[i]).fontBold()
+                                                        .hoverTextColor('blue', 'black').click(function (dv) {
+                                                        conTiming.text(dv.text());
+                                                        $('#abs-ani-menu-timing-' + syncBlock.ify.split('-')[0] + '-' + menu.id().split('-')[4]).data('div').text('(' + dv.text() + ')');
+                                                        packaging(syncBlock.ify, $('#abs-ani-menu-effect-' + syncBlock.ify).text(), $('#abs-ani-menu-timing-' + syncBlock.ify).text(), durationValue.text());
+                                                        selTiming.detach();
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    var conDuration = div().deco(decoSelector).appendTo(content).zIndex(1).keypress(function (dv, e) {
+                                        if (e.which == 13) {
+                                            durationOK.trigger('click');
+                                            e.preventDefault();
+                                            return false;
+                                        }
+                                    }).click(function (dv, e) {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+
+                                        focus(seq);
+                                        durationValue.$text.focus();
+                                    });
+
+                                    var durationValue = div().appendTo(conDuration).size('80%', '100%').text(syncBlock.duration).editable().textAlignCenter().cursorText().fontBold().hoverTextColor('blue', 'black');
+                                    var durationOK = div().appendTo(conDuration).size('20%', '100%').text('OK').fontBold().textAlignCenter().cursorPointer()
+                                        .hoverTextColor('blue', 'black').click(function () {
+                                            packaging(syncBlock.ify, $('#abs-ani-menu-effect-' + syncBlock.ify).text(), $('#abs-ani-menu-timing-' + syncBlock.ify).text(), durationValue.text());
+                                        });
+                                }
+                            });
+
+                            div().id('abs-ani-menu-effect-'+syncBlock.ify).appendTo(menu).size('90%', 'auto').fontBold().text(convertEffect(syncBlock.effect));
+                            div().appendTo(menu).size('auto', 'auto').text('×').fontBold().hoverTextColor('blue', 'black').click(function (dv, e) {
+                                e.stopPropagation();
+                                e.preventDefault();
+
+                                menu.remove();
+                                manager.remove(syncBlock.ify);
+                            });
+                            div().id('abs-ani-menu-timing-'+syncBlock.ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + syncBlock.timing + ')').fontSize(12).fontBold();
+
+                        }
+                        
+                        addAnimation.appendTo(pipeBody);
+                    }
+                },
+                append: function () {
+                    // console.log(animationQueue);
+
+                    var that = this;
+                    var i;
                     var manager = that.animationManager();
                     var effect = ['Show', 'Hide', 'Fade In', 'Fade Out', 'Slide Down', 'Slide Up'];
                     var timing = ['클릭시', '이전 애니메이션 시작 시', '이전 애니메이션 완료 후'];
@@ -67,45 +285,57 @@ define ([], function() {
                         var aniData = {};
                         aniData.ify = ify;
                         aniData.id = curId();
-                        switch (eff) {
-                            case 'Show':
-                                aniData.effect = 'show';
-                                break;
-                            case 'Hide':
-                                aniData.effect = 'hide';
-                                break;
-                            case 'Fade In':
-                                aniData.effect = 'fadeIn';
-                                break;
-                            case 'Fade Out':
-                                aniData.effect = 'fadeOut';
-                                break;
-                            case 'Slide Down':
-                                aniData.effect = 'slideDown';
-                                break;
-                            case 'Slide Up':
-                                aniData.effect = 'slideUp';
-                                break;
-                        }
+                        aniData.effect = convertEffect(eff);
                         aniData.timing = tim.slice(1, tim.length - 1);
                         aniData.duration = parseInt(dur);
 
                         for (i = 0; i < animationQueue.length; i++) {
                             if (animationQueue[i].ify === ify) {
                                 animationQueue[i] = aniData;
-                                console.log(animationQueue);
+                                // console.log(animationQueue);
                                 return;
                             }
                         }
 
                         animationQueue.push(aniData);
-                        console.log(animationQueue);
+                        // console.log(animationQueue);
+                    };
+
+                    var convertEffect = function(eff) {
+                        switch (eff) {
+                            case 'Show':
+                                return 'show';
+                            case 'show':
+                                return 'Show';
+                            case 'Hide':
+                                return 'hide';
+                            case 'hide':
+                                return 'Hide';
+                            case 'Fade In':
+                                return 'fadeIn';
+                            case 'fadeIn':
+                                return 'Fade In';
+                            case 'Fade Out':
+                                return 'fadeOut';
+                            case 'fadeOut':
+                                return 'Fade Out';
+                            case 'Slide Down':
+                                return 'slideDown';
+                            case 'slideDown':
+                                return 'Slide Down';
+                            case 'Slide Up':
+                                return 'slideUp';
+                            case 'slideUp':
+                                return 'Slide Up';
+                        }
                     };
 
                     var root = div().class('abs-option').appendTo(target).size('100%', '100%').color('#eeeeee').border('1px solid gray').selectable(false).overflowScroll();
                     div().appendTo(root).size('100%', '5%').color('black').text('AMBASA - Animation').fontColor('white').fontSize(20).border('1px solid #eeeeee').textAlignCenter().cursorDefault();
 
-                    var body = div().appendTo(root).size('100%', '95%');
+                    var body = div().id('abs-body-'+curSlideId()).appendTo(root).size('100%', '95%');
+
+                    pipeBody = body;
 
                     var preview = div().appendTo(body).size('100%', 50).color('white');
                     div().appendTo(preview).size('30%', 23).color('#eeeeee').marginLeft(30).marginTop(12).text('▶').fontBold().textAlignCenter()
@@ -118,7 +348,7 @@ define ([], function() {
                             manager.preview(false);
                         });
 
-                    var addAnimation = div().deco(decoAddAnimation).click(function (dv, e) {
+                    var addAnimation = div().id('abs-ani-'+curSlideId()).deco(decoAddAnimation).click(function (dv, e) {
                             e.stopPropagation();
                             e.preventDefault();
 
@@ -172,7 +402,7 @@ define ([], function() {
                                                 }
                                             });
 
-                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).data('div').text().slice(1, length - 1))
+                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).data('div').text().slice(1, length - 2))
                                             .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                                 e.stopPropagation();
                                                 e.preventDefault();
