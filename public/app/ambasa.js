@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
 
-    var useOnline = true;
+    var useOnline = false;
 
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
@@ -193,6 +193,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var getABSbyId = function (id) {
         return $('#' + id).data('ambasa');
     };
+    var getDivById = function (id) {
+        if (isFullscreen)
+            id += '-clone';
+        return $('#' + id).data('div');
+    };
     var syncBlockbyId = function (id) {
         if (curObj) {
             curObj.deactive();
@@ -302,6 +307,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             slide.append(new ABSObject(actionObj.params));
                             syncBlockbyId(actionObj.slide);
                             break;
+                        case 'event':
+                            var abs = getABSbyId(actionObj.id);
+                            switch (actionObj.type) {
+                                case 'click':
+                                    abs.click(actionObj.prev);
+                                    break;
+                                case 'hover':
+                                    abs.hover(actionObj.prev);
+                                    break;
+                            }
+                            abs.setParams();
+                            break;
                     }
                 }
                 else if (actionObj.target === 'slide') {
@@ -374,6 +391,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             slide.removeObj(actionObj.id);
                             syncBlockbyId(actionObj.slide);
                             break;
+                        case 'event':
+                            var abs = getABSbyId(actionObj.id);
+                            switch (actionObj.type) {
+                                case 'click':
+                                    abs.click(actionObj.cur);
+                                    break;
+                                case 'hover':
+                                    abs.hover(actionObj.cur);
+                                    break;
+                            }
+                            abs.setParams();
+                            break;
                     }
                 }
                 else if (actionObj.target === 'slide') {
@@ -440,6 +469,21 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             add({
                 target: 'obj',
                 action: 'media',
+                type: type,
+                id: obj.getId(),
+                slide: getSlideNum(),
+                prev: prev,
+                cur: cur
+            })
+        };
+        // click, hover
+        this.onEvent = function (obj, type) {
+            var prev = obj.getParams()[type];
+            obj.setParams();
+            var cur = obj.getParams()[type];
+            add({
+                target: 'obj',
+                action: 'event',
                 type: type,
                 id: obj.getId(),
                 slide: getSlideNum(),
@@ -745,28 +789,28 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             // left
             if (event.which === 37) {
                 event.preventDefault();
-                dv.css('left',parseInt(dv.left())-move);
+                dv.css('left', parseInt(dv.left()) - move);
                 actionManager.onStyle(curObj, ['left']);
                 syncBlock();
             }
             // up
             else if (event.which === 38) {
                 event.preventDefault();
-                dv.css('top',parseInt(dv.top())-move);
+                dv.css('top', parseInt(dv.top()) - move);
                 actionManager.onStyle(curObj, ['top']);
                 syncBlock();
             }
             // right
             else if (event.which === 39) {
                 event.preventDefault();
-                dv.css('left',parseInt(dv.left())+move);
+                dv.css('left', parseInt(dv.left()) + move);
                 actionManager.onStyle(curObj, ['left']);
                 syncBlock();
             }
             // down
             else if (event.which === 40) {
                 event.preventDefault();
-                dv.css('top',parseInt(dv.top())+move);
+                dv.css('top', parseInt(dv.top()) + move);
                 actionManager.onStyle(curObj, ['top']);
                 syncBlock();
             }
@@ -877,19 +921,40 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var idGenerator = new IdGenerator('ABS-');
     var idSlideGenerator = new IdGenerator('ABSlide');
 
-
     /** ABS Object **/
 
     var ABSObject = function (_params, isClone) {
         var that = this, params = {};
         var dv = div().class('abs-object').size(100, 100).zIndex(10)
             .position('absolute').left(-sbgMarginLeft + 150).top(-sbgMarginTop + 10);
-        // .borderWidth('1px').borderStyle('solid').borderColor('black');
         dv.$.data('ambasa', this);
 
-        var id, moduleName, iframeUrl;
+        var id, moduleName, iframeUrl, clickCode, hoverCode;
+
+        if (params.style === undefined)
+            params.style = {};
+        if (params.id) {
+            id = params.id;
+            idGenerator.set(id);
+        }
+        else {
+            id = idGenerator.get();
+            params.id = id;
+        }
+
 
         // initialize if params given
+        /**
+         * params = {
+         *  type
+         *  media
+         *  click
+         *  hover
+         *  style
+         *  id
+         *  ...
+         * }
+         */
         if (_params) {
             params = $.extend({}, _params);
             setAllStyles(dv, params.style);
@@ -982,19 +1047,18 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                         if (iframeUrl !== '') {
                             dv.iframe(iframeUrl);
                         }
+                        break;
                 }
             }
+            clickCode = params.click;
+            // TODO : hover
+            hoverCode = params.click;
         }
-        if (params.style === undefined)
-            params.style = {};
-        if (params.id) {
-            id = params.id;
-            idGenerator.set(id);
-        }
-        else {
-            id = idGenerator.get();
-            params.id = id;
-        }
+        // set click
+        dv.click(function (dv, e) {
+            if (clickCode)
+                eval('(' + clickCode + ')(dv,e)');
+        });
 
         // additional initializtion
         dv.id(id);
@@ -1074,6 +1138,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     params.media = iframeUrl;
                     break;
             }
+            params.click = clickCode;
+            params.hover = hoverCode;
         };
         this.getParams = function () {
             return params;
@@ -1104,6 +1170,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         this.loadIframe = function (url) {
             iframeUrl = url;
             dv.iframe(url);
+        };
+        this.click = function (codeStr) {
+            clickCode = codeStr;
+        };
+        this.hover = function (codeStr) {
+            hoverCode = codeStr;
         };
         return this;
     };
@@ -1909,5 +1981,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             onEnter(AB.fName, userId);
         else
             onLoad(AB.fName);
-    };
+    }
+    ;
 });

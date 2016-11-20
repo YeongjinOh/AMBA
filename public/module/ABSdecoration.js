@@ -219,9 +219,18 @@ define ([], function() {
             });
             var apply = div().appendTo(menuBar).id('abs-event-apply').text('apply').textAlignCenter().fontSize(20).size('25%', '100%')
                 .color('#cccccc').border('2px solid black').cursorPointer().hoverColor('gray', '#cccccc').click(function (dv, e) {
-                    // TODO: code 여기서 전달해주기!
-                    console.log(curEvent.id());
-                    console.log(editor.text());
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    switch (curEvent.id()) {
+                        case 'abs-event-click':
+                            curObj.click(editor.text());
+                            actionManager.onEvent(curObj, 'click');
+                            break;
+                        case 'abs-event-hover':
+                            curObj.hover(editor.text());
+                            actionManager.onEvent(curObj, 'hover');
+                            break;
+                    }
+
                 });
 
             div().appendTo(apply).float('right').text('X').textAlignCenter().fontSize(1).size(18, 19).color('#cccccc')
@@ -233,7 +242,7 @@ define ([], function() {
                 $('#abs-event-apply').trigger('click');
             });
 
-            var editor = div().appendTo(root).displayBlock().text('function(dv, e) {\n\t// input code\n}').size('100%', 'auto').minHeight(270).aceEditor();
+            var editor = div().appendTo(root).displayBlock().text('function(dv, e) {\n\t// var other = getDivById("'+id+'")\n}').size('100%', 'auto').minHeight(270).aceEditor();
 
             curEvent = $('#abs-event-click').data('div');
             $('#'+curEvent.id()).trigger('click');
