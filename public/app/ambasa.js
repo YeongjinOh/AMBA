@@ -931,8 +931,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         var id, moduleName, iframeUrl, clickCode, hoverCode;
 
+
         // if (params.style === undefined)
         //     params.style = {};
+        // set id
         if (typeof _params === 'object' && _params.id) {
             id = _params.id;
             idGenerator.set(id);
@@ -942,6 +944,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             params.id = id;
         }
 
+        // default
+        clickCode = 'function(dv, e) {\n\t// var other = getDivById("'+id+'")\n}';
+        params.click = clickCode;
+        hoverCode = 'dv.hover(function () {\n\t//hover in\n}, function () {\n\t//hover out\n})';
+        params.hover = hoverCode;
 
         // initialize if params given
         /**
@@ -1050,15 +1057,22 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                         break;
                 }
             }
-            clickCode = params.click;
+            if (params.click)
+                clickCode = params.click;
             // TODO : hover
-            hoverCode = params.click;
+            if (params.hover)
+                hoverCode = params.hover;
         }
         // set click
         dv.click(function (dv, e) {
             if (clickCode)
                 eval('(' + clickCode + ')(dv,e)');
         });
+        dv.hover(function () {
+            if (hoverCode)
+                eval(hoverCode);
+        });
+
 
         // additional initializtion
         dv.id(id);

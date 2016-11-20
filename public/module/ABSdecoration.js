@@ -184,14 +184,12 @@ define ([], function() {
         function eventEdit(id, fn) {
             syncMenu(undefined, 'abs-event-' + id);
 
-            var curEvent;
+            var curEvent, curObj = $('#' + idContainer.id).data('ambasa');;
 
             function switchManager(dv) {
                 curEvent.color('#cccccc');
                 dv.color('gray');
-
-                curEvent.code = editor.text();
-                editor.text(dv.code);
+                // curEvent.code = editor.text();
                 curEvent = dv;
             }
 
@@ -207,19 +205,19 @@ define ([], function() {
                 .color('#cccccc').border('2px solid black').cursorPointer().click(function (dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
-
+                editor.text(curObj.getParams().click);
                 switchManager(dv);
             });
             div().appendTo(menuBar).id('abs-event-hover').text('hover').textAlignCenter().fontSize(20).size('25%', '100%')
                 .color('#cccccc').border('2px solid black').cursorPointer().click(function (dv, e) {
                 e.stopPropagation();
                 e.preventDefault();
-
+                editor.text(curObj.getParams().hover);
                 switchManager(dv);
             });
             var apply = div().appendTo(menuBar).id('abs-event-apply').text('apply').textAlignCenter().fontSize(20).size('25%', '100%')
                 .color('#cccccc').border('2px solid black').cursorPointer().hoverColor('gray', '#cccccc').click(function (dv, e) {
-                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    curObj = $('#' + idContainer.id).data('ambasa');
                     switch (curEvent.id()) {
                         case 'abs-event-click':
                             curObj.click(editor.text());
@@ -241,8 +239,8 @@ define ([], function() {
                 absRemove('abs-event-' + id);
                 $('#abs-event-apply').trigger('click');
             });
-
-            var editor = div().appendTo(root).displayBlock().text('function(dv, e) {\n\t// var other = getDivById("'+id+'")\n}').size('100%', 'auto').minHeight(270).aceEditor();
+            curObj = $('#' + idContainer.id).data('ambasa');
+            var editor = div().appendTo(root).displayBlock().text(''+curObj.getParams().click).size('100%', 'auto').minHeight(270).aceEditor();
 
             curEvent = $('#abs-event-click').data('div');
             $('#'+curEvent.id()).trigger('click');
