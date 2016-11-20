@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
 
-    var useOnline = true, useLocalStorage = false;
+    var useOnline = true;
 
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
@@ -32,11 +32,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     // local에서 client 2개 띄우기 위해 랜덤값 부여
     // var username = Math.random();
-     var username = authFactory.getUsername();
+    var username = authFactory.getUsername();
     var token = authFactory.getToken();
     if (!username || !token) {
         $(location).attr('href', '/?app=signin');
-        alert('로그인 페이지로 이동합니다.')
+        alert('로그인 페이지로 이동합니다.');
         return;
     }
 
@@ -484,8 +484,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
         this.onCopySlide = function (slide, params) {
             add({
-                target:'slide',
-                action:'copy',
+                target: 'slide',
+                action: 'copy',
                 slide: slide.getIdx(),
                 params: params
             })
@@ -667,13 +667,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var onCopy = function () {
         if (curObj) {
             copyParam = {
-                type:'object',
-                param:curObj.getParams()
+                type: 'object',
+                param: curObj.getParams()
             };
         } else if (curSlide) {
             copyParam = {
-                type:'slide',
-                param:curSlide.export()
+                type: 'slide',
+                param: curSlide.export()
             }
         }
     };
@@ -681,10 +681,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         if (typeof copyParam !== 'object')
             return;
         if (copyParam.type === 'object') {
-            var param = copyParam.param;
+            var param = $.extend({}, copyParam.param);
             param.id = idGenerator.get();
-            param.style.left = parseInt(param.style.left) + 5;
-            param.style.top = parseInt(param.style.top) + 5;
             var obj = absObject(param);
             obj.focus();
             curSlide.append(obj);
@@ -738,6 +736,41 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             event.preventDefault();
             slideManager.next();
         }
+        else if (!event.shiftKey && !isFullscreen && curObj && event.which >= 37 && event.which <= 40) {
+            var move = 5;
+            // var param = curObj.getParams();
+            var dv = curObj.div();
+            if (event.altKey)
+                move = 1;
+            // left
+            if (event.which === 37) {
+                event.preventDefault();
+                dv.css('left',parseInt(dv.left())-move);
+                actionManager.onStyle(curObj, ['left']);
+                syncBlock();
+            }
+            // up
+            else if (event.which === 38) {
+                event.preventDefault();
+                dv.css('top',parseInt(dv.top())-move);
+                actionManager.onStyle(curObj, ['top']);
+                syncBlock();
+            }
+            // right
+            else if (event.which === 39) {
+                event.preventDefault();
+                dv.css('left',parseInt(dv.left())+move);
+                actionManager.onStyle(curObj, ['left']);
+                syncBlock();
+            }
+            // down
+            else if (event.which === 40) {
+                event.preventDefault();
+                dv.css('top',parseInt(dv.top())+move);
+                actionManager.onStyle(curObj, ['top']);
+                syncBlock();
+            }
+        }
         /** Ctrl Key **/
         else if (event.ctrlKey) {
             // Ctrl + Shift + Z
@@ -771,14 +804,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 onPaste();
             }
         }
-        /** Alt key **/
-        else if (event.altKey) {
-            // Cmd + up
+        /** Shift key **/
+        else if (event.shiftKey) {
+            // Shift + up
             if (event.which === 38 && !isFullscreen && curObj) {
                 event.preventDefault();
                 curObj.incZidx();
             }
-            // Cmd + down
+            // Shift + down
             else if (event.which === 40 && !isFullscreen && curObj) {
                 event.preventDefault();
                 curObj.decZidx();
@@ -880,6 +913,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                         else {
                             dv.tinymce({
                                 inline: true,
+                                plugins: "textcolor",
                                 toolbar: "styleselect fontselect fontsizeselect | forecolor backcolor",
                                 width: '100%'
                             }, function (child) {
@@ -1270,8 +1304,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 params[newId].id = newId;
             }
             var newSlideParam = {
-                params:params,
-                aniQueue:[]
+                params: params,
+                aniQueue: []
             };
             slide.load(newSlideParam);
             syncBlock();
@@ -1299,7 +1333,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         // curSlide을 지운다.
         this.del = function (idx) {
             if (idx !== undefined) {
-                var slide = slides.splice(idx-1, 1)[0];
+                var slide = slides.splice(idx - 1, 1)[0];
                 slide.remove();
                 for (var i = idx; i < slides.length; i++) {
                     slides[i].setIdx(i + 1);
@@ -1323,20 +1357,20 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             }
         };
         this.up = function () {
-            if (curSlide && curSlide.getIdx()>1) {
+            if (curSlide && curSlide.getIdx() > 1) {
                 // change block order in block list
                 var idx = curSlide.getIdx();
-                var prev = slides[idx-2].getBlockWrapper();
+                var prev = slides[idx - 2].getBlockWrapper();
                 prev.$.insertAfter(curSlide.getBlockWrapper().$);
 
                 // change order in array slides
-                var tmp = slides[idx-1];
-                slides[idx-1] = slides[idx-2];
-                slides[idx-2] = tmp;
+                var tmp = slides[idx - 1];
+                slides[idx - 1] = slides[idx - 2];
+                slides[idx - 2] = tmp;
 
                 // change index order in block list
-                slides[idx-1].setIdx(idx);
-                slides[idx-2].setIdx(idx-1);
+                slides[idx - 1].setIdx(idx);
+                slides[idx - 2].setIdx(idx - 1);
             }
         };
         this.down = function () {
@@ -1349,13 +1383,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 curSlide.getBlockWrapper().$.insertAfter(next.$);
 
                 // change order in array slides
-                var tmp = slides[idx-1];
-                slides[idx-1] = slides[idx];
+                var tmp = slides[idx - 1];
+                slides[idx - 1] = slides[idx];
                 slides[idx] = tmp;
 
                 // change index order in block list
-                slides[idx-1].setIdx(idx);
-                slides[idx].setIdx(idx+1);
+                slides[idx - 1].setIdx(idx);
+                slides[idx].setIdx(idx + 1);
             }
         };
         this.next = function () {
@@ -1478,7 +1512,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     /** basic setting for layout **/
 
-    //var w = window.outerWidth, h = window.outerHeight;
+        //var w = window.outerWidth, h = window.outerHeight;
 //var w = 1280, h = 800;
     var w = window.outerWidth, h = window.outerHeight;
     // var w = 1280, h = 800;
@@ -1514,8 +1548,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     if (dh * sbgMaxWidth < dw * sbgMaxHeight)
         ratio = dw / sbgMaxWidth;
 
-        // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
-        // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
+    // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
+    // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
     var sbgWidth = 1280 * 0.6, sbgHeight = 800 * 0.6, ratio;
     if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
         ratio = sbgWidth / slideEditorWidth;
@@ -1565,8 +1599,20 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var decoMenu = function (dv) {
         dv.size('100%', 25).padding(3).paddingLeft(10).cursorPointer().hoverColor('#999999', '#cccccc');
     };
-    var menu1 = div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
+    div().appendTo(contextMenuBar).deco(decoMenu).text('추가').click(function () {
+        slideManager.new();
+        $("#abs-slide-context-menu").hide(100);
+    });
+    div().appendTo(contextMenuBar).deco(decoMenu).text('삭제').click(function () {
         slideManager.del();
+        $("#abs-slide-context-menu").hide(100);
+    });
+    div().appendTo(contextMenuBar).deco(decoMenu).text('위로').click(function () {
+        slideManager.up();
+        $("#abs-slide-context-menu").hide(100);
+    });
+    div().appendTo(contextMenuBar).deco(decoMenu).text('아래').click(function () {
+        slideManager.down();
         $("#abs-slide-context-menu").hide(100);
     });
 
@@ -1856,12 +1902,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var memberManager = new MemberManager();
     memberManager.insertMember(username);
 
-    window.ambasa.load = function (fName) {
+    if (AB.fName !== undefined) {
         var userId = localStorage.getItem("ambasa");
-        joinOnline(fName);
+        joinOnline(AB.fName);
         if (userId)
-            onEnter(fName, userId);
+            onEnter(AB.fName, userId);
         else
-            onLoad(fName);
+            onLoad(AB.fName);
     };
 });

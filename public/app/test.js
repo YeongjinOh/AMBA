@@ -1,6 +1,34 @@
 //div().append().text('This is test application');
 
+function person(){
+    return new Person();
+}
 
+function Person(){
+    //this.name = 'name';////this객체에 name을 바인딩하면 외부에서 접근가능이라서 캡슐화X, 보안X
+     var name = '1212';
+    this.setName = function (value) {
+        name  = value;
+    };
+    this.getName = function () {
+        return name;
+    };
+}
+
+function Test(){ 
+//this.number = 1; //this객체에 name을 바인딩하면 외부에서 접근가능이라서 캡슐화X, 보안X 
+    var number = 0;  
+    this.incNum = function(){ 
+        number++; 
+    };
+     this.getNum = function(){ 
+         return number; 
+     }
+  }
+
+function test(){
+    return new Test();
+}
 /**
  * AB -> AB
  * AC
