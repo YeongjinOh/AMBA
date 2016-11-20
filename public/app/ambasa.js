@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
 
-    var useOnline = false;
+    var useOnline = true;
 
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
@@ -1902,12 +1902,12 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var memberManager = new MemberManager();
     memberManager.insertMember(username);
 
-    window.ambasa.load = function (fName) {
+    if (AB.fName !== undefined) {
         var userId = localStorage.getItem("ambasa");
-        joinOnline(fName);
+        joinOnline(AB.fName);
         if (userId)
-            onEnter(fName, userId);
+            onEnter(AB.fName, userId);
         else
-            onLoad(fName);
+            onLoad(AB.fName);
     };
 });
