@@ -7,7 +7,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     /////////////////////////////////////////////////////////////////
 
     /** set global module **/
-
     window.ambasa = {};
 
     var useOnline = false;
@@ -1554,7 +1553,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     var SlideShowManager = function () {
         var ww = window.outerWidth, wh = window.outerHeight, zoomRatio = 1;
-        var fullscreenViewer = div().append().size(ww, wh).displayNone().color('black');
+        var fullscreenViewer = div().appendTo(root).size(ww, wh).displayNone().color('black');
         if (wh * sbgWidth > ww * sbgHeight) {
             zoomRatio = ww / sbgWidth;
             fullscreenViewer.paddingTop((wh - sbgHeight * zoomRatio) / 2);
@@ -1600,12 +1599,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         //var w = window.outerWidth, h = window.outerHeight;
 //var w = 1280, h = 800;
-    var w = window.outerWidth, h = window.outerHeight;
-    // var w = 1280, h = 800;
+    var w = window.outerWidth, h = window.outerHeight, zoom = window.innerWidth/w*100;
+    var root = div().append().size(w,h).css('zoom',zoom+'%');
+
+
     var menuBarWidth = w, menuBarHeight = 100, statusBarWidth = w, statusBarHeight = 30,
         slideListWidth = 220, slideListHeight = h - menuBarHeight - statusBarHeight,
         slideEditorWidth = w - slideListWidth, slideEditorHeight = slideListHeight;
-    var parent = div().append().size(w, h);
+
+    var parent = div().appendTo(root).size(w, h);
     var menuBar = div().appendTo(parent).size(menuBarWidth, menuBarHeight).borderBottom(borderGray);
     var slideList = div().appendTo(parent).size(slideListWidth, slideListHeight).borderRight(borderGray).color(slideListColor).overflowAuto();
     var slideEditor = div().appendTo(parent).size(slideEditorWidth, slideEditorHeight).color(slideEditorColor).position('absolute').overflowHidden();
@@ -1621,7 +1623,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     // blank
     var blank = div().displayNone();
     var refresh = function () {
-        blank.append();
+        blank.appendTo(root);
     };
 
 
@@ -1636,7 +1638,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     // var sbgMargin = slideEditorWidth / 8, ratio = 5/3; // 전체 화면과 Editor 상 background 사이의 비율
     // var sbgMaxWidth = slideEditor.widthPixel() - 2 * sbgMargin, sbgMaxHeight = slideEditor.heightPixel() - 2 * sbgMargin;
-    var sbgWidth = 1280 * 0.6, sbgHeight = 800 * 0.6, ratio;
+    var sbgWidth = dw * 0.6, sbgHeight = dh * 0.6, ratio;
     if (sbgHeight * slideEditorWidth < sbgWidth * slideEditorHeight)
         ratio = sbgWidth / slideEditorWidth;
     else
@@ -1680,7 +1682,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     };
 
     // for slide
-    var contextMenuBar = div().append().id('abs-slide-context-menu').width(80).zIndex(1000).position('absolute')
+    var contextMenuBar = div().appendTo(root).id('abs-slide-context-menu').width(80).zIndex(1000).position('absolute')
         .color('#cccccc').border('1px solid gray').borderRadius(2).overflowHidden().displayNone();
     var decoMenu = function (dv) {
         dv.size('100%', 25).padding(3).paddingLeft(10).cursorPointer().hoverColor('#999999', '#cccccc');
@@ -1816,7 +1818,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     }
 
     // type obj
-    var typeObjBar = div().appendTo(fileInfoHeader).size(400, 30).border(1).margin(20).marginLeft(80).border(borderGray).borderRadius(4);
+    var typeObjBar = div().appendTo(fileInfoHeader).size(400, 30).border(1).margin(20).marginLeft(80).border(borderGray).borderRadius(4).overflowAuto();
     var decoTypeObj = function (dv) {
         dv.height(25).border(1).margin(2).marginLeft(5).padding(3).cursorPointer().class('abs-option');
     };
