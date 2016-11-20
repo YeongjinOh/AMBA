@@ -10,7 +10,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     window.ambasa = {};
 
-    var useOnline = true;
+    var useOnline = false;
 
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
@@ -736,7 +736,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             event.preventDefault();
             slideManager.next();
         }
-        else if (!isFullscreen && curObj) {
+        else if (!event.shiftKey && !isFullscreen && curObj && event.which >= 37 && event.which <= 40) {
             var move = 5;
             // var param = curObj.getParams();
             var dv = curObj.div();
@@ -804,14 +804,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 onPaste();
             }
         }
-        /** Alt key **/
-        else if (event.altKey) {
-            // Cmd + up
+        /** Shift key **/
+        else if (event.shiftKey) {
+            // Shift + up
             if (event.which === 38 && !isFullscreen && curObj) {
                 event.preventDefault();
                 curObj.incZidx();
             }
-            // Cmd + down
+            // Shift + down
             else if (event.which === 40 && !isFullscreen && curObj) {
                 event.preventDefault();
                 curObj.decZidx();
