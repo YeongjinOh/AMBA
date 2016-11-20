@@ -931,10 +931,10 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
         var id, moduleName, iframeUrl, clickCode, hoverCode;
 
-        if (params.style === undefined)
-            params.style = {};
-        if (params.id) {
-            id = params.id;
+        // if (params.style === undefined)
+        //     params.style = {};
+        if (typeof _params === 'object' && _params.id) {
+            id = _params.id;
             idGenerator.set(id);
         }
         else {
