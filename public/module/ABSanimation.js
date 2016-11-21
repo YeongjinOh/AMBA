@@ -117,8 +117,8 @@ define ([], function() {
                         var syncBlock;
 
                         var addAnimation = $('#abs-ani-'+curSlideId()).data('div');
-                        
-                        addAnimation.detach();
+                        if (addAnimation)
+                            addAnimation.detach();
                         
                         while (syncStack.length !== 0) {
                             seq++;
@@ -236,8 +236,8 @@ define ([], function() {
                             div().id('abs-ani-menu-timing-'+syncBlock.ify).appendTo(menu).displayBlock().size('100%', 'auto').text('(' + syncBlock.timing + ')').fontSize(12).fontBold();
 
                         }
-                        
-                        addAnimation.appendTo(pipeBody);
+                        if (addAnimation)
+                            addAnimation.appendTo(pipeBody);
                     }
                 },
                 append: function () {
