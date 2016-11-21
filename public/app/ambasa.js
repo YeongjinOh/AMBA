@@ -9,7 +9,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     /** set global module **/
     window.ambasa = {};
 
-    var useOnline = false;
+    var useOnline = true;
 
     var isServer = true, isJoining = true, isEdit = false;
     var roomid = undefined;
@@ -985,7 +985,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             dv.tinymce({
                                 inline: true,
                                 plugins: "textcolor",
-                                toolbar: "styleselect fontselect fontsizeselect | forecolor backcolor",
+                                toolbar: "styleselect fontselect fontsizeselect | bullist numlist outdent indent | forecolor backcolor",
                                 width: '100%'
                             }, function (child) {
                                 child.focusin(function () {
