@@ -613,13 +613,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         fileName.text(fName);
 
 
+        var postData = JSON.stringify(slideManager.export());
+        console.log('postData:', postData.length);
 
         $.post("/hashstore/put",
             {
                 cid: 'ambasa',
                 token : token,
                 akey: fName,
-                value: JSON.stringify(slideManager.export())
+                value: postData
             }, function (data) {
                 if (data.resultCode == 0) {
                     alert('저장하였습니다.');

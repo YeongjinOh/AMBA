@@ -10,6 +10,10 @@ var app = express();
 
 var nodeadmin = require('nodeadmin');
 
+app.use(bodyParser.json({limit : '50mb'}));
+app.use(bodyParser.urlencoded({limit : '50mb', extended: true, parameterLimit: 5000000}));
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -17,13 +21,15 @@ app.set('view engine', 'ejs');
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(cookieParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(nodeadmin(app));
+
+
+
 
 //라우터보다 먼저 미들웨어 등록!!
 var useRedis = true;
@@ -38,6 +44,7 @@ if (useRedis) {
     next();
   });
 }
+
 
 app.use('/', require('./routes/index'));
 app.use('/users', require('./routes/users'));
