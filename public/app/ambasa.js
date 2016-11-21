@@ -1327,11 +1327,15 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             }
             var animationQueue = absAnimation.export();
             return {
+                id:slideId,
                 params: params,
                 aniQueue: animationQueue
             };
         };
         this.load = function (slideParam) {
+            if (slideParam.id)
+                slideId = slideParam.id;
+            slideBackground.id(slideId);
             var params = slideParam.params;
             var aniQueue = slideParam.aniQueue;
             absAnimation.import(aniQueue);
@@ -1858,7 +1862,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             curSlide.append(obj);
         }
     });
-    div().appendTo(typeObjBar).deco(decoTypeObj).text('Ace').click(function () {
+    div().appendTo(typeObjBar).deco(decoTypeObj).text('IDE').click(function () {
         if (curSlide) {
             var obj = absObject({
                 type: 'ace', media: '', style: {
