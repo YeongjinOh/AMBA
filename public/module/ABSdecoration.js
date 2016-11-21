@@ -516,6 +516,19 @@ define ([], function() {
                     }
                 });
             });
+
+            div().appendTo(mediaMenuBar).deco(decoMenu).text('zoom').click(function(dv, e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                paperTextAuto(5, dv, function(txt) {
+                    var zoom = parseInt(txt)+'%';
+                    var curDiv = $('#' + idContainer.id).data('div');
+                    curDiv.css('zoom',zoom);
+                    var curObj = $('#' + idContainer.id).data('ambasa');
+                    actionManager.onStyle(curObj, ['zoom']);
+                });
+            });
         });
 
         div().appendTo(contextMenuBar).deco(decoMenu).text('event').click(function(dv) {
