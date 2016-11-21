@@ -7,12 +7,18 @@ var router = express.Router();
 var crypto = require('./amba_crypto');
 var db = require('../db');
 
-router.get('/put', function(req, res, next) {
-    var param = req.query;
-    var aauth = JSON.parse(crypto.decrypt(param.token));
-    param.hashkey = aauth.uid;
+router.post('/put', function(req, res, next) {
+
+    var body = req.body;
+    var aauth = JSON.parse(crypto.decrypt(body.token));
+
+    var cid = req.body.cid;
+    var hashkey = aauth.uid;
+    var akey = req.body.akey;
+    var value = req.body.value;
+
     db.query("INSERT INTO hash_store (cid, hashkey, akey, value) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE value = ?;",
-        [param.cid, param.hashkey, param.key, param.value, param.value])
+        [cid, hashkey, akey, value, value])
         .then(function () {
             res.json({
                 resultCode: 0
@@ -25,6 +31,26 @@ router.get('/put', function(req, res, next) {
             });
         });
 });
+
+//router.get('/put', function(req, res, next) {
+//    var param = req.query;
+//    var aauth = JSON.parse(crypto.decrypt(param.token));
+//    param.hashkey = aauth.uid;
+//    db.query("INSERT INTO hash_store (cid, hashkey, akey, value) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE value = ?;",
+//        [param.cid, param.hashkey, param.key, param.value, param.value])
+//        .then(function () {
+//            res.json({
+//                resultCode: 0
+//            });
+//        })
+//        .catch(function (err) {
+//            res.json({
+//                resultCode: -1,
+//                msg: err
+//            });
+//        });
+//});
+
 
 router.get('/get', function(req, res, next) {
     var param = req.query;

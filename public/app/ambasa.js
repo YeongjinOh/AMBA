@@ -29,6 +29,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         };
     }();
 
+
+
     // local에서 client 2개 띄우기 위해 랜덤값 부여
     // var username = Math.random();
     var username = authFactory.getUsername();
@@ -609,14 +611,16 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             return;
         }
         fileName.text(fName);
-        var param = {
-            cid: 'ambasa',
-            token: token,
-            key: fName,
-            value: JSON.stringify(slideManager.export())
-        };
-        $.get("/hashstore/put", param)
-            .done(function (data) {
+
+
+
+        $.post("/hashstore/put",
+            {
+                cid: 'ambasa',
+                token : token,
+                akey: fName,
+                value: JSON.stringify(slideManager.export())
+            }, function (data) {
                 if (data.resultCode == 0) {
                     alert('저장하였습니다.');
                 }
@@ -625,6 +629,24 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     alert('실패하였습니다.');
                 }
             });
+        //
+        //
+        //var param = {
+        //    cid: 'ambasa',
+        //    token: token,
+        //    key: fName,
+        //    value: JSON.stringify(slideManager.export())
+        //};
+        //$.get("/hashstore/put", param)
+        //    .done(function (data) {
+        //        if (data.resultCode == 0) {
+        //            alert('저장하였습니다.');
+        //        }
+        //        else {
+        //            console.log(data.msg);
+        //            alert('실패하였습니다.');
+        //        }
+        //    });
     };
     var onLocalSave = function () {
         var fName = prompt('파일명을 입력해주세요.');
