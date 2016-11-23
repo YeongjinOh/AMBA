@@ -174,7 +174,7 @@ define ([], function() {
                                             }
                                         });
 
-                                    var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-' + syncBlock.ify).data('div').text().slice(1, length - 2))
+                                    var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-' + syncBlock.ify).data('div').text().slice(1, length - 3))
                                         .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                             e.stopPropagation();
                                             e.preventDefault();
@@ -402,7 +402,7 @@ define ([], function() {
                                                 }
                                             });
 
-                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).data('div').text().slice(1, length - 2))
+                                        var conTiming = div().deco(decoSelector).appendTo(content).text($('#abs-ani-menu-timing-'+curSlideId()+'-'+ify).data('div').text().slice(1, length - 3))
                                             .textAlignCenter().hoverTextColor('blue', 'black').click(function (dv, e) {
                                                 e.stopPropagation();
                                                 e.preventDefault();
