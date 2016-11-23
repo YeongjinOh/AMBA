@@ -3,11 +3,11 @@
  */
 var simbol = ['CE', 'C', '≪', '÷', 7, 8, 9, '×', 4, 5, 6, '-', 1, 2, 3, '+', '±', 0, '.', '='];
 var root = div().size('100%', '100%').color('#FFF0F5').append();
-var subCurrent = div().displayBlock().size('70%', 70).color('#F5FFFA').appendTo(root).textAlignRight().fontSize(50).textOverflowEllipsis();
-var mainCurrent = div().displayBlock().size('70%', 150).color('#F5FFFA').appendTo(root).textAlignRight().fontSize(110).textOverflowEllipsis();
+var subCurrent = div().displayBlock().size('70%', 20).color('#F5FFFA').appendTo(root).textAlignRight().fontSize(20).textOverflowEllipsis();
+var mainCurrent = div().displayBlock().size('70%', 80).color('#F5FFFA').appendTo(root).textAlignRight().fontSize(30).textOverflowEllipsis();
 var input = div().size('70%', 600).color('#D3D3D3').appendTo(root).cursorDefault().textAlignCenter().disableSelection();
 for(var i=0; i<20; i++) {
-    div().appendTo(input).size('25%', 120).color('#D3D3D3').hoverColor('#A9A9A9', '#D3D3D3').text(simbol[i]).textAlignCenter().fontSize(80).click(function(dv) {
+    div().appendTo(input).size('25%', 200).color('#D3D3D3').hoverColor('#A9A9A9', '#D3D3D3').text(simbol[i]).textAlignCenter().fontSize(40).click(function(dv) {
         switch(dv.text()) {
             case 'C':
                 subCurrent.text('');
