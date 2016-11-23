@@ -1023,6 +1023,11 @@ Div.prototype.iframe = function (src) {
     return this;
 };
 
+/**
+ * @desc 이미지의 경로를 받아서 <img>태그에 전달해주고 디브의 사이즈에 최적화하여 출력시킨다
+ * @param src
+ * @returns {*}
+ */
 Div.prototype.image = function (src) {
     if (src === '') {
         if (this.$image)
@@ -1161,7 +1166,7 @@ Div.prototype.fileSelectable = function (fn) {
 };
 
 /**
- * @author Lights
+ * @author Lightsoo
  * @desc ace에디터를 통해 가독성 높은 소스를 출력, div의 id값을 파라미터로 넘겨줘서 해당 div에 적용
  *
  * @returns {Div}
@@ -1363,7 +1368,10 @@ Div.prototype.topPos = function () {
         return 0;
 };
 
-
+/**
+ * @desc scroll되는 div에 div가 추가 될때마다 추가된 디브의 위치로 이동
+ * @returns {Div}
+ */
 Div.prototype.setScrollTop = function () {
     var arr = this.children();
     this.$.scrollTop(this.$.get(0).scrollHeight - arr[arr.length - 1].$.height());
