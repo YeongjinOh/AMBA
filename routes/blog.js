@@ -60,12 +60,12 @@ router.get('/', function(req, res, next) {
 
     var currentPage = parseInt(req.query.page) || 1;
     // 페이지 당 출력 개수, 클라이언트에서도 해줘야한다..
-    var itemNumInPage = 3;
+    var itemNumInPage = 4;
     var cid = req.query.cid;
     //var akey = req.query.akey;
     var sql1 = 'SELECT value FROM hash_store WHERE cid = ? ORDER BY seq DESC';
-    //var arr1 = [cid];
-    var arr1 = ['aa'];
+    var arr1 = [cid];
+    //var arr1 = ['aa'];
 
     db.query(sql1, arr1)
         .then(function (results) {
@@ -75,10 +75,12 @@ router.get('/', function(req, res, next) {
             var maxPage = Math.floor(totalItem / itemNumInPage);
 
             var temp = 1;
-            if(totalItem/itemNumInPage === Math.floor(totalItem/itemNumInPage))
+            if(totalItem/itemNumInPage === Math.floor(totalItem/itemNumInPage)){
                 temp = 0;
+            }
 
-            console.log('maxpage : '+ maxPage + ', temp : ' + temp);
+            console.log('totalItem : ', totalItem);
+            console.log('maxpage : '+ maxPage);// + ', temp : ' + temp);
 
             // Skip할 개수 계산. page는 1부터 시작
             var skip = itemNumInPage * (currentPage-1);

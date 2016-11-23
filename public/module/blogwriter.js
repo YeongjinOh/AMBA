@@ -48,7 +48,7 @@ define([], function(){
 
                 $.post("/blog",
                     {
-                        cid: 'blogtest',//AB.module.getCid(),
+                        cid: 'blog',//AB.module.getCid(),
                         hashkey : aauth,//uid
                         akey: data.title + data.timestamp,
                         value: JSON.stringify(data)

@@ -132,7 +132,7 @@ define([],function () {
             this.getPost = function () {
                 return $.get("/blog",
                     {//query
-                        cid: 'blogtest',
+                        cid: 'blog',
                         aauth : aauth,
                         page : page
                     }, function (results) {
