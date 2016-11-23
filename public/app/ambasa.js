@@ -202,6 +202,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         return $('#' + id).data('div');
     };
     var syncBlockbyId = function (id) {
+        if (isLoading)
+            return;
         if (curObj) {
             curObj.deactive();
         }
@@ -215,17 +217,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         else
             console.log('can not find slide by id');
     };
-    var syncBlocks = function (slides, idx) {
-        if (slides.length <= idx) {
-            if (curObj)
-                curObj.active();
+    var syncBlocks = function (slides, visit, idx) {
+
+        if (slides.length <= idx || visit[idx]) {
             return;
         }
-        if (curObj) {
-            curObj.deactive();
-        }
+        visit[idx] = true;
         slides[idx].syncBlock(function () {
-            syncBlocks(slides, idx+1);
+            syncBlocks(slides, visit, idx+1);
         });
     };
 
@@ -235,12 +234,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         var length = 0;
 
         var add = function (action) {
-            // console.log(action);
             if (!lockAction) {
                 actions[++cur] = action;
                 length = cur + 1;
                 if (useOnline && roomid) {
-                    console.log('sendMessage');
+                    console.log('Send action');
                     console.log(action);
                     online.sendMessage({
                         roomid: roomid,
@@ -433,7 +431,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                             slideManager.del();
                             break;
                         case 'copy':
-                            console.log(actionObj)
                             slideManager.copy(actionObj.params);
                             break;
                         case 'load':
@@ -454,12 +451,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             actions = actionParams.actions;
             length = actions.length;
             lock();
-            console.log('prev : ' + cur);
             for (var cur = -1; cur < actionParams.cur; cur++) {
                 this.next();
             }
-            console.log('next : ' + cur);
-
             unlock();
         };
 
@@ -646,24 +640,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     alert('실패하였습니다.');
                 }
             });
-        //
-        //
-        //var param = {
-        //    cid: 'ambasa',
-        //    token: token,
-        //    key: fName,
-        //    value: JSON.stringify(slideManager.export())
-        //};
-        //$.get("/hashstore/put", param)
-        //    .done(function (data) {
-        //        if (data.resultCode == 0) {
-        //            alert('저장하였습니다.');
-        //        }
-        //        else {
-        //            console.log(data.msg);
-        //            alert('실패하였습니다.');
-        //        }
-        //    });
     };
     var onLocalSave = function () {
         var fName = prompt('파일명을 입력해주세요.');
@@ -1347,9 +1323,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                     slideViewer.$image.load(function () {
                         if (typeof callback === 'function') {
                             callback();
-                            console.log('callback called');
                         }
-
                         that.displayNone();
                         if (curSlide)
                             curSlide.display();
@@ -1505,8 +1479,6 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             }
         };
         this.down = function () {
-            console.log(curSlide.getIdx());
-            console.log(slides.length);
             if (curSlide && curSlide.getIdx() < slides.length) {
                 // change block order in block list
                 var idx = curSlide.getIdx();
@@ -1579,23 +1551,13 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         this.load = function (params) {
             isLoading = true;
             this.clear();
-            // var sync = function (j) {
-            //     setTimeout(function () {
-            //         syncBlockbyId(j)
-            //     }, j * 200);
-            // };
+            var visit = [];
             for (var i = 0; i < params.length; i++) {
                 this.new();
                 slides[i].load(params[i]);
-                // sync(i + 1);
+                visit[i] = false;
             }
-            // isLoading = false;
-
-            syncBlocks(slides, 0);
-            //
-            // setTimeout(function () {
-            //     isLoading = false;
-            // }, 200*i);
+            syncBlocks(slides, visit, 0);
         };
         this.get = function (id) {
             return slides[id - 1];
