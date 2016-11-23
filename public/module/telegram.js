@@ -248,28 +248,7 @@ define(['OnlineManager'], function (online) {
                         msg: msg
                     });
 
-                    var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
-                            var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
-                                .marginRight(10).color('white').fontSize(15).maxWidth(200)
-                                .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
-                                .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
-                                .fontFamily('Meiryo');
-                            var myTime = div().appendTo(myMsg).size('auto', '13').floatRight()
-                                .fontSize(11)
-                                .text(getTime()).marginRight(5);
-                            myMsg.appendTo(chatListView);
-                            chatListView.setScrollTop();
-                            inputView.text('');
-
-                    //여기서 호출하는게 문제야. send에서 콜백받을때 서버에 전송하도록 바꿔보자.
-                    //$.post("/online/msg",
-                    //    {
-                    //        roomid : currentRoomid,
-                    //        username :  ainfo.username,
-                    //        time : getTime(),
-                    //        message : msg
-                    //    }, function (result) {
-                    //        var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
+                    //var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
                     //        var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
                     //            .marginRight(10).color('white').fontSize(15).maxWidth(200)
                     //            .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
@@ -281,7 +260,27 @@ define(['OnlineManager'], function (online) {
                     //        myMsg.appendTo(chatListView);
                     //        chatListView.setScrollTop();
                     //        inputView.text('');
-                    //    });
+
+                    $.post("/online/msg",
+                        {
+                            roomid : currentRoomid,
+                            username :  ainfo.username,
+                            time : getTime(),
+                            message : msg
+                        }, function (result) {
+                            var myMsg = div().size('100%', 'auto').minHeight(38).marginTop(5);
+                            var txt = div().appendTo(myMsg).size('auto', 'auto').text(msg).floatRight()
+                                .marginRight(10).color('white').fontSize(15).maxWidth(200)
+                                .borderOption(2).borderOption('#EBE8E7', 'color').borderRadius('10%')
+                                .whiteSpace('pre-line').textAlign('left').wordBreak('break-all')
+                                .fontFamily('Meiryo');
+                            var myTime = div().appendTo(myMsg).size('auto', '13').floatRight()
+                                .fontSize(11)
+                                .text(getTime()).marginRight(5);
+                            myMsg.appendTo(chatListView);
+                            chatListView.setScrollTop();
+                            inputView.text('');
+                        });
                 }
             });
 
