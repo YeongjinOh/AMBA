@@ -2,7 +2,6 @@
  * Created by Lightsoo on 2016. 10. 28..
  */
 
-
 define(['primus'], function (Primus) {
 
     var Module = {};

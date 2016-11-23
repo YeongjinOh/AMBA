@@ -1,58 +1,32 @@
 define([], function () {
 
-    // initialize
-    var module = {};
-    var defaultMessage = 'To do';
-    Div.prototype.setParentWidth = function () {
-        return this.width(this.parent().widthPixel());
-    };
-
-    module.todolist = function (target) {
-        var viewer = div().size(350, 500).minHeight(50).color('sky').padding(10)
-            .overflow('scroll').border(1).borderColor('orange').borderRadius(20).appendTo(target);
-        var bottomBarHeight = 50;
-        var bottomBar = div().size(350, bottomBarHeight).margin(10).css('display', 'block').appendTo(target);
-
-        var inputForm = div().size(230 - 20, bottomBarHeight - 20).attr('contenteditable', 'true').margin('auto 12px').padding(10).color('gray').text(defaultMessage).appendTo(bottomBar);
-        var inputButton = div().size(50, bottomBarHeight).margin('auto 13px').color('yellow').appendTo(bottomBar);
-        var blank = div();
-
-        var uncheckedList = div().margin(0).minHeight(0).appendTo(viewer).setParentWidth();
-        var checkedList = div().margin(0).minHeight(0).appendTo(viewer).setParentWidth();
-
-        // set insert functionality
-        inputButton.click(function (e) {
-            var text = inputForm.text();
-            inputForm.text(defaultMessage);
-            var checked = false;
-            var todoWrapper = div().appendTo(uncheckedList).setParentWidth().borderOption('1px dotted', 'bottom').borderOption('rgb(200,200,200)', 'color');
-
-            var todo = div().height(30).padding(10).marginTop(10).verticalAlign('bottom').text(text).appendTo(todoWrapper).fontSize(18).fontBold();
-
-            // set effect onto todoWrapper
-            todoWrapper.hover(function () {
-                todoWrapper.color('rgb(220,253,244)');
-            }, function () {
-                todoWrapper.color('white');
-            })
+    var parent = div().width('100%').margin(50);
+    /** header **/
+    var header = div().appendTo(parent).width('100%').padding(30).color('#f44336');
+    div().appendTo(header).width('100%').margin(10).text('My To Do List').textAlignCenter().fontColor('white').fontSize(30);
+    var inputForm = div().appendTo(header).size('100%',40);
+    var input = div().appendTo(inputForm).size('80%','100%').padding(7).color('white').editable(true).text('').fontSize(16);
+    var button = div().appendTo(inputForm).size('20%','100%').color('#cccccc').text('Add').textAlignCenter().paddingTop(9).cursorPointer()
+        .click(function () {
+            var selected = false;
+            var todo = div().appendTo(todoList).size('100%',60).padding(15).paddingLeft(30).color('#eeeeee')
+                .text(input.text()).fontSize(20).hoverColor('#cccccc','#eeeeee')
                 .click(function () {
-                    checked = !checked;
-                    if (checked) {
-                        todo.textDecorationLineThrough().fontColor('gray').fontNormal();
-                        todoWrapper.detach().appendTo(checkedList);
-                    }
-                    else {
-                        todo.textDecorationNone().fontColor('black').fontBold();
-                        todoWrapper.detach().appendTo(uncheckedList);
-                    }
-                })
-            var cancelButton = div().margin(15).size(10, 10).color('gray').css('float', 'right').appendTo(todoWrapper).click(function () {
-                todoWrapper.remove();
-                blank.appendTo(viewer);
+                    if (selected) todo.textDecoration('none');
+                    else todo.textDecoration('line-through');
+                    selected = !selected;
+                });
+            input.text('');
+            var cancel = div().appendTo(todo).margin(5).floatRight().text('x').cursorPointer().click(function () {
+                todo.remove();
+                cancel.remove();
             });
-            blank.appendTo(viewer);
         });
+    /** content viewer **/
+    var todoList = div().appendTo(parent).width('100%');
+    return {
+        appendTo : function (target) {
+            parent.appendTo(target);
+        }
     };
-
-    return module;
 });

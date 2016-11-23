@@ -26,7 +26,7 @@ define([], function () {
     var curCid;
     AB.getCid = function () {
         return curCid;
-    }
+    };
 
     return {
         run: function (cid, callback) {
