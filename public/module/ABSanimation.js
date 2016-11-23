@@ -478,7 +478,7 @@ define ([], function() {
                     showtimeQueue = animationQueue.slice(0);
                     for(i=0; i<showtimeQueue.length; i++) {
                         if(showtimeQueue[i].effect === 'show' || showtimeQueue[i].effect === 'fadeIn' || showtimeQueue[i].effect === 'slideDown') {
-                            if ($('#' + showtimeQueue[i].id+'-clone').data('div'));
+                            if ($('#' + showtimeQueue[i].id+'-clone').data('div') !== undefined)
                                 $('#' + showtimeQueue[i].id+'-clone').data('div').displayNone();
                         }
                     }
