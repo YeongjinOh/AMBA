@@ -1727,12 +1727,14 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
 
     /** menu bar **/
 
-    var leftMenuBarWrapper = div().appendTo(menuBar).size('70%', '100%');
+    var leftMenuBarWrapper = div().appendTo(menuBar).size('20%', '100%');
+    var centerMenuBarWrapper = div().appendTo(menuBar).size('50%', '100%');
     var fileInfoHeader = div().appendTo(leftMenuBarWrapper).size('100%', 60);
+    var centerTopMenuBar = div().appendTo(centerMenuBarWrapper).size('100%', 55);
     var defaultName = "제목 없는 프레젠테이션";
     var fileName = div().appendTo(fileInfoHeader).size(200, 30).margin(20).text(defaultName).fontColor('gray').fontSize(20);
 
-    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('35%', 40);
+    var slideMenuBar = div().appendTo(leftMenuBarWrapper).size('100%', 40);
     var decoSlideMenuButton = function (div) {
         div.size(25, 25).marginLeft(15).cursorPointer();
     };
@@ -1755,7 +1757,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var downSlideButton = div().appendTo(slideListButtons).deco(decoSlideListButton).image('../images/arrowDown.png').click(onDownSlide);
 
     // object menu bar
-    var objMenuBar = div().appendTo(leftMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
+    var objMenuBar = div().appendTo(centerMenuBarWrapper).height(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoObjMenu = function (dv) {
         var wrapper = div().appendTo(objMenuBar).class("abs-option").size(28, 28).hoverColor('#eeeeee', 'white').cursorPointer();
         dv.appendTo(wrapper).size(15, 15).border(1);
@@ -1810,7 +1812,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         }
     });
 
-    var styleMenuBar = div().appendTo(leftMenuBarWrapper).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
+    var styleMenuBar = div().appendTo(centerMenuBarWrapper).height(30).marginLeft(30).margin(5).border(borderGray).borderRadius(3).overflowHidden();
     var decoStyleMenu = function (dv) {
         var wrapper = div().appendTo(styleMenuBar).class('abs-option').size(28, 28).hoverColor('#eeeeee', 'white').cursorPointer();
         dv.appendTo(wrapper).size(15, 15).border(1);
@@ -1838,9 +1840,9 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     }
 
     // type obj
-    var typeObjBar = div().appendTo(fileInfoHeader).size(400, 30).border(1).margin(20).marginLeft(80).border(borderGray).borderRadius(4).overflowAuto();
+    var typeObjBar = div().appendTo(centerTopMenuBar).height(30).border(1).margin(20).marginLeft(5).border(borderGray).borderRadius(4).overflowAuto();
     var decoTypeObj = function (dv) {
-        dv.height(25).border(1).margin(2).marginLeft(5).padding(3).cursorPointer().class('abs-option');
+        dv.height('100%').fontColor('#555555').padding(5).cursorPointer().class('abs-option').hoverColor('#dddddd','white');
     };
     div().appendTo(typeObjBar).deco(decoTypeObj).text('Text').click(function () {
         if (curSlide) {
@@ -1941,11 +1943,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             onAnimationViewer();
         isAniViewerOn = !isAniViewerOn;
     };
-    var buttonTelegram = div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
+    var buttonTelegram = div().appendTo(centerTopMenuBar).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
         .text('Telegram').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee', 'white')
         .click(onTelegram);
 
-    var buttonAnimation = div().appendTo(fileInfoHeader).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
+    var buttonAnimation = div().appendTo(centerTopMenuBar).class('abs-option').margin(5).marginTop(20).padding(3).border(borderGray).borderRadius(4)
         .text('Animation').fontColor('gray').floatRight().cursorPointer().hoverColor('#eeeeee', 'white')
         .click(switchAnimationViewer);
 
