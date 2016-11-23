@@ -142,6 +142,8 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
         }
     };
     var syncBlock = function () {
+        if (isLoading)
+            return;
         if (curObj) {
             curObj.deactive();
         }
@@ -212,6 +214,19 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             });
         else
             console.log('can not find slide by id');
+    };
+    var syncBlocks = function (slides, idx) {
+        if (slides.length <= idx) {
+            if (curObj)
+                curObj.active();
+            return;
+        }
+        if (curObj) {
+            curObj.deactive();
+        }
+        slides[idx].syncBlock(function () {
+            syncBlocks(slides, idx+1);
+        });
     };
 
     var ActionManager = function () {
@@ -1330,8 +1345,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
                 onrendered: function (canvas) {
                     slideViewer.image(canvas.toDataURL("image/png"));
                     slideViewer.$image.load(function () {
-                        if (typeof callback === 'function')
+                        if (typeof callback === 'function') {
                             callback();
+                            console.log('callback called');
+                        }
+
                         that.displayNone();
                         if (curSlide)
                             curSlide.display();
@@ -1559,17 +1577,25 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             pageTotal.text(slides.length);
         };
         this.load = function (params) {
+            isLoading = true;
             this.clear();
-            var sync = function (j) {
-                setTimeout(function () {
-                    syncBlockbyId(j)
-                }, j * 200);
-            };
+            // var sync = function (j) {
+            //     setTimeout(function () {
+            //         syncBlockbyId(j)
+            //     }, j * 200);
+            // };
             for (var i = 0; i < params.length; i++) {
                 this.new();
                 slides[i].load(params[i]);
-                sync(i + 1)
+                // sync(i + 1);
             }
+            // isLoading = false;
+
+            syncBlocks(slides, 0);
+            //
+            // setTimeout(function () {
+            //     isLoading = false;
+            // }, 200*i);
         };
         this.get = function (id) {
             return slides[id - 1];
@@ -1934,7 +1960,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
             teleWrapper.fadeIn(300);
         showTelegram = !showTelegram;
     };
-    var teleWrapper = div()
+    var teleWrapper = div();
     if (useOnline)
         teleWrapper.appendTo(parent).iframe('/?app=telegram').border('8px ridge #dddddd').position('absolute')
             .draggable().resizable().top(100).left(30).displayNone().color('white');
@@ -2010,21 +2036,26 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     var slideManager = new SlideManager();
     var slideShowManager = new SlideShowManager();
     var curSlide, curBackground, curObj, curDiv;
-    var isFullscreen = false;
+    var isFullscreen = false, isLoading = false;
     var copyParam, lockAction = false;
-    lock();
-    slideManager.new();
-    unlock();
     var memberManager = new MemberManager();
-    memberManager.insertMember(username);
 
-    if (AB.fName !== undefined) {
-        var userId = localStorage.getItem("ambasa");
-        joinOnline(AB.fName);
-        if (userId)
-            onEnter(AB.fName, userId);
-        else
-            onLoad(AB.fName);
-    }
-    ;
+    var init = function () {
+        lock();
+        slideManager.new();
+        unlock();
+
+        memberManager.insertMember(username);
+
+        if (AB.fName !== undefined) {
+            var userId = localStorage.getItem("ambasa");
+            joinOnline(AB.fName);
+            if (userId)
+                onEnter(AB.fName, userId);
+            else
+                onLoad(AB.fName);
+        }
+    };
+
+    $(document).ready(init);
 });
