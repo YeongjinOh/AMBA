@@ -219,7 +219,11 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     };
     var syncBlocks = function (slides, visit, idx) {
 
-        if (slides.length <= idx || visit[idx]) {
+        if (slides.length <= idx) {
+            isLoading = false;
+            return;
+        }
+        if (visit[idx]) {
             return;
         }
         visit[idx] = true;
