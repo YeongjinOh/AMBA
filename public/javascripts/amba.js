@@ -13,9 +13,6 @@ function div() {
 function Div() {
     this.$ = $('<div>');
     this.$text = $('<span>');
-    this.$image = $('<img>');
-    this.$video = $('<video>');
-    this.$audio = $('<audio>');
     this.$.data('div', this);
     this.class('amba');
     this.param = {};
@@ -1029,6 +1026,8 @@ Div.prototype.iframe = function (src) {
  * @returns {*}
  */
 Div.prototype.image = function (src) {
+    if (this.$image === undefined)
+        this.$image = $('<img>');
     if (src === '') {
         if (this.$image)
             this.$image.remove();
@@ -1061,6 +1060,8 @@ Div.prototype.image = function (src) {
 };
 
 Div.prototype.video = function (id, src) {
+    if(this.$video === undefined)
+        this.$video = $('<video>');
     if (src === '') {
         if (this.$video)
             this.$video.remove();
@@ -1087,6 +1088,8 @@ Div.prototype.video = function (id, src) {
 };
 
 Div.prototype.audio = function (id, src) {
+    if (this.$audio === undefined)
+        this.$audio = $('<audio>');
     if (src === '') {
         if (this.$audio)
             this.$audio.remove();

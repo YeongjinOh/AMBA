@@ -478,7 +478,8 @@ define ([], function() {
                     showtimeQueue = animationQueue.slice(0);
                     for(i=0; i<showtimeQueue.length; i++) {
                         if(showtimeQueue[i].effect === 'show' || showtimeQueue[i].effect === 'fadeIn' || showtimeQueue[i].effect === 'slideDown') {
-                            $('#' + showtimeQueue[i].id+'-clone').data('div').displayNone();
+                            if ($('#' + showtimeQueue[i].id+'-clone').data('div') !== undefined)
+                                $('#' + showtimeQueue[i].id+'-clone').data('div').displayNone();
                         }
                     }
                 },
@@ -518,7 +519,8 @@ define ([], function() {
                             curAni.border('3px dotted blue');
 
                             target = $('#' + temp.id).data('div');
-
+                            if (target === undefined)
+                                return;
                             if (temp.effect === 'show') {
                                 target.displayNone();
                             }
@@ -611,6 +613,8 @@ define ([], function() {
                                 var temp = animationQueue[index--];
 
                                 target = $('#' + temp.id + '-clone').data('div');
+                                if (target === undefined)
+                                    return;
                                 backup(target, temp.effect);
 
                                 if (temp) {
