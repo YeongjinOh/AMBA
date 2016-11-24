@@ -131,7 +131,6 @@ define(['OnlineManager'], function (online) {
                         data: {
                             //roomid: randomRoomid,
                             roomid: newRoomContentRoomName.text(),
-
                             userList : userList
                         },
                         success: function(msg){
@@ -152,7 +151,6 @@ define(['OnlineManager'], function (online) {
                         }
                     });
                 }
-
             });
 
         var newRoomBottomCancel = div().appendTo(newRoomBottom).size('auto',23).floatRight()
@@ -165,7 +163,7 @@ define(['OnlineManager'], function (online) {
                 vParent.displayNone();
             });
 
-        var divTop = div().appendTo(parent).size(300, 50)
+        var divTop = div().appendTo(parent).size(301, 50)
             .borderOption(1).borderOption('#EBE8E7', 'color')
             .color('white').displayBlock();
         var divTop1 = div().appendTo(divTop).size(248,50);

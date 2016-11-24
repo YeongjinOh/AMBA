@@ -38,7 +38,13 @@ router.post('/rooms', function (req,res,next) {
 
     console.log('body : ', req.body);
     var roomid = req.body.roomid;
-    var userList = req.body['userList[]'];
+    //console.log('test : ', req.body.userList.length);
+
+    //var userList = req.body['userList[]'];
+    var userList = req.body.userList;
+
+    //console.log('userList : ', userList);
+    //console.log('userList : ', userList.length);
 
     for(var i=0; i<userList.length;i++){
         var key = 'AMBATA:' + userList[i];
