@@ -39,21 +39,21 @@ define(['OnlineManager'], function (online) {
         var currentRoomid;
         var userList =[];
 
-        var parent = div().appendTo(target).size(300, 'auto').borderOption(1).borderOption('#EBE8E7', 'color');
-        var vParent = div().appendTo(target).size(300,'auto').displayNone()
+        var parent = div().appendTo(target).size(301, 'auto').borderOption(1).borderOption('#EBE8E7', 'color');
+        var vParent = div().appendTo(target).size(301,'auto').displayNone()
             .position('absolute').left(0).top(0);
 
 
-        var popupWrapper = div().appendTo(vParent).size(300, 398).color('white')
+        var popupWrapper = div().appendTo(vParent).size(301, 398).color('white')
             .borderOption(1).borderOption('#EBE8E7', 'color');
 
-        var popupHeader = div().appendTo(popupWrapper).size(300,50)
+        var popupHeader = div().appendTo(popupWrapper).size(301,50)
             .padding(6)
             .text('CHATTING ROOM').fontSize(27).fontColor('green').fontBold()
             .borderBottom('solid 2px').borderBottomColor('#EBE8E7');
 
-        var popupContent = div().appendTo(popupWrapper).size(300,300).overflow('scroll');
-        var popupBottom = div().appendTo(popupWrapper).size(300,48)
+        var popupContent = div().appendTo(popupWrapper).size(301,300).overflow('scroll');
+        var popupBottom = div().appendTo(popupWrapper).size(301,48)
             .borderTop('solid 2px').borderTopColor('#EBE8E7')
             .padding(12);
 
