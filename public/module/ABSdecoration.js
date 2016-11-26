@@ -531,6 +531,34 @@ define ([], function() {
             });
         });
 
+        div().appendTo(contextMenuBar).deco(decoMenu).text('css').click(function(dv) {
+            if (!syncMenu('second', 'abs-css-menu'))
+                return false;
+            var cssMenuBar = div().appendTo(dv).class('second').id('abs-css-menu').size(100, 'auto').zIndex(1000).position('absolute')
+                .top(75).left(100).color('#cccccc').border('1px solid gray').borderRadius(2);
+
+            var css = ["border", "cursor", "display", "opacity", "padding", "visibility", "width", "height", "z-index"];
+
+            var add = function (i) {
+                div().appendTo(cssMenuBar).deco(decoMenu).text(css[i]).click(function(dv, e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    paperTextAuto(i, dv, function(val) {
+                        var curDiv = $('#' + idContainer.id).data('div');
+                        curDiv.css(css[i],val);
+                        console.log(css[i]);
+                        console.log(val);
+                        var curObj = $('#' + idContainer.id).data('ambasa');
+                        actionManager.onStyle(curObj, [css[i]]);
+                    });
+                });
+            };
+            for (var i=0; i<css.length; i++) {
+                add(i);
+            }
+
+        });
+
         div().appendTo(contextMenuBar).deco(decoMenu).text('event').click(function(dv) {
             if (!syncMenu('second', 'abs-event-menu'))
                 return false;
