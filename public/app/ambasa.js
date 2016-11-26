@@ -886,7 +886,7 @@ require(['ABSdecoration', 'ABSanimation', 'OnlineManager', 'https://cdnjs.cloudf
     // 다른 곳 클릭시 context-menu hide
     $(document).bind("mousedown", function (e) {
         if (isFullscreen) {
-            slideManager.next();
+            // slideManager.next();
             return;
         }
         if (!$(e.target).parents("#abs-slide-context-menu").length > 0) {
