@@ -21,10 +21,16 @@ var elementViewer = function (key) {
 
 div().appendTo(root).width('100%').text('AMBASA File List').fontSize(30).margin(30);
 
-var wrapper = div().appendTo(root).size(600,50);
-div().appendTo(wrapper).deco(decoLine).size('10%','100%').text('No.').color('#dddddd');
-div().appendTo(wrapper).deco(decoLine).size('35%','100%').text('User id').color('#dddddd');
-div().appendTo(wrapper).deco(decoLine).size('55%','100%').text('File name').color('#dddddd');
+var setHeader = function () {
+    var wrapper = div().appendTo(root).size(600,50);
+    div().appendTo(wrapper).deco(decoLine).size('10%','100%').text('No.').color('#dddddd');
+    div().appendTo(wrapper).deco(decoLine).size('35%','100%').text('User id').color('#dddddd');
+    div().appendTo(wrapper).deco(decoLine).size('55%','100%').text('File name').color('#dddddd');
+};
+
+for (var i=0; i<Math.floor(window.outerWidth/600); i++)
+    setHeader();
+
 $.get("/hashstore/key_list", {cid:cid})
     .done(function(data) {
         console.log(data);
