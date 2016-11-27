@@ -28,7 +28,7 @@ div().appendTo(form).displayBlock().size(270, 40).margin('auto').marginTop(30).c
                     alert('signin success');
                     localStorage.setItem('aauth', data.aauth);
                     localStorage.setItem('ainfo', JSON.stringify(data.ainfo));
-                    $(location).attr('href', '/?app=codelist');
+                    $(location).attr('href', '/?app=ambaide');
                 } else
                     alert(data.msg);
             });
